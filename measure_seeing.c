@@ -124,7 +124,8 @@ int background(char *image, int imwidth, int imheight) {
 	}
     }
 
-    back.background = sum/backpix;
+    //back.background = sum/backpix;
+    back.background = 0.0;
 
     for (i=low_y; i<up_y; i++) {
 	for (j=low_x; j<up_x; j++) {
@@ -136,7 +137,8 @@ int background(char *image, int imwidth, int imheight) {
 	}
     }
 
-    back.sigma = sqrt(sumsq/backpix);
+    //back.sigma = sqrt(sumsq/backpix);
+    back.sigma = 0.0;
 
     return 1;
 
@@ -152,6 +154,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  sumy   = 0.0;
     double  sumyy  = 0.0;
     double  val = 0.0;
+    double  gain = 0.1;
     double  rmom;
     double  dist;
     int low_y, up_y, low_x, up_x;
@@ -194,8 +197,8 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     if ( sum <= 0.0 ) {
 	box[num].sigmaxy = -1.0;
 	box[num].sigmafwhm = -1.0;
-	box[num].cenx = 0.0;
-	box[num].ceny = 0.0;
+	box[num].x = imwidth/2.0;
+	box[num].y = imheight/2.0;
 	box[num].fwhm = -1.0;
     } else {
 	rmom = ( sumxx - sumx * sumx / sum + sumyy - sumy * sumy / sum ) / sum;
@@ -209,8 +212,8 @@ int centroid(char *image, int imwidth, int imheight, int num) {
 	box[num].counts = sum;
 	box[num].cenx   = sumx / sum;
 	box[num].ceny   = sumy / sum;
-	box[num].x = box[num].cenx;
-	box[num].y = box[num].ceny;
+	box[num].x += gain*(box[num].cenx - box[num].x);
+	box[num].y += gain*(box[num].ceny - box[num].y);
 	box[num].sigmaxy= box[num].noise * sourcepix / box[num].counts / sqrt(6.0);
 	box[num].sigmafwhm = box[num].noise * pow(sourcepix,1.5) / 10.
 	    / box[num].fwhm / box[num].counts
@@ -238,13 +241,23 @@ int grab_frame(dc1394camera_t *cam, char *buf, int nbytes) {
     return 1;
 }
 
-int main(int argc, char *argv[]) {
+char gaussian(float x, float y, float cenx, float ceny, float a, float sigma) {
+    float gauss;
+    int rsq;
+    rsq = (cenx - x)*(cenx - x) + (ceny - y)*(ceny - y);
+    gauss = a*expf(-1.0*rsq/(sigma*sigma));
+    if (gauss > 255) 
+	gauss = 255;
+    return (char)gauss;
+}
+
+int main() {
     
     dc1394camera_t *camera;
     char *buffer, *buffer2, *average;
     fitsfile *fptr;
     int i, j, f, status, nimages, anynul, nboxes, test;
-    char fitsfile[256];
+    char fitsfile[256], xpastr[256];
     char *froot;
     FILE *init, *out;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
@@ -445,8 +458,40 @@ int main(int argc, char *argv[]) {
 	dist_l[f] = stardist(0, 1);
 	sig_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
 	
+	if (f % 10 == 0) {
+	    status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
+			    average, nelements, names, messages, NXPA);
+	    sprintf(xpastr, "image; box %f %f %d %d 0.0", 
+		    box[0].x, box[0].y, boxsize, boxsize); 
+	    status = XPASet(xpa, "ds9", "regions", "ack=false", 
+			    xpastr, strlen(xpastr), names, messages, NXPA);
+	    sprintf(xpastr, "image; box %f %f %d %d 0.0", 
+		    box[1].x, box[1].y, boxsize, boxsize); 
+	    status = XPASet(xpa, "ds9", "regions", "ack=false", 
+			    xpastr, strlen(xpastr), names, messages, NXPA);
+	}
+	
     }
 
+    gettimeofday(&end_time, NULL);
+    printf("End capture.\n");
+
+    /*-----------------------------------------------------------------------
+     *  stop data transmission
+     *-----------------------------------------------------------------------*/
+    start_sec = start_time.tv_sec;
+    start_usec = start_time.tv_usec;
+    end_sec = end_time.tv_sec;
+    end_usec = end_time.tv_usec;
+
+    elapsed_time = (float)((end_sec + 1.0e-6*end_usec) - (start_sec + 1.0e-6*start_usec));
+    fps = nimages/elapsed_time;
+    printf("Elapsed time = %g seconds.\n", elapsed_time);
+    printf("Framerate = %g fps.\n", fps);
+
+    err=dc1394_video_set_transmission(camera,DC1394_OFF);
+    DC1394_ERR_RTN(err,"couldn't stop the camera?");
+    
     /*
     sprintf(fitsfile, "!%s", froot);
     fits_create_file(&fptr, fitsfile, &status);
@@ -455,10 +500,6 @@ int main(int argc, char *argv[]) {
     fits_close_file(fptr, &status);
     fits_report_error(stderr, status);
     */
-    if (f % 20 == 0) {
-	status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-			buffer, nelements, names, messages, NXPA);
-    }
 
     /* analyze short exposure */
     printf("\t SHORT EXPOSURE\n");
@@ -493,11 +534,13 @@ int main(int argc, char *argv[]) {
     fprintf(out, "long exp seeing  = %f\n", seeing_long);
     fprintf(out, "corr ave seeing  = %f\n", seeing_ave);
 
+    /*
     init = fopen("init_cen_all", "w");
     for (i=0; i<nboxes; i++) {
 	fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
     }
     fclose(init);
+    */
 
     fclose(out);
 
