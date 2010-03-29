@@ -68,10 +68,10 @@ int main(int argc, char *argv[])
     if (!d)
         return 1;
     err=dc1394_camera_enumerate (d, &list);
-    DC1394_ERR_RTN(err,"Failed to enumerate cameras");
+    DC1394_ERR_RTN(err,"Failed to enumerate cameras.");
 
     if (list->num == 0) {
-        dc1394_log_error("No cameras found");
+        dc1394_log_error("No cameras found.");
         return 1;
     }
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
     err = dc1394_format7_get_total_bytes (camera, DC1394_VIDEO_MODE_FORMAT7_0, &total_bytes);
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get total bytes");
-    printf ("I: total bytes is %"PRIu64" before SFF enabled\n", total_bytes);
+    printf ("I: total bytes per frame are %"PRIu64"\n", total_bytes);
 
     // err = dc1394_feature_set_value (camera, DC1394_FEATURE_GAIN, 24);
     //DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Error setting gain");
@@ -135,11 +135,6 @@ int main(int argc, char *argv[])
     err=dc1394_format7_get_packet_size(camera, DC1394_VIDEO_MODE_FORMAT7_0, &actual_bytes);
     DC1394_ERR_RTN(err,"dc1394_format7_get_packet_size error");
     printf( "camera reports actual packet size = %d bytes\n", actual_bytes);
-
-    err=dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_0, &total_bytes);
-    DC1394_ERR_RTN(err,"dc1394_query_format7_total_bytes error");
-    printf( "camera reports total bytes per frame = %"PRId64" bytes\n",
-            total_bytes);
 
     /*-----------------------------------------------------------------------
      *  have the camera start sending us data

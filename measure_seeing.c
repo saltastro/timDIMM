@@ -6,491 +6,500 @@
 #include <fitsio.h>
 #include <gsl/gsl_statistics.h>
 #include <xpa.h>
+#include <sys/time.h>
+#include <string.h>
+#include <inttypes.h>
+
+#define NXPA 10
 
 typedef struct _Box {
-  double  x;
-  double  y;
-  double  fwhm;
-  double  cenx;
-  double  ceny;
-  double  counts;
-  double  background;
-  double  noise;
-  double  sigmaxythresh;
-  double  sigmaxy;
-  double  sigmafwhmthresh;
-  double  sigmafwhm;
-  int     r;
+    double  x;
+    double  y;
+    double  fwhm;
+    double  cenx;
+    double  ceny;
+    double  counts;
+    double  background;
+    double  noise;
+    double  sigmaxythresh;
+    double  sigmaxy;
+    double  sigmafwhmthresh;
+    double  sigmafwhm;
+    int     r;
 } Box;
 
 typedef struct _Back {
-  double x;
-  double y;
-  double background;
-  double sigma;
-  int r;
-  int width;
+    double x;
+    double y;
+    double background;
+    double sigma;
+    int r;
+    int width;
 } Back;
 
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
 int boxsize = 13;
-float pixel_scale = 0.61;
+double pixel_scale = 0.61;
 
 double stardist(int i, int j) {
-  return( sqrt( (box[i].cenx-box[j].cenx)*(box[i].cenx-box[j].cenx) +
-		(box[i].ceny-box[j].ceny)*(box[i].ceny-box[j].ceny) ) );
+    return( sqrt( (box[i].cenx-box[j].cenx)*(box[i].cenx-box[j].cenx) +
+		  (box[i].ceny-box[j].ceny)*(box[i].ceny-box[j].ceny) ) );
 }
 
 /* this routine uses a. tokovinin's modified equation given in
    2002, PASP, 114, 1156
 */
 double seeing(double var, double d, double r) {
-  double lambda;
-  double b, K, seeing;
+    double lambda;
+    double b, K, seeing;
 
-  lambda = 0.65e-6;
-  b = r/d;
+    lambda = 0.65e-6;
+    b = r/d;
+    
+    /* pixel scale in "/pixel, convert to rad */
+    var = var*pow(pixel_scale/206265.0,2);
+    
+    K = 0.364*(1.0 - 0.532*pow(b, -1/3) - 0.024*pow(b, -7/3));
 
-  /* pixel scale in "/pixel, convert to rad */
-  var = var*pow(pixel_scale/206265.0,2);
+    seeing = 206265.0*0.98*pow(d/lambda, 0.2)*pow(var/K, 0.6);
 
-  K = 0.364*(1.0 - 0.532*pow(b, -1/3) - 0.024*pow(b, -7/3));
-
-  seeing = 206265.0*0.98*pow(d/lambda, 0.2)*pow(var/K, 0.6);
-
-  return seeing;
+    return seeing;
 }
 
 /* this routine uses the classic DIMM equation */
 double old_seeing(double var, double d, double r) {
-  double lambda;
-  double r0;
+    double lambda;
+    double r0;
 
-  lambda = 0.65e-6;
+    lambda = 0.65e-6;
 
-  /* pixel scale in "/pixel, convert to rad */
-  var = var*pow(pixel_scale/206265.0,2);
+    /* pixel scale in "/pixel, convert to rad */
+    var = var*pow(pixel_scale/206265.0,2);
+    
+    r0 = pow(2.0*(lambda*lambda)*( 
+		 ( 0.1790*pow(d, (-1.0/3.0)) - 
+		   0.0968*pow(r, (-1.0/3.0)) )/var 
+		 ), 0.6);
 
-  r0 = pow(2.0*(lambda*lambda)*( 
-				( 0.1790*pow(d, (-1.0/3.0)) - 
-				  0.0968*pow(r, (-1.0/3.0)) )/var 
-				), 0.6);
-
-  return 206265.0*0.98*lambda/r0;
+    return 206265.0*0.98*lambda/r0;
 }
 
 /* measure the background in an annulus around the spot pattern */
-int background(char *image) {
+int background(char *image, int imwidth, int imheight) {
 
-  int i, j, backpix;
-  int low_y, up_y, low_x, up_x;
-  double dist, sum, sumsq;
+    int i, j, backpix;
+    int low_y, up_y, low_x, up_x;
+    double dist, sum, sumsq;
+    
+    backpix = 0;
+    sum = 0.0;
+    sumsq = 0.0;
 
-  backpix = 0;
-  sum = 0.0;
-  sumsq = 0.0;
-
-  low_y = back.y - back.r - back.width;
-  up_y  = back.y + back.r + back.width;
-  low_x = back.x - back.r - back.width;
-  up_x  = back.x + back.r + back.width;
-  if (low_y < 0) {
-    low_y = 0;
-  }
-  if (up_y >= 480) {
-    up_y = 479;
-  }
-  if (low_x < 0) {
-    low_x = 0;
-  }
-  if (up_x >= 640) {
-    up_x = 639;
-  }
-
-  for (i=low_y; i<up_y; i++) {
-    for (j=low_x; j<up_x; j++) {
-      dist = sqrt(pow(back.x-j, 2) + pow(back.y-i, 2));
-      if (dist >= back.r && dist <= back.r+back.width) {
-	sum += image[i*naxes[0]+j];
-	backpix++;
-      }
+    low_y = back.y - back.r - back.width;
+    up_y  = back.y + back.r + back.width;
+    low_x = back.x - back.r - back.width;
+    up_x  = back.x + back.r + back.width;
+    if (low_y < 0) {
+	low_y = 0;
     }
-  }
-
-  back.background = sum/backpix;
-
-  for (i=low_y; i<up_y; i++) {
-    for (j=low_x; j<up_x; j++) {
-      dist = sqrt(pow(back.x-j, 2) + pow(back.y-i, 2));
-      if (dist >= back.r && dist <= back.r+back.width) {
-	sumsq += (image[i*naxes[0]+j]-back.background)*
-	  (image[i*naxes[0]+j]-back.background);
-      }
+    if (up_y >= imheight) {
+	up_y = imheight;
     }
-  }
+    if (low_x < 0) {
+	low_x = 0;
+    }
+    if (up_x >= imwidth) {
+	up_x = imwidth;
+    }
 
-  back.sigma = sqrt(sumsq/backpix);
+    for (i=low_y; i<up_y; i++) {
+	for (j=low_x; j<up_x; j++) {
+	    dist = sqrt(pow(back.x-j, 2) + pow(back.y-i, 2));
+	    if (dist >= back.r && dist <= back.r+back.width) {
+		sum += image[i*naxes[0]+j];
+		backpix++;
+	    }
+	}
+    }
 
-  return 1;
+    back.background = sum/backpix;
+
+    for (i=low_y; i<up_y; i++) {
+	for (j=low_x; j<up_x; j++) {
+	    dist = sqrt(pow(back.x-j, 2) + pow(back.y-i, 2));
+	    if (dist >= back.r && dist <= back.r+back.width) {
+		sumsq += (image[i*naxes[0]+j]-back.background)*
+		    (image[i*naxes[0]+j]-back.background);
+	    }
+	}
+    }
+
+    back.sigma = sqrt(sumsq/backpix);
+
+    return 1;
 
 }
 
 /* measure centroid using center-of-mass algorithm */
-int centroid(char *image, int num) {
+int centroid(char *image, int imwidth, int imheight, int num) {
 
-  int i, j;
-  double  sum    = 0.0;
-  double  sumx   = 0.0;
-  double  sumxx  = 0.0;
-  double  sumy   = 0.0;
-  double  sumyy  = 0.0;
-  double  val = 0.0;
-  double  rmom;
-  double  dist;
-  int low_y, up_y, low_x, up_x;
-  int sourcepix = 0;
+    int i, j;
+    double  sum    = 0.0;
+    double  sumx   = 0.0;
+    double  sumxx  = 0.0;
+    double  sumy   = 0.0;
+    double  sumyy  = 0.0;
+    double  val = 0.0;
+    double  rmom;
+    double  dist;
+    int low_y, up_y, low_x, up_x;
+    int sourcepix = 0;
 
-  low_y = box[num].y - box[num].r;
-  up_y  = box[num].y + box[num].r;
-  low_x = box[num].x - box[num].r;
-  up_x  = box[num].x + box[num].r;
-  if (low_y < 0) {
-    low_y = 0;
-  }
-  if (up_y >= 480) {
-    up_y = 479;
-  }
-  if (low_x < 0) {
-    low_x = 0;
-  }
-  if (up_x >= 640) {
-    up_x = 639;
-  }
-
-  for (i=low_y; i<up_y; i++) {
-    for (j=low_x; j<up_x; j++) {
-
-      dist = sqrt(pow(box[num].x-j, 2) + pow(box[num].y-i, 2));
-      if (dist <= box[num].r) {
-	val = image[i*naxes[0]+j] - back.background;
-	sum   += val;
-	sumx  += val*j;
-	sumxx += val*j*j;
-	sumy  += val*i;
-	sumyy += val*i*i;
-	sourcepix++;
-      }
-
+    low_y = box[num].y - box[num].r;
+    up_y  = box[num].y + box[num].r;
+    low_x = box[num].x - box[num].r;
+    up_x  = box[num].x + box[num].r;
+    if (low_y < 0) {
+	low_y = 0;
     }
-  }
+    if (up_y >= imheight) {
+	up_y = imheight;
+    }
+    if (low_x < 0) {
+	low_x = 0;
+    }
+    if (up_x >= imwidth) {
+	up_x = imwidth;
+    }
+    
+    for (i=low_y; i<up_y; i++) {
+	for (j=low_x; j<up_x; j++) {
+	    
+	    dist = sqrt(pow(box[num].x-j, 2) + pow(box[num].y-i, 2));
+	    if (dist <= box[num].r) {
+		val = image[i*naxes[0]+j] - back.background;
+		sum   += val;
+		sumx  += val*j;
+		sumxx += val*j*j;
+		sumy  += val*i;
+		sumyy += val*i*i;
+		sourcepix++;
+	    }
+	    
+	}
+    }
 
-  if ( sum <= 0.0 ) {
-    box[num].sigmaxy = -1.0;
-    box[num].sigmafwhm = -1.0;
-    box[num].cenx = 0.0;
-    box[num].ceny = 0.0;
-    box[num].fwhm = -1.0;
-  } else {
-    rmom = ( sumxx - sumx * sumx / sum + sumyy - sumy * sumy / sum ) / sum;
- 
-    if ( rmom <= 0 ) {
-      box[num].fwhm = -1.0;
+    if ( sum <= 0.0 ) {
+	box[num].sigmaxy = -1.0;
+	box[num].sigmafwhm = -1.0;
+	box[num].cenx = 0.0;
+	box[num].ceny = 0.0;
+	box[num].fwhm = -1.0;
     } else {
-      box[num].fwhm = sqrt(rmom)  * 2.354 / sqrt(2.0);
-    }
+	rmom = ( sumxx - sumx * sumx / sum + sumyy - sumy * sumy / sum ) / sum;
+	
+	if ( rmom <= 0 ) {
+	    box[num].fwhm = -1.0;
+	} else {
+	    box[num].fwhm = sqrt(rmom)  * 2.354 / sqrt(2.0);
+	}
 
-    box[num].counts = sum;
-    box[num].cenx   = sumx / sum;
-    box[num].ceny   = sumy / sum;
-    box[num].x = box[num].cenx;
-    box[num].y = box[num].ceny;
-    box[num].sigmaxy= box[num].noise * sourcepix / box[num].counts / sqrt(6.0);
-    box[num].sigmafwhm = box[num].noise * pow(sourcepix,1.5) / 10.
-      / box[num].fwhm / box[num].counts
-      * 2.354 * 2.354 / 2.0;
-  }  
+	box[num].counts = sum;
+	box[num].cenx   = sumx / sum;
+	box[num].ceny   = sumy / sum;
+	box[num].x = box[num].cenx;
+	box[num].y = box[num].ceny;
+	box[num].sigmaxy= box[num].noise * sourcepix / box[num].counts / sqrt(6.0);
+	box[num].sigmafwhm = box[num].noise * pow(sourcepix,1.5) / 10.
+	    / box[num].fwhm / box[num].counts
+	    * 2.354 * 2.354 / 2.0;
+    }  
 
-  return 1;
+    return 1;
 
 }
 
-int main() {
+int grab_frame(dc1394camera_t *cam, char *buf, int nbytes) {
+    dc1394video_frame_t *frame=NULL;
+    dc1394error_t err;
+
+    err = dc1394_capture_dequeue(cam, DC1394_CAPTURE_POLICY_WAIT, &frame);
+    if (err != DC1394_SUCCESS) {
+	dc1394_log_error("Unable to capture.");
+	dc1394_capture_stop(cam);
+	dc1394_camera_free(cam);
+	exit(1);
+    }
+
+    memcpy(buf, frame->image, nbytes);
+    dc1394_capture_enqueue(cam, frame);
+    return 1;
+}
+
+int main(int argc, char *argv[]) {
+    
+    dc1394camera_t *camera;
+    char *buffer, *buffer2, *average;
+    fitsfile *fptr;
+    int i, j, f, status, nimages, anynul, nboxes, test;
+    char fitsfile[256];
+    char *froot;
+    FILE *init, *out;
+    float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
+    double dist[1000], sig[1000], dist_l[1000], sig_l[1000];
+    double mean, var, avesig;
+    double seeing_short, seeing_long, seeing_ave;
+    struct timeval start_time, end_time;
+    time_t start_sec, end_sec;
+    suseconds_t start_usec, end_usec;
+    float elapsed_time, fps;
+
+    dc1394_t * dc;
+    dc1394camera_list_t * list;
+    dc1394error_t err;
+    
+    unsigned int min_bytes, max_bytes, max_height, max_width;
+    unsigned int actual_bytes, winleft, wintop;
+    uint64_t total_bytes = 0;
+    char *names[NXPA];
+    char *messages[NXPA];
+
+    double d = 0.076;
+    double r = 0.143;
+
+    XPA xpa;
+    xpa = XPAOpen(NULL);
+
+    stderr = freopen("measure_seeing.log", "w", stderr);
+
+    status = 0;
+    anynul = 0;
+    naxes[0] = 320;
+    naxes[1] = 240;
+    fpixel = 1;
   
-  char *buffer, *buffer2, *average;
-  fitsfile *fptr;
-  int i, j, f, status, nimages, anynul, nboxes, test;
-  char fitsfile[256];
-  char *froot;
-  FILE *init, *out;
-  float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
-  double dist01[900], dist02[900], dist12[900];
-  double sig01[900], sig02[900], sig12[900];
-  double dist01_l[900], dist02_l[900], dist12_l[900];
-  double sig01_l[900], sig02_l[900], sig12_l[900];
-  double mean01, mean02, mean12;
-  double var01, var02, var12;
-  double avesig01, avesig02, avesig12;
-  double seeing_ave_short, seeing_ave_long, seeing_ave;
+    nelements = naxes[0]*naxes[1];
+    
+    dc = dc1394_new();
+    if (!dc)
+	return 1;
+    err = dc1394_camera_enumerate(dc, &list);
+    DC1394_ERR_RTN(err, "Failed to enumerate cameras.");
 
-  double d = 0.076;
-  double r = 0.143;
+    if (list->num == 0) {
+	dc1394_log_error("No cameras found.");
+	return 1;
+    }
 
-  out = fopen("/dev/shm/video/seeing.dat", "a");
-  init = fopen("/dev/shm/video/init_cen_all", "r");
-  i = 0;
-  while (fscanf(init, "%f %f\n", &xx, &yy) != EOF) {
-    box[i].x = xx;
-    box[i].cenx = xx;
-    box[i].y = yy;
-    box[i].ceny = yy;
-    box[i].r = boxsize/2.0;
-    i++;
-  }
-  nboxes = i;
-  fclose(init); 
+    camera = dc1394_camera_new(dc, list->ids[0].guid);
+    if (!camera) {
+	dc1394_log_error("Failed to initialize camera with guid %"PRIx64".", 
+			 list->ids[0].guid);
+	return 1;
+    }
+    dc1394_camera_free_list(list);
 
-  back.r = 40;
-  back.width = 5;
+    printf("Using camera with GUID %"PRIx64"\n", camera->guid);
 
-  status = 0;
-  anynul = 0;
-  naxes[0] = 640;
-  naxes[1] = 480;
-  fpixel = 1;
-  
-  nelements = naxes[0]*naxes[1];
+    // need to use legacy firewire400 mode for now.  800 not quite reliable.
+    dc1394_video_set_iso_speed(camera, DC1394_ISO_SPEED_400);
 
-  /* init card */
-  if (FB_Init() == RET_ERROR) {
-    printf("FlashBus failed init\n");
-    return(-1);
-  }
+    // configure camera for format7
+    err = dc1394_video_set_mode(camera, DC1394_VIDEO_MODE_FORMAT7_0);
+    DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't choose format7_0");
+    printf("I: video mode is format7_0\n");
 
-  /* configure video capture */
-  FB_SetVideoConfig(TYPE_COMPOSITE, STANDARD_NTSC, 1, 0);
+    err = dc1394_format7_get_max_image_size(camera, DC1394_VIDEO_MODE_FORMAT7_0, 
+					    &max_width, &max_height);
+    DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size for format7_0");
+    printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
+    printf ("I: current image size is: height = %ld, width = %ld\n", naxes[1], naxes[0]);
 
-  /* set up offscreen video capture */
-  if (FB_VideoOffscreen(naxes[0], naxes[1], 8, TRUE) != RET_SUCCESS) {
-    printf("Couldn't set offscreen capture\n");
-    return(-1);
-  }
- 
-  /* allocate the buffers */
-  if (!(buffer = malloc(nelements*sizeof(char)))) {
-    printf("Couldn't Allocate Image Buffer\n");
-    exit(-1);
-  }
-  if (!(buffer2 = malloc(nelements*sizeof(char)))) {
-    printf("Couldn't Allocate 2nd Image Buffer\n");
-    exit(-1);
-  }
-  if (!(average = malloc(nelements*sizeof(float)))) {
-    printf("Couldn't Allocate Average Image Buffer\n");
-    exit(-1);
-  }
+    winleft = (max_width - naxes[0])/2;
+    wintop = (max_height - naxes[1])/2;
+	
+    err = dc1394_format7_set_roi(camera,
+				 DC1394_VIDEO_MODE_FORMAT7_0,
+				 DC1394_COLOR_CODING_MONO8,
+				 DC1394_USE_MAX_AVAIL,
+				 winleft, wintop, // left, top
+				 naxes[0], naxes[1]);
+    DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
+    printf("I: ROI is (%d, %d) - (%ld, %ld)\n", 
+	   winleft, wintop, winleft+naxes[0], wintop+naxes[1]);
 
-  FB_VideoLive(TRUE, ALIGN_ANY);
-  FB_WaitVSync(12);
+    err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_0, &total_bytes);
+    DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
+    printf("I: total bytes per frame are %"PRIu64"\n", total_bytes);
 
-  nimages = 500;
-  froot = "/dev/shm/video/seeing.fits";
+    err = dc1394_capture_setup(camera, 16, DC1394_CAPTURE_FLAGS_DEFAULT);
+    DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Error capturing.");
 
-  for (f=0; f<nimages; f++) {
-    /* first do a single exposure */
-    FB_WaitVSync(1);
-    FB_CopyVGARect(0, 
-		   0, 
-		   naxes[0], 
-		   naxes[1], 
-		   buffer, 
-		   -1, 
-		   COPYDIR_FROMOFFSCREEN);
-    xsum = 0.0;
-    ysum = 0.0;
+    // start the camera up
+    err = dc1394_video_set_transmission(camera, DC1394_ON);
+    if (err != DC1394_SUCCESS) {
+	dc1394_log_error("Unable to start camera iso transmission.");
+	dc1394_capture_stop(camera);
+	dc1394_camera_free(camera);
+	exit(1);
+    }
+
+    out = fopen("seeing.dat", "a");
+    init = fopen("init_cen_all", "r");
+    i = 0;
+    while (fscanf(init, "%f %f\n", &xx, &yy) != EOF) {
+	box[i].x = xx;
+	box[i].cenx = xx;
+	box[i].y = yy;
+	box[i].ceny = yy;
+	box[i].r = boxsize/2.0;
+	i++;
+    }
+    nboxes = i;
+    fclose(init); 
+
+    back.r = 80;
+    back.width = 10;
+
+    /* allocate the buffers */
+    if (!(buffer = malloc(nelements*sizeof(char)))) {
+	printf("Couldn't Allocate Image Buffer\n");
+	exit(-1);
+    }
+    if (!(buffer2 = malloc(nelements*sizeof(char)))) {
+	printf("Couldn't Allocate 2nd Image Buffer\n");
+	exit(-1);
+    }
+    if (!(average = malloc(nelements*sizeof(float)))) {
+	printf("Couldn't Allocate Average Image Buffer\n");
+	exit(-1);
+    }
+
+    nimages = 1000;
+    froot = "seeing.fits";
+
+    gettimeofday(&start_time, NULL);
+
+    for (f=0; f<nimages; f++) {
+	/* first do a single exposure */
+	grab_frame(camera, buffer, nelements*sizeof(char));
+
+	// find center of star images and calculate background
+	xsum = 0.0;
+	ysum = 0.0;
+	for (i=0; i<nboxes; i++) {
+	    xsum += box[i].cenx;
+	    ysum += box[i].ceny;
+	}
+	back.x = xsum/nboxes;
+	back.y = ysum/nboxes;
+	background(buffer, naxes[0], naxes[1]);
+	
+	for (i=0; i<nboxes; i++) {
+	    box[i].noise = back.sigma;
+	    box[i].r = boxsize/2.0;
+	    //centroid(buffer, i);
+	    //box[i].r = boxsize/3.0;
+	    //centroid(buffer, i);
+	    //box[i].r = boxsize/4.0;
+	    centroid(buffer, naxes[0], naxes[1], i);
+	}
+
+	dist[f] = stardist(0, 1);
+	sig[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
+
+	/* now average two exposures */
+	grab_frame(camera, buffer, nelements*sizeof(char));
+	grab_frame(camera, buffer2, nelements*sizeof(char));
+
+	for (j=0; j<nelements; j++) {
+	    test = buffer[j]+buffer2[j];
+	    if (test <= 254) {
+		average[j] = buffer[j]+buffer2[j];
+	    } else {
+		average[j] = 254;
+	    }
+	}
+	xsum = 0.0;
+	ysum = 0.0;
+	for (i=0; i<nboxes; i++) {
+	    xsum += box[i].cenx;
+	    ysum += box[i].ceny;
+	}
+	back.x = xsum/nboxes;
+	back.y = ysum/nboxes;
+	background(average, naxes[0], naxes[1]);
+
+	for (i=0; i<nboxes; i++) {
+	    box[i].noise = back.sigma;
+	    box[i].r = boxsize/2.0;
+	    //centroid(average, i);
+	    //box[i].r = boxsize/3.0;
+	    //centroid(average, i);
+	    //box[i].r = boxsize/4.0;
+	    centroid(average, naxes[0], naxes[1], i);
+	}
+
+	dist_l[f] = stardist(0, 1);
+	sig_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
+	
+    }
+
+    /*
+    sprintf(fitsfile, "!%s", froot);
+    fits_create_file(&fptr, fitsfile, &status);
+    fits_create_img(fptr, BYTE_IMG, 2, naxes, &status);
+    fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &status);
+    fits_close_file(fptr, &status);
+    fits_report_error(stderr, status);
+    */
+    if (f % 20 == 0) {
+	status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
+			buffer, nelements, names, messages, NXPA);
+    }
+
+    /* analyze short exposure */
+    printf("\t SHORT EXPOSURE\n");
+    mean = gsl_stats_mean(dist, 1, nimages);
+    avesig = gsl_stats_mean(sig, 1, nimages);
+    printf("mean = %f, avesig = %f\n", mean, avesig);
+    
+    printf("\n");
+
+    var = gsl_stats_variance_m(dist, 1, nimages, mean);
+    var = var - avesig;
+    seeing_short = seeing(var, d, r);
+    printf("sigma = %f, seeing = %f\n", sqrt(var), seeing_short);
+
+    /* analyze long exposure */
+    printf("\t LONG EXPOSURE\n");
+    mean = gsl_stats_mean(dist_l, 1, nimages);
+    avesig = gsl_stats_mean(sig_l, 1, nimages);
+    printf("mean_l = %f, avesig_l = %f\n", mean, avesig);
+
+    printf("\n");
+
+    var = gsl_stats_variance_m(dist_l, 1, nimages, mean);
+    var = var - avesig;
+    seeing_long = seeing(var, d, r);
+    printf("sigma_l = %f, seeing_l = %f\n", sqrt(var), seeing_long);
+
+    seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
+    printf("Exposure corrected seeing = %4.2f\"\n\n", seeing_ave);
+
+    fprintf(out, "short exp seeing = %f\n", seeing_short);
+    fprintf(out, "long exp seeing  = %f\n", seeing_long);
+    fprintf(out, "corr ave seeing  = %f\n", seeing_ave);
+
+    init = fopen("init_cen_all", "w");
     for (i=0; i<nboxes; i++) {
-      xsum += box[i].cenx;
-      ysum += box[i].ceny;
+	fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
     }
-    back.x = xsum/nboxes;
-    back.y = ysum/nboxes;
-    background(buffer);
+    fclose(init);
 
-    for (i=0; i<nboxes; i++) {
-      box[i].noise = back.sigma;
-      //box[i].r = boxsize/2.0;
-      centroid(buffer, i);
-      //box[i].r = boxsize/3.0;
-      centroid(buffer, i);
-      //box[i].r = boxsize/4.0;
-      centroid(buffer, i);
-    }
+    fclose(out);
 
-    dist01[f] = stardist(0, 1);
-    sig01[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
-
-    dist02[f] = stardist(0, 2);
-    sig02[f] = box[0].sigmaxy*box[0].sigmaxy + box[2].sigmaxy*box[2].sigmaxy;
-
-    dist12[f] = stardist(1, 2);
-    sig12[f] = box[1].sigmaxy*box[1].sigmaxy + box[2].sigmaxy*box[2].sigmaxy;
-
-    /* now average two exposures */
-    FB_WaitVSync(1);
-    FB_CopyVGARect(0, 
-		   0, 
-		   naxes[0], 
-		   naxes[1], 
-		   buffer, 
-		   -1, 
-		   COPYDIR_FROMOFFSCREEN);
-    FB_WaitVSync(1);
-    FB_CopyVGARect(0, 
-		   0, 
-		   naxes[0], 
-		   naxes[1], 
-		   buffer2, 
-		   -1, 
-		   COPYDIR_FROMOFFSCREEN);
-    for (j=0; j<nelements; j++) {
-      test = buffer[j]+buffer2[j];
-      if (test <= 254) {
-	average[j] = buffer[j]+buffer2[j];
-      } else {
-	average[j] = 254;
-      }
-    }
-    xsum = 0.0;
-    ysum = 0.0;
-    for (i=0; i<nboxes; i++) {
-      xsum += box[i].cenx;
-      ysum += box[i].ceny;
-    }
-    back.x = xsum/nboxes;
-    back.y = ysum/nboxes;
-    background(average);
-
-    for (i=0; i<nboxes; i++) {
-      box[i].noise = back.sigma;
-      //box[i].r = boxsize/2.0;
-      centroid(average, i);
-      //box[i].r = boxsize/3.0;
-      centroid(average, i);
-      //box[i].r = boxsize/4.0;
-      centroid(average, i);
-    }
-
-    dist01_l[f] = stardist(0, 1);
-    sig01_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
-
-    dist02_l[f] = stardist(0, 2);
-    sig02_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[2].sigmaxy*box[2].sigmaxy;
-
-    dist12_l[f] = stardist(1, 2);
-    sig12_l[f] = box[1].sigmaxy*box[1].sigmaxy + box[2].sigmaxy*box[2].sigmaxy;
-
-  }
-
-  sprintf(fitsfile, "!%s", froot);
-  fits_create_file(&fptr, fitsfile, &status);
-  fits_create_img(fptr, BYTE_IMG, 2, naxes, &status);
-  fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &status);
-  fits_close_file(fptr, &status);
-  fits_report_error(stderr, status);
-
-  /* analyze short exposure */
-  printf("\t SHORT EXPOSURE\n");
-  mean01 = gsl_stats_mean(dist01, 1, nimages);
-  avesig01 = gsl_stats_mean(sig01, 1, nimages);
-  printf("mean01 = %f, avesig01 = %f\n", mean01, avesig01);
-
-  mean02 = gsl_stats_mean(dist02, 1, nimages);
-  avesig02 = gsl_stats_mean(sig02, 1, nimages);
-  printf("mean02 = %f, avesig02 = %f\n", mean02, avesig02);
-
-  mean12 = gsl_stats_mean(dist12, 1, nimages);
-  avesig12 = gsl_stats_mean(sig12, 1, nimages);
-  printf("mean12 = %f, avesig12 = %f\n", mean12, avesig12);
-
-  printf("\n");
-
-  var01 = gsl_stats_variance_m(dist01, 1, nimages, mean01);
-  var01 = var01 - avesig01;
-  printf("sigma01 = %f, seeing01 = %f\n", sqrt(var01), seeing(var01, d, r));
-
-  var02 = gsl_stats_variance_m(dist02, 1, nimages, mean02);
-  var02 = var02 - avesig02;
-  printf("sigma02 = %f, seeing02 = %f\n", sqrt(var02), seeing(var02, d, r));
-
-  var12 = gsl_stats_variance_m(dist12, 1, nimages, mean12);
-  var12 = var12 - avesig12;
-  printf("sigma12 = %f, seeing12 = %f\n", sqrt(var12), seeing(var12, d, r));
-
-  seeing_ave_short = (seeing(var01, d, r) +
-		      seeing(var02, d, r) +
-		      seeing(var12, d, r))/3.0;
-
-  printf("Ave. short exposure seeing = %4.2f\"\n", seeing_ave_short);
-
-  fprintf(out, "short = %f %f %f\n", 
-	  seeing(var01, d, r),
-	  seeing(var02, d, r),
-	  seeing(var12, d, r));
-
-  /* analyze long exposure */
-  printf("\t LONG EXPOSURE\n");
-  mean01 = gsl_stats_mean(dist01_l, 1, nimages);
-  avesig01 = gsl_stats_mean(sig01_l, 1, nimages);
-  printf("mean01 = %f, avesig01 = %f\n", mean01, avesig01);
-
-  mean02 = gsl_stats_mean(dist02_l, 1, nimages);
-  avesig02 = gsl_stats_mean(sig02_l, 1, nimages);
-  printf("mean02 = %f, avesig02 = %f\n", mean02, avesig02);
-
-  mean12 = gsl_stats_mean(dist12_l, 1, nimages);
-  avesig12 = gsl_stats_mean(sig12_l, 1, nimages);
-  printf("mean12 = %f, avesig12 = %f\n", mean12, avesig12);
-
-  printf("\n");
-
-  var01 = gsl_stats_variance_m(dist01_l, 1, nimages, mean01);
-  var01 = var01 - avesig01;
-  printf("sigma01 = %f, seeing01 = %f\n", sqrt(var01), seeing(var01, d, r));
-
-  var02 = gsl_stats_variance_m(dist02_l, 1, nimages, mean02);
-  var02 = var02 - avesig02;
-  printf("sigma02 = %f, seeing02 = %f\n", sqrt(var02), seeing(var02, d, r));
-
-  var12 = gsl_stats_variance_m(dist12_l, 1, nimages, mean12);
-  var12 = var12 - avesig12;
-  printf("sigma12 = %f, seeing12 = %f\n", sqrt(var12), seeing(var12, d, r));
-
-  seeing_ave_long = (seeing(var01, d, r) +
-		     seeing(var02, d, r) +
-		     seeing(var12, d, r))/3.0;
-
-  printf("Ave. long exposure seeing = %4.2f\"\n", seeing_ave_long);
-
-  fprintf(out, "long = %f %f %f\n", 
-	  seeing(var01, d, r),
-	  seeing(var02, d, r),
-	  seeing(var12, d, r));
-	  
-  seeing_ave = pow(seeing_ave_short, 1.75)*pow(seeing_ave_long,-0.75);
-  printf("Exposure corrected seeing = %4.2f\"\n\n", seeing_ave);
-
-  fprintf(out, "short ave = %f\n", seeing_ave_short);
-  fprintf(out, "long ave  = %f\n", seeing_ave_long);
-  fprintf(out, "corr ave  = %f\n", seeing_ave);
-
-  init = fopen("/dev/shm/video/init_cen_all", "w");
-  for (i=0; i<nboxes; i++) {
-    fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
-  }
-  fclose(init);
-
-  fclose(out);
-
-  return (status);
+    return (status);
 }
