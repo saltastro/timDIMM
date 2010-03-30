@@ -154,7 +154,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  sumy   = 0.0;
     double  sumyy  = 0.0;
     double  val = 0.0;
-    double  gain = 0.3;
+    double  gain = 0.5;
     double  rmom;
     double  dist;
     double nsigma = 5.0;
