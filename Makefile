@@ -3,7 +3,7 @@
 CC = gcc
 CFLAGS = -g -I/opt/local/include
 LDFLAGS = -L/opt/local/lib -framework CoreFoundation -framework Carbon -lIOKit -lm -lcfitsio -lxpa -ldc1394
-EXECS = grab_cube grab_cube_16bpp_binned grab_cube_8bpp_binned measure_seeing
+EXECS = grab_cube grab_cube_16bpp_binned grab_cube_8bpp_binned measure_seeing ave_frames
 
 all:	${EXECS}
 
@@ -21,3 +21,6 @@ grab_cube_8bpp_binned:	grab_cube_8bpp_binned.c
 
 measure_seeing:	measure_seeing.c
 	${CC} ${CFLAGS} measure_seeing.c ${LDFLAGS} -lgsl -lgslcblas -o measure_seeing
+
+ave_frames:	ave_frames.c
+	${CC} ${CFLAGS} ave_frames.c ${LDFLAGS} -o ave_frames

@@ -40,8 +40,8 @@ typedef struct _Back {
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
-int boxsize = 13;
-double pixel_scale = 0.61;
+int boxsize = 30;
+double pixel_scale = 1.22;
 
 double stardist(int i, int j) {
     return( sqrt( (box[i].cenx-box[j].cenx)*(box[i].cenx-box[j].cenx) +
@@ -124,8 +124,8 @@ int background(char *image, int imwidth, int imheight) {
 	}
     }
 
-    //back.background = sum/backpix;
-    back.background = 0.0;
+    back.background = sum/backpix;
+    //back.background = 0.0;
 
     for (i=low_y; i<up_y; i++) {
 	for (j=low_x; j<up_x; j++) {
@@ -137,8 +137,8 @@ int background(char *image, int imwidth, int imheight) {
 	}
     }
 
-    //back.sigma = sqrt(sumsq/backpix);
-    back.sigma = 0.0;
+    back.sigma = sqrt(sumsq/backpix);
+    //back.sigma = 1.0;
 
     return 1;
 
@@ -154,9 +154,10 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  sumy   = 0.0;
     double  sumyy  = 0.0;
     double  val = 0.0;
-    double  gain = 0.1;
+    double  gain = 0.3;
     double  rmom;
     double  dist;
+    double nsigma = 5.0;
     int low_y, up_y, low_x, up_x;
     int sourcepix = 0;
 
@@ -183,12 +184,14 @@ int centroid(char *image, int imwidth, int imheight, int num) {
 	    dist = sqrt(pow(box[num].x-j, 2) + pow(box[num].y-i, 2));
 	    if (dist <= box[num].r) {
 		val = image[i*naxes[0]+j] - back.background;
-		sum   += val;
-		sumx  += val*j;
-		sumxx += val*j*j;
-		sumy  += val*i;
-		sumyy += val*i*i;
-		sourcepix++;
+		if (val >= nsigma*back.sigma) {
+		    sum   += val;
+		    sumx  += val*j;
+		    sumxx += val*j*j;
+		    sumy  += val*i;
+		    sumyy += val*i*i;
+		    sourcepix++;
+		}
 	    }
 	    
 	}
@@ -197,8 +200,8 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     if ( sum <= 0.0 ) {
 	box[num].sigmaxy = -1.0;
 	box[num].sigmafwhm = -1.0;
-	box[num].x = imwidth/2.0;
-	box[num].y = imheight/2.0;
+	//box[num].x = imwidth/2.0;
+	//box[num].y = imheight/2.0;
 	box[num].fwhm = -1.0;
     } else {
 	rmom = ( sumxx - sumx * sumx / sum + sumyy - sumy * sumy / sum ) / sum;
@@ -241,14 +244,27 @@ int grab_frame(dc1394camera_t *cam, char *buf, int nbytes) {
     return 1;
 }
 
-char gaussian(float x, float y, float cenx, float ceny, float a, float sigma) {
-    float gauss;
-    int rsq;
-    rsq = (cenx - x)*(cenx - x) + (ceny - y)*(ceny - y);
-    gauss = a*expf(-1.0*rsq/(sigma*sigma));
-    if (gauss > 255) 
-	gauss = 255;
-    return (char)gauss;
+int add_gaussian(char *buffer, float cenx, float ceny, float a, float sigma) {
+    float gauss, rsq;
+    int i, j, low_x, up_x, low_y, up_y, size;
+
+    size = 30;
+    low_x = (int)(cenx-size);
+    up_x = (int)(cenx+size);
+    low_y = (int)(ceny-size);
+    up_y = (int)(ceny+size);
+
+    for (i=low_y; i<up_y; i++) {
+	for (j=low_x; j<up_x; j++) {
+	    rsq = (cenx - j)*(cenx - j) + (ceny - i)*(ceny - i);
+	    gauss = a*expf(-1.0*rsq/(sigma*sigma));
+	    if (gauss > 255) 
+		gauss = 255;
+	    buffer[i*naxes[0]+j] += (char)gauss;
+	}
+    }
+
+    return 1;
 }
 
 int main() {
@@ -258,11 +274,11 @@ int main() {
     fitsfile *fptr;
     int i, j, f, status, nimages, anynul, nboxes, test;
     char fitsfile[256], xpastr[256];
-    char *froot;
+    char *froot, *timestr;
     FILE *init, *out;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
-    double dist[1000], sig[1000], dist_l[1000], sig_l[1000];
-    double mean, var, avesig;
+    double dist[2000], sig[2000], dist_l[2000], sig_l[2000];
+    double mean, var, var_l, avesig;
     double seeing_short, seeing_long, seeing_ave;
     struct timeval start_time, end_time;
     time_t start_sec, end_sec;
@@ -279,8 +295,8 @@ int main() {
     char *names[NXPA];
     char *messages[NXPA];
 
-    double d = 0.076;
-    double r = 0.143;
+    double d = 0.060;
+    double r = 0.130;
 
     XPA xpa;
     xpa = XPAOpen(NULL);
@@ -320,21 +336,23 @@ int main() {
     dc1394_video_set_iso_speed(camera, DC1394_ISO_SPEED_400);
 
     // configure camera for format7
-    err = dc1394_video_set_mode(camera, DC1394_VIDEO_MODE_FORMAT7_0);
+    err = dc1394_video_set_mode(camera, DC1394_VIDEO_MODE_FORMAT7_1);
     DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't choose format7_0");
     printf("I: video mode is format7_0\n");
 
-    err = dc1394_format7_get_max_image_size(camera, DC1394_VIDEO_MODE_FORMAT7_0, 
+    err = dc1394_format7_get_max_image_size(camera, DC1394_VIDEO_MODE_FORMAT7_1, 
 					    &max_width, &max_height);
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size for format7_0");
     printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
     printf ("I: current image size is: height = %ld, width = %ld\n", naxes[1], naxes[0]);
 
-    winleft = (max_width - naxes[0])/2;
-    wintop = (max_height - naxes[1])/2;
-	
+    //winleft = (max_width - naxes[0])/2;
+    //wintop = (max_height - naxes[1])/2;
+    winleft = 0;
+    wintop = 0;
+
     err = dc1394_format7_set_roi(camera,
-				 DC1394_VIDEO_MODE_FORMAT7_0,
+				 DC1394_VIDEO_MODE_FORMAT7_1,
 				 DC1394_COLOR_CODING_MONO8,
 				 DC1394_USE_MAX_AVAIL,
 				 winleft, wintop, // left, top
@@ -343,7 +361,7 @@ int main() {
     printf("I: ROI is (%d, %d) - (%ld, %ld)\n", 
 	   winleft, wintop, winleft+naxes[0], wintop+naxes[1]);
 
-    err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_0, &total_bytes);
+    err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
     DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
     printf("I: total bytes per frame are %"PRIu64"\n", total_bytes);
 
@@ -385,12 +403,12 @@ int main() {
 	printf("Couldn't Allocate 2nd Image Buffer\n");
 	exit(-1);
     }
-    if (!(average = malloc(nelements*sizeof(float)))) {
+    if (!(average = malloc(nelements*sizeof(char)))) {
 	printf("Couldn't Allocate Average Image Buffer\n");
 	exit(-1);
     }
 
-    nimages = 1000;
+    nimages = 2000;
     froot = "seeing.fits";
 
     gettimeofday(&start_time, NULL);
@@ -398,6 +416,8 @@ int main() {
     for (f=0; f<nimages; f++) {
 	/* first do a single exposure */
 	grab_frame(camera, buffer, nelements*sizeof(char));
+	// add_gaussian(buffer, 175.0, 130.0, 50.0, 3.0);
+	// add_gaussian(buffer, 155.0, 115.0, 50.0, 3.0);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
@@ -435,6 +455,9 @@ int main() {
 		average[j] = 254;
 	    }
 	}
+	// add_gaussian(average, 175.0, 130.0, 50.0, 3.0);
+	// add_gaussian(average, 155.0, 115.0, 50.0, 3.0);
+
 	xsum = 0.0;
 	ysum = 0.0;
 	for (i=0; i<nboxes; i++) {
@@ -458,7 +481,7 @@ int main() {
 	dist_l[f] = stardist(0, 1);
 	sig_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
 	
-	if (f % 10 == 0) {
+	if (f % 40 == 0) {
 	    status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
 			    average, nelements, names, messages, NXPA);
 	    sprintf(xpastr, "image; box %f %f %d %d 0.0", 
@@ -485,7 +508,7 @@ int main() {
     end_usec = end_time.tv_usec;
 
     elapsed_time = (float)((end_sec + 1.0e-6*end_usec) - (start_sec + 1.0e-6*start_usec));
-    fps = nimages/elapsed_time;
+    fps = 3*nimages/elapsed_time;
     printf("Elapsed time = %g seconds.\n", elapsed_time);
     printf("Framerate = %g fps.\n", fps);
 
@@ -522,25 +545,22 @@ int main() {
 
     printf("\n");
 
-    var = gsl_stats_variance_m(dist_l, 1, nimages, mean);
-    var = var - avesig;
-    seeing_long = seeing(var, d, r);
-    printf("sigma_l = %f, seeing_l = %f\n", sqrt(var), seeing_long);
+    var_l = gsl_stats_variance_m(dist_l, 1, nimages, mean);
+    var_l = var_l - avesig;
+    seeing_long = seeing(var_l, d, r);
+    printf("sigma_l = %f, seeing_l = %f\n", sqrt(var_l), seeing_long);
 
     seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
     printf("Exposure corrected seeing = %4.2f\"\n\n", seeing_ave);
 
-    fprintf(out, "short exp seeing = %f\n", seeing_short);
-    fprintf(out, "long exp seeing  = %f\n", seeing_long);
-    fprintf(out, "corr ave seeing  = %f\n", seeing_ave);
+    timestr = ctime(&end_sec);
+    fprintf(out, "%s %f %f %f %f %f\n", timestr, var, var_l, seeing_short, seeing_long, seeing_ave);
 
-    /*
     init = fopen("init_cen_all", "w");
     for (i=0; i<nboxes; i++) {
 	fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
     }
     fclose(init);
-    */
 
     fclose(out);
 
