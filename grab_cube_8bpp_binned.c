@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set roi");
     printf ("I: roi is (0, 0) - (%d, %d)\n", width, height);
 
-    err = dc1394_format7_get_total_bytes (camera, DC1394_VIDEO_MODE_FORMAT7_0, &total_bytes);
+    err = dc1394_format7_get_total_bytes (camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get total bytes");
     printf ("I: total bytes is %"PRIu64" before SFF enabled\n", total_bytes);
 
@@ -128,16 +128,16 @@ int main(int argc, char *argv[])
     /*-----------------------------------------------------------------------
      *  print allowed and used packet size
      *-----------------------------------------------------------------------*/
-    err=dc1394_format7_get_packet_parameters(camera, DC1394_VIDEO_MODE_FORMAT7_0, &min_bytes, &max_bytes);
+    err=dc1394_format7_get_packet_parameters(camera, DC1394_VIDEO_MODE_FORMAT7_1, &min_bytes, &max_bytes);
 
     DC1394_ERR_RTN(err,"Packet para inq error");
     printf( "camera reports allowed packet size from %d - %d bytes\n", min_bytes, max_bytes);
 
-    err=dc1394_format7_get_packet_size(camera, DC1394_VIDEO_MODE_FORMAT7_0, &actual_bytes);
+    err=dc1394_format7_get_packet_size(camera, DC1394_VIDEO_MODE_FORMAT7_1, &actual_bytes);
     DC1394_ERR_RTN(err,"dc1394_format7_get_packet_size error");
     printf( "camera reports actual packet size = %d bytes\n", actual_bytes);
 
-    err=dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_0, &total_bytes);
+    err=dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
     DC1394_ERR_RTN(err,"dc1394_query_format7_total_bytes error");
     printf( "camera reports total bytes per frame = %"PRId64" bytes\n",
             total_bytes);
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
     // set up FITS image and capture
     fits_create_file(&fptr, filename, &status);
-    dc1394_get_image_size_from_video_mode(camera, DC1394_VIDEO_MODE_FORMAT7_0, &width, &height);
+    dc1394_get_image_size_from_video_mode(camera, DC1394_VIDEO_MODE_FORMAT7_1, &width, &height);
     fits_create_img(fptr, BYTE_IMG, 3, naxes, &status);
 
     /*-----------------------------------------------------------------------
