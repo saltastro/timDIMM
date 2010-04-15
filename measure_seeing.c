@@ -40,7 +40,7 @@ typedef struct _Back {
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
-int boxsize = 30;
+int boxsize = 20;
 double pixel_scale = 1.22;
 
 double stardist(int i, int j) {
@@ -157,7 +157,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  gain = 0.5;
     double  rmom;
     double  dist;
-    double nsigma = 5.0;
+    double nsigma = 7.0;
     int low_y, up_y, low_x, up_x;
     int sourcepix = 0;
 
@@ -277,10 +277,11 @@ int main() {
     char *froot, *timestr;
     FILE *init, *out;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
-    double dist[2000], sig[2000], dist_l[2000], sig_l[2000];
+    double dist[3000], sig[3000], dist_l[3000], sig_l[3000];
     double mean, var, var_l, avesig;
     double seeing_short, seeing_long, seeing_ave;
     struct timeval start_time, end_time;
+    struct tm ut;
     time_t start_sec, end_sec;
     suseconds_t start_usec, end_usec;
     float elapsed_time, fps;
@@ -391,7 +392,7 @@ int main() {
     nboxes = i;
     fclose(init); 
 
-    back.r = 80;
+    back.r = 60;
     back.width = 10;
 
     /* allocate the buffers */
@@ -408,7 +409,7 @@ int main() {
 	exit(-1);
     }
 
-    nimages = 2000;
+    nimages = 3000;
     froot = "seeing.fits";
 
     gettimeofday(&start_time, NULL);
@@ -416,8 +417,8 @@ int main() {
     for (f=0; f<nimages; f++) {
 	/* first do a single exposure */
 	grab_frame(camera, buffer, nelements*sizeof(char));
-	// add_gaussian(buffer, 175.0, 130.0, 50.0, 3.0);
-	// add_gaussian(buffer, 155.0, 115.0, 50.0, 3.0);
+//	add_gaussian(buffer, 195.0, 130.0, 50.0, 3.0);
+//	add_gaussian(buffer, 140.0, 115.0, 50.0, 3.0);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
@@ -455,8 +456,8 @@ int main() {
 		average[j] = 254;
 	    }
 	}
-	// add_gaussian(average, 175.0, 130.0, 50.0, 3.0);
-	// add_gaussian(average, 155.0, 115.0, 50.0, 3.0);
+	// add_gaussian(average, 195.0, 130.0, 50.0, 3.0);
+	// add_gaussian(average, 140.0, 115.0, 50.0, 3.0);
 
 	xsum = 0.0;
 	ysum = 0.0;
@@ -483,7 +484,7 @@ int main() {
 	
 	if (f % 40 == 0) {
 	    status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-			    average, nelements, names, messages, NXPA);
+			    buffer, nelements, names, messages, NXPA);
 	    sprintf(xpastr, "image; box %f %f %d %d 0.0", 
 		    box[0].x, box[0].y, boxsize, boxsize); 
 	    status = XPASet(xpa, "ds9", "regions", "ack=false", 
@@ -551,10 +552,22 @@ int main() {
     printf("sigma_l = %f, seeing_l = %f\n", sqrt(var_l), seeing_long);
 
     seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
-    printf("Exposure corrected seeing = %4.2f\"\n\n", seeing_ave);
+    printf("\033[0;31mExposure corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_ave);
 
     timestr = ctime(&end_sec);
-    fprintf(out, "%s %f %f %f %f %f\n", timestr, var, var_l, seeing_short, seeing_long, seeing_ave);
+    gmtime_r(&end_sec, &ut);
+    fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f\n", 
+	    ut.tm_year+1900, 
+	    ut.tm_mon+1, 
+	    ut.tm_mday, 
+	    ut.tm_hour, 
+	    ut.tm_min, 
+	    ut.tm_sec, 
+	    var, 
+	    var_l, 
+	    seeing_short, 
+	    seeing_long, 
+	    seeing_ave);
 
     init = fopen("init_cen_all", "w");
     for (i=0; i<nboxes; i++) {
