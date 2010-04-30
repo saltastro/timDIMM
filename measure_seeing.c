@@ -6,6 +6,7 @@
 #include <fitsio.h>
 #include <gsl/gsl_statistics.h>
 #include <xpa.h>
+#include <time.h>
 #include <sys/time.h>
 #include <string.h>
 #include <inttypes.h>
