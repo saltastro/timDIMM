@@ -7,7 +7,7 @@ import pyfits
 import imagestats
 
 def rfits(file):
-    f = pyfits.open(file)
+    f = pyfits.open(file, memmap=True)
     hdu = f[0]
     (im, hdr) = (hdu.data, hdu.header)
     f.close()
