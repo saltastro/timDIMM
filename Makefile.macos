@@ -25,5 +25,5 @@ measure_seeing:	measure_seeing.c
 ave_frames:	ave_frames.c
 	${CC} ${CFLAGS} ave_frames.c ${LDFLAGS} -o ave_frames
 
-ave_frames_ff:  ave_frames_ff.c
-        ${CC} ${CFLAGS} ave_frames_ff.c ${LDFLAGS} -o ave_frames_ff
+ave_frames_ff:	ave_frames_ff.c
+	${CC} ${CFLAGS} ave_frames_ff.c ${LDFLAGS} -o ave_frames_ff

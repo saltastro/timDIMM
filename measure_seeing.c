@@ -414,12 +414,15 @@ int main() {
     froot = "seeing.fits";
 
     gettimeofday(&start_time, NULL);
+    grab_frame(camera, buffer2, nelements*sizeof(char));
+    add_gaussian(buffer2, 195.0, 130.0, 50.0, 3.0);
+    add_gaussian(buffer2, 140.0, 115.0, 50.0, 3.0);
 
     for (f=0; f<nimages; f++) {
 	/* first do a single exposure */
 	grab_frame(camera, buffer, nelements*sizeof(char));
-//	add_gaussian(buffer, 195.0, 130.0, 50.0, 3.0);
-//	add_gaussian(buffer, 140.0, 115.0, 50.0, 3.0);
+	add_gaussian(buffer, 195.0, 130.0, 50.0, 3.0);
+	add_gaussian(buffer, 140.0, 115.0, 50.0, 3.0);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
@@ -446,9 +449,6 @@ int main() {
 	sig[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
 
 	/* now average two exposures */
-	grab_frame(camera, buffer, nelements*sizeof(char));
-	grab_frame(camera, buffer2, nelements*sizeof(char));
-
 	for (j=0; j<nelements; j++) {
 	    test = buffer[j]+buffer2[j];
 	    if (test <= 254) {
@@ -457,8 +457,7 @@ int main() {
 		average[j] = 254;
 	    }
 	}
-	// add_gaussian(average, 195.0, 130.0, 50.0, 3.0);
-	// add_gaussian(average, 140.0, 115.0, 50.0, 3.0);
+	memcpy(buffer2, buffer, nelements*sizeof(char));
 
 	xsum = 0.0;
 	ysum = 0.0;
