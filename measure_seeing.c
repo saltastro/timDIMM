@@ -482,18 +482,18 @@ int main() {
 
 	dist_l[f] = stardist(0, 1);
 	sig_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
-	
-	if (f % 40 == 0) {
-	    status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-			    buffer, nelements, names, messages, NXPA);
-	    sprintf(xpastr, "image; box %f %f %d %d 0.0", 
-		    box[0].x, box[0].y, boxsize, boxsize); 
-	    status = XPASet(xpa, "ds9", "regions", "ack=false", 
-			    xpastr, strlen(xpastr), names, messages, NXPA);
-	    sprintf(xpastr, "image; box %f %f %d %d 0.0", 
-		    box[1].x, box[1].y, boxsize, boxsize); 
-	    status = XPASet(xpa, "ds9", "regions", "ack=false", 
-			    xpastr, strlen(xpastr), names, messages, NXPA);
+
+ 	if (f % 40 == 0) {
+	  status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
+			  buffer, nelements, names, messages, NXPA);
+	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
+		  box[0].x, box[0].y, boxsize, boxsize);
+	  status = XPASet(xpa, "ds9", "regions", "ack=false",
+			  xpastr, strlen(xpastr), names, messages, NXPA);
+	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
+		  box[1].x, box[1].y, boxsize, boxsize);
+	  status = XPASet(xpa, "ds9", "regions", "ack=false",
+			  xpastr, strlen(xpastr), names, messages, NXPA);
 	}
 	
     }
