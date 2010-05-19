@@ -301,7 +301,7 @@ int main() {
     double r = 0.130;
 
     XPA xpa;
-    xpa = XPAOpen(NULL);
+    // xpa = XPAOpen(NULL);
 
     stderr = freopen("measure_seeing.log", "w", stderr);
 
@@ -414,15 +414,19 @@ int main() {
     froot = "seeing.fits";
 
     gettimeofday(&start_time, NULL);
-    grab_frame(camera, buffer2, nelements*sizeof(char));
-    add_gaussian(buffer2, 195.0, 130.0, 50.0, 3.0);
-    add_gaussian(buffer2, 140.0, 115.0, 50.0, 3.0);
 
     for (f=0; f<nimages; f++) {
 	/* first do a single exposure */
+      printf("first frame, f = %d\n", f);
 	grab_frame(camera, buffer, nelements*sizeof(char));
 	add_gaussian(buffer, 195.0, 130.0, 50.0, 3.0);
 	add_gaussian(buffer, 140.0, 115.0, 50.0, 3.0);
+
+	/* then do a second one */
+      printf("second frame, f = %d\n", f);
+	grab_frame(camera, buffer2, nelements*sizeof(char));
+	add_gaussian(buffer2, 195.0, 130.0, 50.0, 3.0);
+	add_gaussian(buffer2, 140.0, 115.0, 50.0, 3.0);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
@@ -457,7 +461,6 @@ int main() {
 		average[j] = 254;
 	    }
 	}
-	memcpy(buffer2, buffer, nelements*sizeof(char));
 
 	xsum = 0.0;
 	ysum = 0.0;
@@ -482,18 +485,18 @@ int main() {
 	dist_l[f] = stardist(0, 1);
 	sig_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
 
- 	if (f % 40 == 0) {
-	  status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-			  buffer, nelements, names, messages, NXPA);
-	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
-		  box[0].x, box[0].y, boxsize, boxsize);
-	  status = XPASet(xpa, "ds9", "regions", "ack=false",
-			  xpastr, strlen(xpastr), names, messages, NXPA);
-	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
-		  box[1].x, box[1].y, boxsize, boxsize);
-	  status = XPASet(xpa, "ds9", "regions", "ack=false",
-			  xpastr, strlen(xpastr), names, messages, NXPA);
-	}
+ 	/* if (f % 40 == 0) { */
+	/*   status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false", */
+	/* 		  buffer, nelements, names, messages, NXPA); */
+	/*   sprintf(xpastr, "image; box %f %f %d %d 0.0", */
+	/* 	  box[0].x, box[0].y, boxsize, boxsize); */
+	/*   status = XPASet(xpa, "ds9", "regions", "ack=false", */
+	/* 		  xpastr, strlen(xpastr), names, messages, NXPA); */
+	/*   sprintf(xpastr, "image; box %f %f %d %d 0.0", */
+	/* 	  box[1].x, box[1].y, boxsize, boxsize); */
+	/*   status = XPASet(xpa, "ds9", "regions", "ack=false", */
+	/* 		  xpastr, strlen(xpastr), names, messages, NXPA); */
+	/* } */
 	
     }
 
@@ -516,14 +519,12 @@ int main() {
     err=dc1394_video_set_transmission(camera,DC1394_OFF);
     DC1394_ERR_RTN(err,"couldn't stop the camera?");
     
-    /*
     sprintf(fitsfile, "!%s", froot);
     fits_create_file(&fptr, fitsfile, &status);
     fits_create_img(fptr, BYTE_IMG, 2, naxes, &status);
     fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &status);
     fits_close_file(fptr, &status);
     fits_report_error(stderr, status);
-    */
 
     /* analyze short exposure */
     printf("\t SHORT EXPOSURE\n");
