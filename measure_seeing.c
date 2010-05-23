@@ -348,8 +348,6 @@ int main() {
     printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
     printf ("I: current image size is: height = %ld, width = %ld\n", naxes[1], naxes[0]);
 
-    //winleft = (max_width - naxes[0])/2;
-    //wintop = (max_height - naxes[1])/2;
     winleft = 0;
     wintop = 0;
 
