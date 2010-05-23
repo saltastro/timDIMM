@@ -158,7 +158,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  gain = 0.5;
     double  rmom;
     double  dist;
-    double nsigma = 5.0;
+    double nsigma = 7.0;
     int low_y, up_y, low_x, up_x;
     int sourcepix = 0;
 
@@ -228,33 +228,26 @@ int centroid(char *image, int imwidth, int imheight, int num) {
 
 }
 
-int grab_frame(dc1394camera_t *c, char *buf, int nbytes) {
+int grab_frame(dc1394camera_t *cam, char *buf, int nbytes) {
     dc1394video_frame_t *frame=NULL;
     dc1394error_t err;
 
-    err = dc1394_capture_dequeue(c, DC1394_CAPTURE_POLICY_WAIT, &frame);
+    err = dc1394_capture_dequeue(cam, DC1394_CAPTURE_POLICY_WAIT, &frame);
     if (err != DC1394_SUCCESS) {
 	dc1394_log_error("Unable to capture.");
-	dc1394_capture_stop(c);
-	dc1394_camera_free(c);
+	dc1394_capture_stop(cam);
+	dc1394_camera_free(cam);
 	exit(1);
     }
 
     memcpy(buf, frame->image, nbytes);
-    dc1394_capture_enqueue(c, frame);
+    dc1394_capture_enqueue(cam, frame);
     return 1;
 }
 
 int add_gaussian(char *buffer, float cenx, float ceny, float a, float sigma) {
     float gauss, rsq;
     int i, j, low_x, up_x, low_y, up_y, size;
-    double xoff, yoff;
-
-    xoff = 2.0*drand48() - 1.0;
-    yoff = 2.0*drand48() - 1.0;
-
-    cenx += 0.5*xoff;
-    ceny += 0.5*yoff;
 
     size = 30;
     low_x = (int)(cenx-size);
@@ -275,24 +268,17 @@ int add_gaussian(char *buffer, float cenx, float ceny, float a, float sigma) {
     return 1;
 }
 
-int main(int argc, char *argv[]) {
+int main() {
     
-    dc1394_t * dc;
-    dc1394camera_t * camera;
-    dc1394camera_list_t * list;
-    dc1394error_t err;
-    dc1394video_mode_t mode;
-    unsigned int min_bytes, max_bytes, max_height, max_width, winleft, wintop;
-    uint64_t total_bytes = 0;
-
+    dc1394camera_t *camera;
     char *buffer, *buffer2, *average;
     fitsfile *fptr;
-    int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
-    char filename[256], xpastr[256];
+    int i, j, f, status, nimages, anynul, nboxes, test;
+    char fitsfile[256], xpastr[256];
     char *froot, *timestr;
     FILE *init, *out;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
-    double *dist, *sig, *dist_l, *sig_l;
+    double dist[3000], sig[3000], dist_l[3000], sig_l[3000];
     double mean, var, var_l, avesig;
     double seeing_short, seeing_long, seeing_ave;
     struct timeval start_time, end_time;
@@ -301,53 +287,48 @@ int main(int argc, char *argv[]) {
     suseconds_t start_usec, end_usec;
     float elapsed_time, fps;
 
-    unsigned int actual_bytes;
+    dc1394_t * dc;
+    dc1394camera_list_t * list;
+    dc1394error_t err;
+    
+    unsigned int min_bytes, max_bytes, max_height, max_width;
+    unsigned int actual_bytes, winleft, wintop;
+    uint64_t total_bytes = 0;
     char *names[NXPA];
     char *messages[NXPA];
 
     double d = 0.060;
     double r = 0.130;
-    srand48((unsigned)time(NULL));
 
     XPA xpa;
-    xpa = XPAOpen(NULL);
+    // xpa = XPAOpen(NULL);
 
     stderr = freopen("measure_seeing.log", "w", stderr);
 
-    if (argc <= 1) {
-	printf("Must specifiy number of measurements.\n");
-	exit(-1);
-    }
-
-    nimages = atoi(argv[1]);
-    fstatus = 0;
     status = 0;
     anynul = 0;
-    xsize = 320;
-    ysize = 240;
-    naxes[0] = xsize;
-    naxes[1] = ysize;
+    naxes[0] = 320;
+    naxes[1] = 240;
     fpixel = 1;
   
     nelements = naxes[0]*naxes[1];
-
-    mode = DC1394_VIDEO_MODE_FORMAT7_1;
+    
     dc = dc1394_new();
     if (!dc)
-	return -1;
+	return 1;
     err = dc1394_camera_enumerate(dc, &list);
     DC1394_ERR_RTN(err, "Failed to enumerate cameras.");
 
     if (list->num == 0) {
 	dc1394_log_error("No cameras found.");
-	return -1;
+	return 1;
     }
 
     camera = dc1394_camera_new(dc, list->ids[0].guid);
     if (!camera) {
 	dc1394_log_error("Failed to initialize camera with guid %"PRIx64".", 
 			 list->ids[0].guid);
-	return -1;
+	return 1;
     }
     dc1394_camera_free_list(list);
 
@@ -357,13 +338,15 @@ int main(int argc, char *argv[]) {
     dc1394_video_set_iso_speed(camera, DC1394_ISO_SPEED_400);
 
     // configure camera for format7
-    err = dc1394_video_set_mode(camera, mode);
-    DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't choose video mode.");
+    err = dc1394_video_set_mode(camera, DC1394_VIDEO_MODE_FORMAT7_1);
+    DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't choose format7_0");
+    printf("I: video mode is format7_0\n");
 
-    err = dc1394_format7_get_max_image_size(camera, mode, &max_width, &max_height);
-    DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size.");
+    err = dc1394_format7_get_max_image_size(camera, DC1394_VIDEO_MODE_FORMAT7_1, 
+					    &max_width, &max_height);
+    DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size for format7_0");
     printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
-    printf ("I: current image size is: height = %d, width = %d\n", ysize, xsize);
+    printf ("I: current image size is: height = %ld, width = %ld\n", naxes[1], naxes[0]);
 
     //winleft = (max_width - naxes[0])/2;
     //wintop = (max_height - naxes[1])/2;
@@ -371,14 +354,14 @@ int main(int argc, char *argv[]) {
     wintop = 0;
 
     err = dc1394_format7_set_roi(camera,
-				 mode,
+				 DC1394_VIDEO_MODE_FORMAT7_1,
 				 DC1394_COLOR_CODING_MONO8,
 				 DC1394_USE_MAX_AVAIL,
 				 winleft, wintop, // left, top
-				 xsize, ysize);
+				 naxes[0], naxes[1]);
     DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
-    printf("I: ROI is (%d, %d) - (%d, %d)\n", 
-	   winleft, wintop, winleft+xsize, wintop+ysize);
+    printf("I: ROI is (%d, %d) - (%ld, %ld)\n", 
+	   winleft, wintop, winleft+naxes[0], wintop+naxes[1]);
 
     err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
     DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
@@ -393,10 +376,8 @@ int main(int argc, char *argv[]) {
 	dc1394_log_error("Unable to start camera iso transmission.");
 	dc1394_capture_stop(camera);
 	dc1394_camera_free(camera);
-	return -1;
+	exit(1);
     }
-
-    printf("Camera successfully initialized.\n");
 
     out = fopen("seeing.dat", "a");
     init = fopen("init_cen_all", "r");
@@ -416,22 +397,6 @@ int main(int argc, char *argv[]) {
     back.width = 10;
 
     /* allocate the buffers */
-    if (!(dist = calloc(nimages, sizeof(double)))) {
-	printf("Couldn't allocate dist array.\n");
-	exit(-1);
-    }
-    if (!(sig = calloc(nimages, sizeof(double)))) {
-	printf("Couldn't allocate sig array.\n");
-	exit(-1);
-    }
-    if (!(dist_l = calloc(nimages, sizeof(double)))) {
-	printf("Couldn't allocate dist_l array.\n");
-	exit(-1);
-    }
-    if (!(sig_l = calloc(nimages, sizeof(double)))) {
-	printf("Couldn't allocate sig_l array.\n");
-	exit(-1);
-    }
     if (!(buffer = malloc(nelements*sizeof(char)))) {
 	printf("Couldn't Allocate Image Buffer\n");
 	exit(-1);
@@ -445,19 +410,23 @@ int main(int argc, char *argv[]) {
 	exit(-1);
     }
 
+    nimages = 3000;
     froot = "seeing.fits";
 
     gettimeofday(&start_time, NULL);
 
-    /* get initial frame */
-    grab_frame(camera, buffer2, nelements*sizeof(char));
-    add_gaussian(buffer2, 195.0, 130.0, 100.0, 2.0);
-    add_gaussian(buffer2, 140.0, 115.0, 100.0, 2.0);
-
     for (f=0; f<nimages; f++) {
+	/* first do a single exposure */
+      printf("first frame, f = %d\n", f);
 	grab_frame(camera, buffer, nelements*sizeof(char));
-	add_gaussian(buffer, 195.0, 130.0, 15.0, 2.0);
-	add_gaussian(buffer, 140.0, 115.0, 15.0, 2.0);
+	add_gaussian(buffer, 195.0, 130.0, 50.0, 3.0);
+	add_gaussian(buffer, 140.0, 115.0, 50.0, 3.0);
+
+	/* then do a second one */
+      printf("second frame, f = %d\n", f);
+	grab_frame(camera, buffer2, nelements*sizeof(char));
+	add_gaussian(buffer2, 195.0, 130.0, 50.0, 3.0);
+	add_gaussian(buffer2, 140.0, 115.0, 50.0, 3.0);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
@@ -492,7 +461,6 @@ int main(int argc, char *argv[]) {
 		average[j] = 254;
 	    }
 	}
-	memcpy(buffer2, buffer, nelements*sizeof(char));
 
 	xsum = 0.0;
 	ysum = 0.0;
@@ -517,47 +485,47 @@ int main(int argc, char *argv[]) {
 	dist_l[f] = stardist(0, 1);
 	sig_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
 
-	sprintf(filename, "!%s", froot);
-	fits_create_file(&fptr, "!seeing.fits", &fstatus);
-	fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
-	fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
-	fits_close_file(fptr, &fstatus);
-	fits_report_error(stdout, fstatus);
-
- 	if (f % 80 == 0) {
-	  status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-			  buffer, nelements, names, messages, NXPA);
-	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
-		  box[0].x, box[0].y, boxsize, boxsize);
-	  status = XPASet(xpa, "ds9", "regions", "ack=false",
-			  xpastr, strlen(xpastr), names, messages, NXPA);
-	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
-		  box[1].x, box[1].y, boxsize, boxsize);
-	  status = XPASet(xpa, "ds9", "regions", "ack=false",
-			  xpastr, strlen(xpastr), names, messages, NXPA);
-	}
+ 	/* if (f % 40 == 0) { */
+	/*   status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false", */
+	/* 		  buffer, nelements, names, messages, NXPA); */
+	/*   sprintf(xpastr, "image; box %f %f %d %d 0.0", */
+	/* 	  box[0].x, box[0].y, boxsize, boxsize); */
+	/*   status = XPASet(xpa, "ds9", "regions", "ack=false", */
+	/* 		  xpastr, strlen(xpastr), names, messages, NXPA); */
+	/*   sprintf(xpastr, "image; box %f %f %d %d 0.0", */
+	/* 	  box[1].x, box[1].y, boxsize, boxsize); */
+	/*   status = XPASet(xpa, "ds9", "regions", "ack=false", */
+	/* 		  xpastr, strlen(xpastr), names, messages, NXPA); */
+	/* } */
 	
     }
 
     gettimeofday(&end_time, NULL);
     printf("End capture.\n");
 
+    /*-----------------------------------------------------------------------
+     *  stop data transmission
+     *-----------------------------------------------------------------------*/
     start_sec = start_time.tv_sec;
     start_usec = start_time.tv_usec;
     end_sec = end_time.tv_sec;
     end_usec = end_time.tv_usec;
 
     elapsed_time = (float)((end_sec + 1.0e-6*end_usec) - (start_sec + 1.0e-6*start_usec));
-    fps = nimages/elapsed_time;
+    fps = 3*nimages/elapsed_time;
     printf("Elapsed time = %g seconds.\n", elapsed_time);
     printf("Framerate = %g fps.\n", fps);
 
-    /*-----------------------------------------------------------------------
-     *  stop data transmission
-     *-----------------------------------------------------------------------*/
     err=dc1394_video_set_transmission(camera,DC1394_OFF);
     DC1394_ERR_RTN(err,"couldn't stop the camera?");
     
+    sprintf(fitsfile, "!%s", froot);
+    fits_create_file(&fptr, fitsfile, &status);
+    fits_create_img(fptr, BYTE_IMG, 2, naxes, &status);
+    fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &status);
+    fits_close_file(fptr, &status);
+    fits_report_error(stderr, status);
+
     /* analyze short exposure */
     printf("\t SHORT EXPOSURE\n");
     mean = gsl_stats_mean(dist, 1, nimages);
