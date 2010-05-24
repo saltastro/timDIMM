@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     naxes[1] = height;
     nelements = naxes[0]*naxes[1];
 
-    // stderr = freopen("grab_cube.log", "w", stderr);
+    stderr = freopen("grab_cube.log", "w", stderr);
 
     d = dc1394_new ();
     if (!d)
