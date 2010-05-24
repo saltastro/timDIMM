@@ -15,29 +15,42 @@ input = open("init_cen_all", 'r')
 lines = input.readlines()
 input.close()
 
-tol = 75.0
+tol = 80.0
 
 scope.set_slew_centering()
+
+minx = 1000.0
+maxx = 0.0
+miny = 1000.0
+maxy = 0.0
 
 for line in lines:
     x, y = line.split()
     x = float(x)
     y = float(y)
+    if x > maxx:
+        maxx = x
+    if x < minx:
+        minx = x
+    if y > maxy:
+        maxy = y
+    if y < miny:
+        miny-y
 
-    if x > 320-tol:
-        print "Move East."
-        scope.move_East()
-    if x < tol:
-        print "Move West."
-        scope.move_West()
-    if y < tol/1.5:
-        print "Move North."
-        scope.move_North()
-    if y > 240-tol/1.5:
-        print "Move South."
-        scope.move_South()
+if maxx > 320-tol:
+    print "Move East."
+    scope.move_East()
+if minx < tol:
+    print "Move West."
+    scope.move_West()
+if miny < tol/1.5:
+    print "Move North."
+    scope.move_North()
+if maxy > 240-tol/1.5:
+    print "Move South."
+    scope.move_South()
 
-time.sleep(0.5)
+time.sleep(0.4)
 print "Stop Move."
 
 scope.AbortSlew()

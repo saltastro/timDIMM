@@ -479,7 +479,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	dist[f] = stardist(0, 1);
-	sig[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
+	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
 
 	/* now average two exposures */
 	for (j=0; j<nelements; j++) {
@@ -513,7 +513,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	dist_l[f] = stardist(0, 1);
-	sig_l[f] = box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy;
+	sig_l[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
 
 	sprintf(filename, "!%s", froot);
 	fits_create_file(&fptr, "!seeing.fits", &fstatus);
