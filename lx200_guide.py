@@ -7,7 +7,7 @@ import LX200
 from LX200.LX200Utils import *
 
 port = LX200.LXSerial(debug=False)
-port.connect('/dev/tty.PL2303-00002006')
+port.connect('/dev/tty.PL2303-00001004')
 
 scope = LX200.Telescope(port, "LX200GPS", debug=False)
 
@@ -35,7 +35,7 @@ for line in lines:
     if y > maxy:
         maxy = y
     if y < miny:
-        miny-y
+        miny = y
 
 if maxx > 320-tol:
     print "Move East."
