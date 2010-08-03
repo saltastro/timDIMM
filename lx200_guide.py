@@ -50,7 +50,7 @@ if maxy > 240-tol/1.5:
     print "Move South."
     scope.move_South()
 
-time.sleep(0.4)
+time.sleep(0.3)
 print "Stop Move."
 
 scope.AbortSlew()
