@@ -10,7 +10,7 @@ from find_boxes import *
 
 def check_image():
     os.system("./ave_frames 5 \!spiral.fits")
-    os.system("cat spiral.fits | xpaset ds9 fits")
+    os.system("cat spiral.fits | xpaset timDIMM fits")
     hdu = rfits("spiral.fits")
     image = hdu.data
     n, stars = daofind(image)
@@ -43,7 +43,7 @@ def minus_y(s, t):
     stop(s, t)
 
 port = LX200.LXSerial(debug=False)
-port.connect('/dev/tty.PL2303-00002006')
+port.connect('/dev/tty.PL2303-00001004')
 
 scope = LX200.Telescope(port, "LX200GPS", debug=False)
 

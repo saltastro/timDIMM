@@ -290,7 +290,7 @@ int main(int argc, char *argv[]) {
     int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
     char filename[256], xpastr[256];
     char *froot, *timestr;
-    FILE *init, *out;
+    FILE *init, *out, *cenfile;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
     double *dist, *sig, *dist_l, *sig_l;
     double mean, var, var_l, avesig;
@@ -397,7 +397,9 @@ int main(int argc, char *argv[]) {
     printf("Camera successfully initialized.\n");
 
     out = fopen("seeing.dat", "a");
+    cenfile = fopen("centroids.dat", "w");
     init = fopen("init_cen_all", "r");
+
     i = 0;
     while (fscanf(init, "%f %f\n", &xx, &yy) != EOF) {
 	box[i].x = xx;
@@ -449,13 +451,13 @@ int main(int argc, char *argv[]) {
 
     /* get initial frame */
     grab_frame(camera, buffer2, nelements*sizeof(char));
-//    add_gaussian(buffer2, 195.0, 130.0, 100.0, 2.0);
-//    add_gaussian(buffer2, 140.0, 115.0, 100.0, 2.0);
+    // add_gaussian(buffer2, 195.0, 130.0, 100.0, 2.0);
+    // add_gaussian(buffer2, 140.0, 115.0, 100.0, 2.0);
 
     for (f=0; f<nimages; f++) {
 	grab_frame(camera, buffer, nelements*sizeof(char));
-//	add_gaussian(buffer, 195.0, 130.0, 15.0, 2.0);
-//	add_gaussian(buffer, 140.0, 115.0, 15.0, 2.0);
+	// add_gaussian(buffer, 195.0, 130.0, 15.0, 2.0);
+	// add_gaussian(buffer, 140.0, 115.0, 15.0, 2.0);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
@@ -476,14 +478,25 @@ int main(int argc, char *argv[]) {
 	    //centroid(buffer, i);
 	    //box[i].r = boxsize/4.0;
 	    centroid(buffer, naxes[0], naxes[1], i);
+	    fprintf(cenfile,
+		    "%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f \t ",
+		    box[i].cenx,
+		    box[i].ceny,
+		    box[i].fwhm,
+		    box[i].counts,
+		    back.background,
+		    box[i].noise,
+		    box[i].sigmaxy,
+		    box[i].sigmafwhm);
 	}
 
 	dist[f] = stardist(0, 1);
 	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
+	fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);
 
 	/* now average two exposures */
 	for (j=0; j<nelements; j++) {
-	    test = buffer[j]+buffer2[j];
+	  test = (int)buffer[j] + (int)buffer2[j];
 	    if (test <= 254) {
 		average[j] = buffer[j]+buffer2[j];
 	    } else {
@@ -522,16 +535,16 @@ int main(int argc, char *argv[]) {
 	fits_close_file(fptr, &fstatus);
 	fits_report_error(stdout, fstatus);
 
- 	if (f % 80 == 0) {
-	  status = XPASet(xpa, "ds9", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
+ 	if (f % 160 == 0) {
+	  status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
 			  buffer, nelements, names, messages, NXPA);
 	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
 		  box[0].x, box[0].y, boxsize, boxsize);
-	  status = XPASet(xpa, "ds9", "regions", "ack=false",
+	  status = XPASet(xpa, "timDIMM", "regions", "ack=false",
 			  xpastr, strlen(xpastr), names, messages, NXPA);
 	  sprintf(xpastr, "image; box %f %f %d %d 0.0",
 		  box[1].x, box[1].y, boxsize, boxsize);
-	  status = XPASet(xpa, "ds9", "regions", "ack=false",
+	  status = XPASet(xpa, "timDIMM", "regions", "ack=false",
 			  xpastr, strlen(xpastr), names, messages, NXPA);
 	}
 	
@@ -605,7 +618,7 @@ int main(int argc, char *argv[]) {
 	fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
     }
     fclose(init);
-
+    fclose(cenfile);
     fclose(out);
 
     return (status);
