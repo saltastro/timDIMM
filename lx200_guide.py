@@ -10,6 +10,7 @@ port = LX200.LXSerial(debug=False)
 port.connect('/dev/tty.PL2303-00001004')
 
 scope = LX200.Telescope(port, "LX200GPS", debug=False)
+library = LX200.Library(port, scope)
 
 input = open("init_cen_all", 'r')
 lines = input.readlines()
@@ -57,6 +58,8 @@ scope.AbortSlew()
 #scope.AbortSlew()
 #scope.AbortSlew()
 time.sleep(1)
+sync = library.sync_object()
+print "Sync'ed to: %s" % sync
 
 port.close()
 
