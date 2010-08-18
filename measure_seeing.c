@@ -84,7 +84,8 @@ double old_seeing(double var, double d, double r) {
 		   0.0968*pow(r, (-1.0/3.0)) )/var 
 		 ), 0.6);
 
-    return 206265.0*0.98*lambda/r0;
+    // return 206265.0*0.98*lambda/r0;
+    return r0;
 }
 
 /* measure the background in an annulus around the spot pattern */
@@ -158,7 +159,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  gain = 0.5;
     double  rmom;
     double  dist;
-    double nsigma = 5.0;
+    double nsigma = 4.0;
     int low_y, up_y, low_x, up_x;
     int sourcepix = 0;
 
@@ -294,7 +295,7 @@ int main(int argc, char *argv[]) {
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
     double *dist, *sig, *dist_l, *sig_l;
     double mean, var, var_l, avesig;
-    double seeing_short, seeing_long, seeing_ave;
+    double r0, seeing_short, seeing_long, seeing_ave;
     struct timeval start_time, end_time;
     struct tm ut;
     time_t start_sec, end_sec;
@@ -587,6 +588,7 @@ int main(int argc, char *argv[]) {
     var = gsl_stats_variance_m(dist, 1, nimages, mean);
     var = var - avesig;
     seeing_short = seeing(var, d, r);
+    r0 = old_seeing(var, d, r);
     printf("sigma = %f, seeing = %f\n", sqrt(var), seeing_short);
 
     /* analyze long exposure */
@@ -604,6 +606,7 @@ int main(int argc, char *argv[]) {
 
     seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
     printf("\033[0;31mExposure corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_ave);
+    printf("\033[0;31mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
 
     timestr = ctime(&end_sec);
     gmtime_r(&end_sec, &ut);
