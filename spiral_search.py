@@ -9,7 +9,7 @@ from LX200.LX200Utils import *
 from find_boxes import *
 
 def check_image():
-    os.system("./ave_frames 5 \!spiral.fits")
+    os.system("./ave_frames 3 \!spiral.fits")
     os.system("cat spiral.fits | xpaset timDIMM fits")
     hdu = rfits("spiral.fits")
     image = hdu.data
@@ -22,27 +22,27 @@ def check_image():
         print "No dice."
         return False
 
-def stop(s, t):
-    time.sleep(t)
+def stop(s):
+    time.sleep(0.2)
     s.AbortSlew()
     s.AbortSlew()
     time.sleep(2)
     
-def plus_x(s, t):
+def plus_x(s):
     s.move_West()
-    stop(s, t)
+    stop(s)
 
-def minus_x(s, t):
+def minus_x(s):
     s.move_East()
-    stop(s, t)
+    stop(s)
 
-def plus_y(s, t):
+def plus_y(s):
     s.move_North()
-    stop(s, t)
+    stop(s)
 
-def minus_y(s, t):
+def minus_y(s):
     s.move_South()
-    stop(s, t)
+    stop(s)
 
 port = LX200.LXSerial(debug=False)
 port.connect('/dev/tty.PL2303-00001004')
@@ -51,7 +51,8 @@ scope = LX200.Telescope(port, "LX200GPS", debug=False)
 
 scope.set_slew_guide()
 n = 0
-t = 0.0
+x = 0
+y = 0
 
 has_stars = check_image()
 
@@ -60,31 +61,56 @@ if has_stars:
 else:
     while n < 50:
         n = n + 1
-        t = t + 0.3
-        
-        minus_y(scope, t)
-        print "Going -Y at n = %d and t = %f" % (n, t)
-        if check_image():
-            break
-        time.sleep(1)
-        plus_x(scope, t)
-        print "Going +X at n = %d and t = %f" % (n, t)
-        if check_image():
-            break
-        time.sleep(1)
-        n = n + 1
-        t = t + 0.3
 
-        plus_y(scope, t)
-        print "Going +Y at n = %d and t = %f" % (n, t)
-        if check_image():
+        for i in range(n):
+            y = y - 1
+            minus_y(scope)
+            print "At (x,y) = (%d,%d)" % (x,y)
+            if check_image():
+                has_stars = True
+                break
+            time.sleep(1)
+
+        if has_stars:
             break
-        time.sleep(1)
-        minus_x(scope, t)
-        print "Going -X at n = %d and t = %f" % (n, t)
-        if check_image():
+
+        for i in range(n):
+            x = x + 1
+            plus_x(scope)
+            print "At (x,y) = (%d,%d)" % (x,y)
+            if check_image():
+                has_stars = True
+                break
+            time.sleep(1)
+
+        if has_stars:
             break
-        time.sleep(1)
+
+        n = n + 1
+
+        for i in range(n):
+            y = y + 1
+            plus_y(scope)
+            print "At (x,y) = (%d,%d)" % (x,y)
+            if check_image():
+                stars = True
+                break
+            time.sleep(1)
+
+        if has_stars:
+            break
+
+        for i in range(n):
+            x = x - 1
+            minus_x(scope)
+            print "At (x,y) = (%d,%d)" % (x,y)
+            if check_image():
+                stars = True
+                break
+            time.sleep(1)
+
+        if has_stars:
+            break
 
 print "Found stars after %d iterations." % n
 
