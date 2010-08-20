@@ -629,6 +629,12 @@ int main(int argc, char *argv[]) {
 	fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
     }
     fclose(init);
+    init = fopen("seeing.out", "w");
+    fprintf(init, "%.2f\n", seeing_ave);
+    fclose(init);
+    init = fopen("r0.out", "w");
+    fprintf(init, "%.1f\n", 100*r0);
+    fclose(init);
     fclose(cenfile);
     fclose(out);
 
