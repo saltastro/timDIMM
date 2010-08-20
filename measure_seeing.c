@@ -156,7 +156,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  sumy   = 0.0;
     double  sumyy  = 0.0;
     double  val = 0.0;
-    double  gain = 0.5;
+    double  gain = 0.7;
     double  rmom;
     double  dist;
     double nsigma = 4.0;
@@ -479,12 +479,13 @@ int main(int argc, char *argv[]) {
 	    //centroid(buffer, i);
 	    //box[i].r = boxsize/4.0;
 	    centroid(buffer, naxes[0], naxes[1], i);
-	    if (box[i].fwhm < 0.0) {
-		fclose(cenfile);
+	    if (box[i].fwhm > 0.0) {
+	      /*		fclose(cenfile);
 		printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
 		status = -1;
 		return(status);
 	    } else {
+	      */
 		fprintf(cenfile,
 			"%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f \t ",
 			box[i].cenx,
