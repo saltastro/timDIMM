@@ -19,11 +19,12 @@ def daofind(im):
     mean = stats.mean
     sig = stats.stddev
 
-    smooth = nd.gaussian_filter(im, 2.0)
+    smooth = nd.gaussian_filter(im, 2.5)
     
-    clip = smooth >= (mean + 0.5)
+    clip = smooth >= (mean + 0.6)
     labels, num = nd.label(clip)
     pos = nd.center_of_mass(im, labels, range(num+1))
+    print num 
     return num, pos[1:]
 
 
