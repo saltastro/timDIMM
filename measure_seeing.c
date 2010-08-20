@@ -480,12 +480,6 @@ int main(int argc, char *argv[]) {
 	    //box[i].r = boxsize/4.0;
 	    centroid(buffer, naxes[0], naxes[1], i);
 	    if (box[i].fwhm > 0.0) {
-	      /*		fclose(cenfile);
-		printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
-		status = -1;
-		return(status);
-	    } else {
-	      */
 		fprintf(cenfile,
 			"%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f \t ",
 			box[i].cenx,
@@ -500,6 +494,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	dist[f] = stardist(0, 1);
+	if (dist[f] > 60.0 || dist[f] < 10.0) {
+	  printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
+	  status = -1;
+	  return(status);
+	}
 	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
 	fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);
 
