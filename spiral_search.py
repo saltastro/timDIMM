@@ -23,25 +23,28 @@ def check_image():
         return False
 
 def stop(s):
-    time.sleep(0.2)
     s.AbortSlew()
     s.AbortSlew()
     time.sleep(2)
     
 def plus_x(s):
     s.move_West()
+    time.sleep(0.4)
     stop(s)
 
 def minus_x(s):
     s.move_East()
+    time.sleep(0.4)
     stop(s)
 
 def plus_y(s):
     s.move_North()
+    time.sleep(0.2)
     stop(s)
 
 def minus_y(s):
     s.move_South()
+    time.sleep(0.2)
     stop(s)
 
 port = LX200.LXSerial(debug=False)
