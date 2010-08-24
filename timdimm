@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+
+from Tkinter import *
+import os
+
+def run(program, *args):
+    pid = os.fork()
+    if not pid:
+       os.execvp(program, (program,) + args)
+    return pid
+
+def killxephem(b, pid):
+    print "\nKilling xephem process #%d\n" % pid
+    os.system("kill -9 %d" % pid)
+    b.config(relief=RAISED)
+    b.config(text="XEphem")
+    b.config(command=lambda c=b: xephem(c))
+    
+def xephem(b):
+    pid = run("xephem")
+    b.config(relief=SUNKEN)
+    b.config(text="Kill XEphem")
+    b.config(command=lambda but=b,p=pid: killxephem(but, p))
+
+def killspiral(b, pid):
+    print "\nKilling spiral_search.py process #%d\n" % pid
+    os.system("kill -9 %d" % pid)
+    b.config(relief=RAISED)
+    b.config(text="Spiral Search")
+    quit.config(state=NORMAL)
+    main.config(state=NORMAL)
+    b.config(command=lambda c=b: spiral(c))
+    
+def spiral(b):
+    pid = run("./spiral_search.py")
+    b.config(relief=SUNKEN)
+    quit.config(state=DISABLED)
+    main.config(state=DISABLED)
+    b.config(text="Kill Spiral Search")
+    b.config(command=lambda but=b,p=pid: killspiral(but, p))
+
+def killdimm9(b, pid):
+    print "\nKilling DS9 process #%d\n" % pid
+    os.system("kill -9 %d" % pid)
+    os.system("killall ds9")
+    b.config(relief=RAISED)
+    b.config(text="DS9 DIMM Viewer")
+    b.config(command=lambda c=b: dimm9(c))
+    
+def dimm9(b):
+    pid = run("./dimm9")
+    b.config(relief=SUNKEN)
+    b.config(text="Kill DS9")
+    b.config(command=lambda but=b,p=pid: killdimm9(but, p))
+
+def killmeasure_seeing(b, pid):
+    print "\nKilling main timDIMM process #%d\n" % pid
+    os.system("kill -9 %d" % pid)
+    b.config(relief=RAISED)
+    b.config(text="Measure Seeing")
+    quit.config(state=NORMAL)
+    search.config(state=NORMAL)
+    b.config(command=lambda c=b: measure_seeing(c))
+    
+def measure_seeing(b):
+    pid = run("./timdimm.sh")
+    b.config(relief=SUNKEN)
+    b.config(text="Stop Measuring Seeing")
+    quit.config(state=DISABLED)
+    search.config(state=DISABLED)
+    b.config(command=lambda but=b,p=pid: killmeasure_seeing(but, p))
+
+root = Tk()
+root.title("timDIMM")
+root.geometry("200x250+100+0")
+
+frame = Frame(root)
+frame.pack()
+
+xeph = Button(frame, text="XEphem")
+xeph.pack(padx=10, pady=5, fill=X)
+xeph.config(command=lambda b=xeph: xephem(b))
+
+ds9 = Button(frame, text="DS9")
+ds9.pack(padx=10, pady=5, fill=X)
+ds9.config(command=lambda b=ds9: dimm9(b))
+
+search = Button(frame, text="Spiral Search")
+search.pack(padx=10, pady=5, fill=X)
+search.config(command=lambda b=search: spiral(b))
+
+main = Button(frame, text="Measure Seeing", width=180)
+main.pack(padx=10, pady=5, expand=True, fill=X)
+main.config(command=lambda b=main: measure_seeing(b))
+
+quit = Button(frame, text="QUIT", fg="red", command=frame.quit)
+quit.pack(pady=20, padx=10, fill=BOTH)
+
+root.mainloop()
