@@ -464,13 +464,13 @@ int main(int argc, char *argv[]) {
 
     /* get initial frame */
     grab_frame(camera, buffer2, nelements*sizeof(char));
-    // add_gaussian(buffer2, 195.0, 130.0, 100.0, 2.0);
-    // add_gaussian(buffer2, 140.0, 115.0, 100.0, 2.0);
+    // add_gaussian(buffer2, 195.0, 130.0, 140.0, 2.0);
+    // add_gaussian(buffer2, 140.0, 115.0, 140.0, 2.0);
 
     for (f=0; f<nimages; f++) {
 	grab_frame(camera, buffer, nelements*sizeof(char));
-	// add_gaussian(buffer, 195.0, 130.0, 15.0, 2.0);
-	// add_gaussian(buffer, 140.0, 115.0, 15.0, 2.0);
+	// add_gaussian(buffer, 195.0, 130.0, 140.0, 2.0);
+	// add_gaussian(buffer, 140.0, 115.0, 140.0, 2.0);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
@@ -607,13 +607,13 @@ int main(int argc, char *argv[]) {
     /* analyze short exposure */
     printf("\t SHORT EXPOSURE\n");
     mean = gsl_stats_wmean(weight, 1, dist, 1, nimages);
-    avesig = gsl_stats_mean(sig, 1, nimages);
+    avesig = gsl_stats_wmean(weight, 1, sig, 1, nimages);
     printf("mean = %f, avesig = %f\n", mean, avesig);
     
     printf("\n");
 
     var = gsl_stats_wvariance_m(weight, 1, dist, 1, nimages, mean);
-    var = var - avesig;
+    var = var - avesig*avesig;
     seeing_short = seeing(var, d, r);
     r0 = old_seeing(var, d, r);
     printf("sigma = %f, seeing = %f\n", sqrt(var), seeing_short);
@@ -621,13 +621,13 @@ int main(int argc, char *argv[]) {
     /* analyze long exposure */
     printf("\t LONG EXPOSURE\n");
     mean = gsl_stats_wmean(weight_l, 1, dist_l, 1, nimages);
-    avesig = gsl_stats_mean(sig_l, 1, nimages);
+    avesig = gsl_stats_wmean(weight_l, 1, sig_l, 1, nimages);
     printf("mean_l = %f, avesig_l = %f\n", mean, avesig);
 
     printf("\n");
 
     var_l = gsl_stats_wvariance_m(weight_l, 1, dist_l, 1, nimages, mean);
-    var_l = var_l - avesig;
+    var_l = var_l - avesig*avesig;
     seeing_long = seeing(var_l, d, r);
     printf("sigma_l = %f, seeing_l = %f\n", sqrt(var_l), seeing_long);
 
