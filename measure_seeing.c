@@ -221,8 +221,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
 	box[num].noise  = back.sigma*sourcepix;
 	box[num].x += gain*(box[num].cenx - box[num].x);
 	box[num].y += gain*(box[num].ceny - box[num].y);
-	box[num].snr = sum/sqrt(box[num].noise*box[num].noise*sourcepix*sourcepix 
-				+ sum);
+	box[num].snr = sum/sqrt(box[num].noise*box[num].noise + sum);
 	box[num].sigmaxy = 1.0 / box[num].snr / sqrt(6.0);
 	box[num].sigmafwhm = back.sigma * pow(sourcepix,1.5) / 10.
 	    / box[num].fwhm / box[num].counts
