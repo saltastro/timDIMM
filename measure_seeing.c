@@ -23,6 +23,7 @@ typedef struct _Box {
     double  background;
     double  noise;
     double  sigmaxythresh;
+    double  snr;
     double  sigmaxy;
     double  sigmafwhmthresh;
     double  sigmafwhm;
@@ -202,9 +203,9 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     if ( sum <= 0.0 ) {
 	box[num].sigmaxy = -1.0;
 	box[num].sigmafwhm = -1.0;
-	//box[num].x = imwidth/2.0;
-	//box[num].y = imheight/2.0;
+	box[num].snr = 0.0;
 	box[num].fwhm = -1.0;
+	box[num].counts = 1.0;
     } else {
 	rmom = ( sumxx - sumx * sumx / sum + sumyy - sumy * sumy / sum ) / sum;
 	
@@ -217,10 +218,13 @@ int centroid(char *image, int imwidth, int imheight, int num) {
 	box[num].counts = sum;
 	box[num].cenx   = sumx / sum;
 	box[num].ceny   = sumy / sum;
+	box[num].noise  = back.sigma*sourcepix;
 	box[num].x += gain*(box[num].cenx - box[num].x);
 	box[num].y += gain*(box[num].ceny - box[num].y);
-	box[num].sigmaxy= box[num].noise * sourcepix / box[num].counts / sqrt(6.0);
-	box[num].sigmafwhm = box[num].noise * pow(sourcepix,1.5) / 10.
+	box[num].snr = sum/sqrt(box[num].noise*box[num].noise*sourcepix*sourcepix 
+				+ sum);
+	box[num].sigmaxy = 1.0 / box[num].snr / sqrt(6.0);
+	box[num].sigmafwhm = back.sigma * pow(sourcepix,1.5) / 10.
 	    / box[num].fwhm / box[num].counts
 	    * 2.354 * 2.354 / 2.0;
     }  
@@ -289,11 +293,12 @@ int main(int argc, char *argv[]) {
     char *buffer, *buffer2, *average;
     fitsfile *fptr;
     int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
+    int nbad = 0, nbad_l = 0;
     char filename[256], xpastr[256];
     char *froot, *timestr;
     FILE *init, *out, *cenfile;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
-    double *dist, *sig, *dist_l, *sig_l;
+    double *dist, *sig, *dist_l, *sig_l, *weight, *weight_l;
     double mean, var, var_l, avesig;
     double r0, seeing_short, seeing_long, seeing_ave;
     struct timeval start_time, end_time;
@@ -425,6 +430,14 @@ int main(int argc, char *argv[]) {
 	printf("Couldn't allocate sig array.\n");
 	exit(-1);
     }
+    if (!(weight = calloc(nimages, sizeof(double)))) {
+	printf("Couldn't allocate sig array.\n");
+	exit(-1);
+    }
+    if (!(weight_l = calloc(nimages, sizeof(double)))) {
+	printf("Couldn't allocate sig array.\n");
+	exit(-1);
+    }
     if (!(dist_l = calloc(nimages, sizeof(double)))) {
 	printf("Couldn't allocate dist_l array.\n");
 	exit(-1);
@@ -472,12 +485,7 @@ int main(int argc, char *argv[]) {
 	background(buffer, naxes[0], naxes[1]);
 	
 	for (i=0; i<nboxes; i++) {
-	    box[i].noise = back.sigma;
 	    box[i].r = boxsize/2.0;
-	    //centroid(buffer, i);
-	    //box[i].r = boxsize/3.0;
-	    //centroid(buffer, i);
-	    //box[i].r = boxsize/4.0;
 	    centroid(buffer, naxes[0], naxes[1], i);
 	    if (box[i].fwhm > 0.0) {
 		fprintf(cenfile,
@@ -489,8 +497,18 @@ int main(int argc, char *argv[]) {
 			back.background,
 			box[i].noise,
 			box[i].sigmaxy,
-			box[i].sigmafwhm);
+			box[i].snr);
 	    }
+	}
+
+	if (box[0].snr < box[1].snr) {
+	    weight[f] = (box[0].snr/box[0].counts)*(box[0].snr/box[0].counts);
+	} else {
+	    weight[f] = (box[1].snr/box[1].counts)*(box[1].snr/box[1].counts);
+	}
+
+	if (weight[f] == 0.0) {
+	    nbad++;
 	}
 
 	dist[f] = stardist(0, 1);
@@ -501,6 +519,7 @@ int main(int argc, char *argv[]) {
 	}
 	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
 	fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);
+
 
 	/* now average two exposures */
 	for (j=0; j<nelements; j++) {
@@ -524,13 +543,22 @@ int main(int argc, char *argv[]) {
 	background(average, naxes[0], naxes[1]);
 
 	for (i=0; i<nboxes; i++) {
-	    box[i].noise = back.sigma;
 	    box[i].r = boxsize/2.0;
 	    //centroid(average, i);
 	    //box[i].r = boxsize/3.0;
 	    //centroid(average, i);
 	    //box[i].r = boxsize/4.0;
 	    centroid(average, naxes[0], naxes[1], i);
+	}
+
+	if (box[0].snr < box[1].snr) {
+	    weight_l[f] = (box[0].snr/box[0].counts)*(box[0].snr/box[0].counts);
+	} else {
+	    weight_l[f] = (box[1].snr/box[1].counts)*(box[1].snr/box[1].counts);
+	}
+
+	if (weight_l[f] == 0.0) {
+	    nbad_l++;
 	}
 
 	dist_l[f] = stardist(0, 1);
@@ -579,13 +607,13 @@ int main(int argc, char *argv[]) {
     
     /* analyze short exposure */
     printf("\t SHORT EXPOSURE\n");
-    mean = gsl_stats_mean(dist, 1, nimages);
+    mean = gsl_stats_wmean(weight, 1, dist, 1, nimages);
     avesig = gsl_stats_mean(sig, 1, nimages);
     printf("mean = %f, avesig = %f\n", mean, avesig);
     
     printf("\n");
 
-    var = gsl_stats_variance_m(dist, 1, nimages, mean);
+    var = gsl_stats_wvariance_m(weight, 1, dist, 1, nimages, mean);
     var = var - avesig;
     seeing_short = seeing(var, d, r);
     r0 = old_seeing(var, d, r);
@@ -593,16 +621,18 @@ int main(int argc, char *argv[]) {
 
     /* analyze long exposure */
     printf("\t LONG EXPOSURE\n");
-    mean = gsl_stats_mean(dist_l, 1, nimages);
+    mean = gsl_stats_wmean(weight_l, 1, dist_l, 1, nimages);
     avesig = gsl_stats_mean(sig_l, 1, nimages);
     printf("mean_l = %f, avesig_l = %f\n", mean, avesig);
 
     printf("\n");
 
-    var_l = gsl_stats_variance_m(dist_l, 1, nimages, mean);
+    var_l = gsl_stats_wvariance_m(weight_l, 1, dist_l, 1, nimages, mean);
     var_l = var_l - avesig;
     seeing_long = seeing(var_l, d, r);
     printf("sigma_l = %f, seeing_l = %f\n", sqrt(var_l), seeing_long);
+
+    printf("Bad samples:  %d for short, %d for long.\n", nbad, nbad_l);
 
     seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
     printf("\033[0;31mExposure corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_ave);
