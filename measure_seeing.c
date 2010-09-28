@@ -160,7 +160,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  gain = 0.7;
     double  rmom;
     double  dist;
-    double nsigma = 4.0;
+    double nsigma = 3.5;
     int low_y, up_y, low_x, up_x;
     int sourcepix = 0;
 
