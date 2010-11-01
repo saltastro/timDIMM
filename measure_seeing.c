@@ -27,6 +27,7 @@ typedef struct _Box {
     double  sigmaxy;
     double  sigmafwhmthresh;
     double  sigmafwhm;
+    double  strehl;
     int     r;
 } Box;
 
@@ -44,6 +45,9 @@ Back back;
 long nelements, naxes[2], fpixel;
 int boxsize = 20;
 double pixel_scale = 1.22;
+double d = 0.060;
+double r = 0.130;
+double lambda = 0.6e-6;
 
 double stardist(int i, int j) {
     return( sqrt( (box[i].cenx-box[j].cenx)*(box[i].cenx-box[j].cenx) +
@@ -53,11 +57,9 @@ double stardist(int i, int j) {
 /* this routine uses a. tokovinin's modified equation given in
    2002, PASP, 114, 1156
 */
-double seeing(double var, double d, double r) {
-    double lambda;
+double seeing(double var) {
     double b, K, seeing;
 
-    lambda = 0.65e-6;
     b = r/d;
     
     /* pixel scale in "/pixel, convert to rad */
@@ -71,11 +73,8 @@ double seeing(double var, double d, double r) {
 }
 
 /* this routine uses the classic DIMM equation */
-double old_seeing(double var, double d, double r) {
-    double lambda;
+double old_seeing(double var) {
     double r0;
-
-    lambda = 0.65e-6;
 
     /* pixel scale in "/pixel, convert to rad */
     var = var*pow(pixel_scale/206265.0,2);
@@ -151,6 +150,7 @@ int background(char *image, int imwidth, int imheight) {
 int centroid(char *image, int imwidth, int imheight, int num) {
 
     int i, j;
+    double  max    = 0.0;
     double  sum    = 0.0;
     double  sumx   = 0.0;
     double  sumxx  = 0.0;
@@ -159,10 +159,11 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  val = 0.0;
     double  gain = 0.7;
     double  rmom;
-    double  dist;
+    double  dist, dx;
     double nsigma = 3.5;
     int low_y, up_y, low_x, up_x;
     int sourcepix = 0;
+    dx = pixel_scale/206265.0;
 
     low_y = box[num].y - box[num].r;
     up_y  = box[num].y + box[num].r;
@@ -188,6 +189,9 @@ int centroid(char *image, int imwidth, int imheight, int num) {
 	    if (dist <= box[num].r) {
 		val = image[i*naxes[0]+j] - back.background;
 		if (val >= nsigma*back.sigma) {
+		    if (val > max) {
+			max = val;
+		    }
 		    sum   += val;
 		    sumx  += val*j;
 		    sumxx += val*j*j;
@@ -206,7 +210,9 @@ int centroid(char *image, int imwidth, int imheight, int num) {
 	box[num].snr = 0.0;
 	box[num].fwhm = -1.0;
 	box[num].counts = 1.0;
+	box[num].strehl = 0.0;
     } else {
+	box[num].strehl = (max/sum)*(4.0/3.14159)*pow( lambda/(d*dx), 2);
 	rmom = ( sumxx - sumx * sumx / sum + sumyy - sumy * sumy / sum ) / sum;
 	
 	if ( rmom <= 0 ) {
@@ -298,7 +304,7 @@ int main(int argc, char *argv[]) {
     FILE *init, *out, *cenfile;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
     double *dist, *sig, *dist_l, *sig_l, *weight, *weight_l;
-    double mean, var, var_l, avesig;
+    double mean, var, var_l, avesig, airmass;
     double r0, seeing_short, seeing_long, seeing_ave;
     struct timeval start_time, end_time;
     struct tm ut;
@@ -310,8 +316,6 @@ int main(int argc, char *argv[]) {
     char *names[NXPA];
     char *messages[NXPA];
 
-    double d = 0.060;
-    double r = 0.130;
     srand48((unsigned)time(NULL));
 
     XPA xpa;
@@ -325,6 +329,7 @@ int main(int argc, char *argv[]) {
     }
 
     nimages = atoi(argv[1]);
+    airmass = atof(argv[2]);
     fstatus = 0;
     status = 0;
     anynul = 0;
@@ -488,7 +493,7 @@ int main(int argc, char *argv[]) {
 	    centroid(buffer, naxes[0], naxes[1], i);
 	    if (box[i].fwhm > 0.0) {
 		fprintf(cenfile,
-			"%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f \t ",
+			"%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f %.2f\t ",
 			box[i].cenx,
 			box[i].ceny,
 			box[i].fwhm,
@@ -496,7 +501,8 @@ int main(int argc, char *argv[]) {
 			back.background,
 			box[i].noise,
 			box[i].sigmaxy,
-			box[i].snr);
+			box[i].snr, 
+		        box[i].strehl);
 	    }
 	}
 
@@ -614,8 +620,8 @@ int main(int argc, char *argv[]) {
 
     var = gsl_stats_wvariance_m(weight, 1, dist, 1, nimages, mean);
     var = var - avesig*avesig;
-    seeing_short = seeing(var, d, r);
-    r0 = old_seeing(var, d, r);
+    seeing_short = seeing(var)/pow(airmass,0.6);
+    r0 = old_seeing(var);
     printf("sigma = %f, seeing = %f\n", sqrt(var), seeing_short);
 
     /* analyze long exposure */
@@ -628,7 +634,7 @@ int main(int argc, char *argv[]) {
 
     var_l = gsl_stats_wvariance_m(weight_l, 1, dist_l, 1, nimages, mean);
     var_l = var_l - avesig*avesig;
-    seeing_long = seeing(var_l, d, r);
+    seeing_long = seeing(var_l)/pow(airmass,0.6);
     printf("sigma_l = %f, seeing_l = %f\n", sqrt(var_l), seeing_long);
 
     printf("Bad samples:  %d for short, %d for long.\n", nbad, nbad_l);
