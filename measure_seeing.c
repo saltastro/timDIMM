@@ -469,13 +469,13 @@ int main(int argc, char *argv[]) {
 
     /* get initial frame */
     grab_frame(camera, buffer2, nelements*sizeof(char));
-    // add_gaussian(buffer2, 195.0, 130.0, 140.0, 2.0);
-    // add_gaussian(buffer2, 140.0, 115.0, 140.0, 2.0);
+    // add_gaussian(buffer2, 195.0, 130.0, 140.0, 1.5);
+    // add_gaussian(buffer2, 140.0, 115.0, 140.0, 1.5);
 
     for (f=0; f<nimages; f++) {
 	grab_frame(camera, buffer, nelements*sizeof(char));
-	// add_gaussian(buffer, 195.0, 130.0, 140.0, 2.0);
-	// add_gaussian(buffer, 140.0, 115.0, 140.0, 2.0);
+	// add_gaussian(buffer, 195.0, 130.0, 140.0, 1.5);
+	// add_gaussian(buffer, 140.0, 115.0, 140.0, 1.5);
 
 	// find center of star images and calculate background
 	xsum = 0.0;
