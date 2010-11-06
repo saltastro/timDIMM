@@ -645,7 +645,7 @@ int main(int argc, char *argv[]) {
 
     timestr = ctime(&end_sec);
     gmtime_r(&end_sec, &ut);
-    fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f\n", 
+    fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f %f\n", 
 	    ut.tm_year+1900, 
 	    ut.tm_mon+1, 
 	    ut.tm_mday, 
@@ -656,7 +656,8 @@ int main(int argc, char *argv[]) {
 	    var_l, 
 	    seeing_short, 
 	    seeing_long, 
-	    seeing_ave);
+	    seeing_ave,
+	    airmass);
 
     init = fopen("init_cen_all", "w");
     for (i=0; i<nboxes; i++) {
