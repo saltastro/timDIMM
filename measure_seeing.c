@@ -44,9 +44,17 @@ Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
 int boxsize = 20;
+/* timdimm values
 double pixel_scale = 1.22;
 double d = 0.060;
 double r = 0.130;
+*/
+
+/* MASSDIMM values */
+double pixel_scale = 1.38;
+double d = 0.080;
+double r = 0.170;
+
 double lambda = 0.6e-6;
 
 double stardist(int i, int j) {
