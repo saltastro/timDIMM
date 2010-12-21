@@ -2,6 +2,6 @@
 
 mkdir ../timDIMM_data/$1
 rm -f centroids.dat
-rm -f data/centroids_*.dat
+gzip -v data/centroids_*.dat
 mv -f data/* ../timDIMM_data/$1
 mv -f lx200.log seeing.dat ../timDIMM_data/$1
