@@ -51,7 +51,10 @@ double r = 0.130;
 */
 
 /* MASSDIMM values */
-double pixel_scale = 1.38;
+/*  20101228:  determined DIMM pixel scale to be 1.78"/pixel using HR1866 
+    and HR8895 as astrometric double stars
+*/
+double pixel_scale = 1.78;
 double d = 0.080;
 double r = 0.170;
 
@@ -168,7 +171,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     double  gain = 0.7;
     double  rmom;
     double  dist, dx;
-    double nsigma = 3.5;
+    double nsigma = 3.0;
     int low_y, up_y, low_x, up_x;
     int sourcepix = 0;
     dx = pixel_scale/206265.0;
