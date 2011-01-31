@@ -41,7 +41,7 @@ for line in lines:
 if maxx > 320-tol:
     print "Move East."
     scope.move_East()
-if minx < tol:
+if minx < 145:
     print "Move West."
     scope.move_West()
 if miny < tol:
@@ -58,8 +58,8 @@ scope.AbortSlew()
 #scope.AbortSlew()
 #scope.AbortSlew()
 time.sleep(1)
-sync = library.sync_object()
-print "Sync'ed to: %s" % sync
+#sync = library.sync_object()
+#print "Sync'ed to: %s" % sync
 
 port.close()
 

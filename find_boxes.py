@@ -44,7 +44,7 @@ if __name__ == '__main__':
     else:
         print "No or not enough stars found."
         output = open("init_cen_all", 'w')
-        output.write("130.0   120.0\n")
-        output.write("190.0   120.0\n")
+        output.write("160.0   120.0\n")
+        output.write("198.0   120.0\n")
         output.close()
 
