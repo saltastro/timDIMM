@@ -2,11 +2,13 @@
 
 require 'timeout'
 require 'socket'
+require 'ast_utils'
 
 ### GTO900 routines
 class GTO900
   def initialize(host, port)
     @port = sockopen(host, port)
+    @catalog = hr_catalog
   end
 
   # wrapper for opening socket and dealing with timeouts
@@ -338,9 +340,19 @@ class GTO900
     return check_GTO900
   end
 
+  def command_ra_raw(str)
+    command("#:Sr #{str}#")
+    return check_GTO900
+  end
+    
   # define commanded Dec
   def command_dec(d, m, s)
     str = "%d*%02d:%02d" % [d,m,s]
+    command("#:Sd #{str}#")
+    return check_GTO900
+  end
+
+  def command_dec_raw(str)
     command("#:Sd #{str}#")
     return check_GTO900
   end
@@ -400,6 +412,16 @@ class GTO900
     return read_GTO900
   end
 
+  # slew to star in HR catalog
+  def slew_HR(hr)
+    hr = hr.to_s
+    ra = @catalog[hr][:ra]
+    dec = @catalog[hr][:dec]
+    command_ra_raw(ra)
+    command_dec_raw(dec)
+    slew
+  end
+
   # startup procedure
   def startup
     clear
@@ -412,7 +434,7 @@ class GTO900
     set_longitude(-20, 48, 30)
     set_gmt_offset(-2)
 #    park_off
-    haltall
+#    haltall
   end
   
   # shutdown procedure

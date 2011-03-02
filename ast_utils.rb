@@ -1,3 +1,40 @@
+# read in HR catalog list used by turbina
+def hr_catalog
+  file = File.new("/Users/timdimm/MASSDIMM/star.lst", "r")
+
+  stars = Hash.new
+  star = Hash.new
+
+  file.each_line { |line|
+    star = { }
+    next if line =~ /#/
+    hr = line[0..3]
+    name = line[5..11]
+    h = "%02d" % line[13..14].to_i
+    m = "%02d" % line[16..17].to_i
+    s = "%02d" % line[19..20].to_i
+    
+    ra = "%s:%s:%s" % [h, m, s]
+
+    sign = line[21..22]
+    d = "%02d" % line[24..25].to_i
+    m = "%02d" % line[27..28].to_i
+    s = "%02d" % line[30..31].to_i
+
+    tmp = "%s%s:%s:%s" % [sign, d, m, s]
+    dec = tmp[1..9]
+    
+    vmag = line[33..37].to_f
+    bmv = line[39..43].to_f
+    sed = line[45..47]
+    sptype = line[49..62]
+
+    star = { :name => name, :ra => ra, :dec => dec, :vmag => vmag }
+    stars[hr] = star
+  }
+  return stars
+end
+
 def sexagesimal(angle)
     angle = angle.to_f
     if (angle < 0)

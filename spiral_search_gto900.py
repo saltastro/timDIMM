@@ -45,6 +45,30 @@ else:
         n = n + 1
 
         for i in range(n):
+            y = y + 1
+            plus_y()
+            print "At (x,y) = (%d,%d)" % (x,y)
+            if check_image():
+                has_stars = True
+                break
+
+        if has_stars:
+            break
+
+        for i in range(n):
+            x = x - 1
+            minus_x()
+            print "At (x,y) = (%d,%d)" % (x,y)
+            if check_image():
+                has_stars = True
+                break
+
+        if has_stars:
+            break
+
+        n = n + 1
+
+        for i in range(n):
             y = y - 1
             minus_y()
             print "At (x,y) = (%d,%d)" % (x,y)
@@ -66,28 +90,5 @@ else:
         if has_stars:
             break
 
-        n = n + 1
-
-        for i in range(n):
-            y = y + 1
-            plus_y()
-            print "At (x,y) = (%d,%d)" % (x,y)
-            if check_image():
-                has_stars = True
-                break
-
-        if has_stars:
-            break
-
-        for i in range(n):
-            x = x - 1
-            minus_x()
-            print "At (x,y) = (%d,%d)" % (x,y)
-            if check_image():
-                has_stars = True
-                break
-
-        if has_stars:
-            break
 
 print "Found stars after %d iterations." % n

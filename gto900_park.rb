@@ -21,7 +21,7 @@ loop {
   d_alt = hms2deg(alt) - alt_c
 
   puts "\t %f degrees to go in Alt, %f degrees to go in Az..." % [d_alt, d_az]
-  if d_az.abs < 1.0/60.0 && d_alt.abs < 1.0/60.0
+  if d_az.abs < 1.0/2.0 && d_alt.abs < 1.0/2.0
     puts "Done parking."
     break
   end
