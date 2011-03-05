@@ -8,9 +8,26 @@ import imagestats
 from find_boxes import *
 
 pixel_scale = 1.22
+dx = pixel_scale/206265.0
 rd = 0.13
 d = 0.06
 lamb = 0.65e-6
+
+def moments(data):
+    """Returns (height, x, y, width_x, width_y)
+    the gaussian parameters of a 2D distribution by calculating its
+    moments """
+    total = data.sum()
+    X, Y = np.indices(data.shape)
+    x = (X*data).sum()/total
+    y = (Y*data).sum()/total
+    col = data[:, int(y)]
+    width_x = np.sqrt(abs((np.arange(col.size)-y)**2*col).sum()/col.sum())
+    row = data[int(x), :]
+    width_y = np.sqrt(abs((np.arange(row.size)-x)**2*row).sum()/row.sum())
+    height = data.max()
+    strehl = (height/total)*(4.0/np.pi)*(lamb/(d*dx))**2
+    return height, strehl, x, y, width_x, width_y
 
 def seeing(v):
     b = rd/d
@@ -39,6 +56,11 @@ c2 = []
 
 for i in range(image.shape[0]):
     n, test = daofind(image[i])
+    im = image[i]
+    v1 = np.var(im[0:50,0:50])
+    v2 = np.var(im[270:319,190:240])
+    v = (v1+v2)/2
+    
     if n == 2:
         x1.append(test[0][0])
         y1.append(test[0][1])
