@@ -55,7 +55,7 @@ end
 def hms2deg(string)
      vals = string.split(':')
      return 'bad' if vals.size != 3
-     hour = vals[0].to_f
+     hour = vals[0].to_f.abs
      min  = vals[1].to_f
      sec  = vals[2].to_f
      blah = hour + min/60.0 + sec/3600.0
