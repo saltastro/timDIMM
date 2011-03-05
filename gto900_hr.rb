@@ -12,4 +12,5 @@ dec_deg = hms2deg(cat[hr][:dec])
 
 puts "Slewing to HR #{hr} (#{cat[hr][:name]}) at RA = #{cat[hr][:ra]} Dec = #{cat[hr][:dec]}......"
 
-system("gto900_slew.rb #{cat[hr][:ra]} #{cat[hr][:dec]}")
+system("gto900_tpoint.rb #{cat[hr][:ra]} #{cat[hr][:dec]}")
+#system("gto900_slew.rb #{cat[hr][:ra]} #{cat[hr][:dec]}")
