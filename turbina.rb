@@ -74,8 +74,7 @@ class Turbina
 
   def run
     command("run")
-    wait = read.to_i
-    return wait
+    return read
   end
 
   def background
@@ -104,6 +103,26 @@ class Turbina
   def init
     command("init")
     return read
+  end
+
+  def flux
+    get("flux")
+  end
+
+  def integral
+    get("integral")
+  end
+
+  def scind
+    get("scind")
+  end
+
+  def bkgr
+    get("bkgr")
+  end
+
+  def ident
+    get("ident")
   end
 
 end
