@@ -1,0 +1,5 @@
+#!/bin/sh
+
+./turbina.rb stop
+./turbina.rb park
+./gto900_park.rb
