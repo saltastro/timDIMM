@@ -52,6 +52,25 @@ def sexagesimal(angle)
     return sprintf("%s%02d:%02d:%02d", sign, d, m, s)
 end
 
+def calc_ha(lst, r)
+  ha1 = lst - r
+  ha2 = lst - (r - 360.0)
+  if ha2 > ha1
+    ha = ha2
+  else
+    ha = ha1
+  end
+
+  if ha > 360.0
+    ha = ha - 360.0
+  end
+
+  if ha > 180.0
+    ha = ha - 360.0
+  end
+  return ha
+end
+
 def hms2deg(string)
      vals = string.split(':')
      return 'bad' if vals.size != 3
@@ -84,4 +103,35 @@ def eqazel(ha, dec)
     airmass = 50.0
   end
   return az, el, airmass
+end
+
+def best_star(lst)
+  lst = 15*hms2deg(lst)
+  cat = hr_catalog
+
+  cat.keys.each { |star|
+
+    r = 15*hms2deg(cat[star][:ra])
+    d = hms2deg(cat[star][:dec])
+
+    ha = calc_ha(lst, r)
+
+    az, el, airmass = eqazel(ha, d)
+
+    cat[star][:ha] = sexagesimal(ha/15.0)
+    cat[star][:az] = sexagesimal(az)
+    cat[star][:el] = sexagesimal(el)
+    cat[star][:airmass] = airmass
+
+  }
+
+  sort = cat.sort { |a,b|  a[1][:airmass] <=> b[1][:airmass] }
+
+  good = Array.new
+  sort.each { |s|
+    if s[1][:airmass] < 1.5 && s[1][:vmag] < 2.2 && s[1][:vmag] > 0.0 && hms2deg(s[1][:ha]) > 0.0
+      good.push(s[0])
+    end
+  }
+  return good[0]
 end

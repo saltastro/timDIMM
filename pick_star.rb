@@ -2,19 +2,25 @@
 
 require 'GTO900'
 require 'ast_utils'
+require 'turbina'
 
-cat = hr_catalog
+s = GTO900.new('massdimm', 7001)
+t = Turbina.new
 
-lst = 15*hms2deg("10:00:00")
+lst = s.lst
+airmass = s.airmass
+s.close
 
-cat.each { |star|
+if airmass < 1.5
+  puts "Fine to stay here."
+else 
+  best_hr = best_star(lst)
+  puts "Should move. Best HR number is #{best_hr}"
+  puts t.stop
+  `./gto900_hr.rb #{best_hr}`
+  puts t.object(best_hr)
+  `./spiral_search_gto900.py`
+  puts t.run
+end
 
-  r = 15*hms2deg(star[:ra])
-  ha = sexagesimal(lst - r)
-
-  cat[star][:ha] = ha
-
-}
-
-puts cat["3685"][:ha]
-
+t.close

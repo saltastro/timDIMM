@@ -10,8 +10,11 @@ r = s.ra
 d = s.dec
 az = s.az
 alt = s.alt
+lst = s.lst
+secz = s.airmass
+ha = sexagesimal(calc_ha(15*hms2deg(lst), 15*hms2deg(r))/15.0)
 side = s.pier?
 
-puts "At RA = %s, Dec = %s, Alt = %s, Az = %s, on the %s side of the pier" % [r, d, alt, az, side]
+puts "At RA = %s, Dec = %s, HA = %s, Alt = %s, Az = %s, secz = %.2f, on the %s side of the pier" % [r, d, ha, alt, az, secz, side]
 
 s.close
