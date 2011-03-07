@@ -1,6 +1,7 @@
 #!/bin/sh
 
 while [ 1 ]; do 
+    ./pick_star.rb
     ./ave_frames 50 \!center.fits
     ./find_boxes.py center.fits
     cat center.fits | xpaset timDIMM fits
