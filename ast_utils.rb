@@ -65,3 +65,23 @@ def hms2deg(string)
      return blah
 end
 
+def eqazel(ha, dec)
+  lat = Math::PI*hms2deg("-32:22:32")/180.0
+  h = Math::PI*ha/180.0
+  d = Math::PI*dec/180.0
+  sphi = Math::sin(lat)
+  cphi = Math::cos(lat)
+  sleft = Math::sin(h)
+  cleft = Math::cos(h)
+  sright = Math::sin(d)
+  cright = Math::cos(d)
+  az = Math::atan2(-1.0*sleft, -1.0*cleft*sphi + sright*cphi/cright)
+  az = (az < 0.0) ? az + 2.0*Math::PI : az
+  el = Math::asin(cleft*cright*cphi + sright*sphi)
+  if el > 0.0
+    airmass = 1.0/Math::cos(Math::PI/2.0 - el)
+  else 
+    airmass = 50.0
+  end
+  return az, el, airmass
+end
