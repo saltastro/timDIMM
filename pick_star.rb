@@ -19,7 +19,6 @@ else
   puts t.stop
   `./gto900_hr.rb #{best_hr}`
   puts t.object(best_hr)
-  `./spiral_search_gto900.py`
   puts t.run
 end
 
