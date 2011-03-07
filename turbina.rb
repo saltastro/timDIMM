@@ -53,17 +53,22 @@ class Turbina
 
   def stop
     command("stop")
-    wait = read.to_i
-    puts "Waiting #{wait} sec for turbina to finish...."
-    sleep(wait)
-    return read
+    resp = read
+    if resp =~ /PARKED/ || resp =~ /READY/
+      return resp
+    else
+      wait = read.to_i
+      puts "Waiting #{wait} sec for turbina to finish...."
+      sleep(wait+1)
+      return read
+    end
   end
 
   def stop_now
     command("stop now")
     wait = read.to_i
     puts "Waiting #{wait} sec for turbina to finish...."
-    sleep(wait)
+    sleep(wait+1)
     return read
   end
 
@@ -81,7 +86,7 @@ class Turbina
     command("run scen1")
     wait = read.to_i
     puts "Running background measurement...."
-    sleep(wait)
+    sleep(wait+1)
     puts "....done."
     return read
   end
