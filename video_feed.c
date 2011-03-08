@@ -40,7 +40,8 @@ int main(int argc, char *argv[]) {
     unsigned int min_bytes, max_bytes, max_height, max_width, winleft, wintop;
     uint64_t total_bytes = 0;
 
-    char *buffer, *buffer2, *average;
+    unsigned char *buffer, *buffer2;
+    unsigned char *average;
     fitsfile *fptr;
     int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
     int nbad = 0, nbad_l = 0;
@@ -60,6 +61,7 @@ int main(int argc, char *argv[]) {
     unsigned int actual_bytes;
     char *names[NXPA];
     char *messages[NXPA];
+    int packet;
 
     stderr = freopen("video.log", "w", stderr);
 
@@ -67,6 +69,8 @@ int main(int argc, char *argv[]) {
 
     XPA xpa;
     xpa = XPAOpen(NULL);
+
+    packet = atoi(argv[1]);
 
     fstatus = 0;
     status = 0;
@@ -119,12 +123,20 @@ int main(int argc, char *argv[]) {
     err = dc1394_format7_set_roi(camera,
 				 mode,
 				 DC1394_COLOR_CODING_MONO8,
-				 DC1394_USE_MAX_AVAIL,
+//				 DC1394_USE_MAX_AVAIL,
+				 packet,
 				 winleft, wintop, // left, top
 				 xsize, ysize);
     DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
     printf("I: ROI is (%d, %d) - (%d, %d)\n", 
 	   winleft, wintop, winleft+xsize, wintop+ysize);
+
+    err=dc1394_video_set_framerate(camera, DC1394_FRAMERATE_MAX);
+    DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
+
+    err = dc1394_feature_set_value (camera, DC1394_FEATURE_SHUTTER, 256);
+    DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
+    printf ("I: shutter is 50\n");
 
     err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
     DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
@@ -149,26 +161,33 @@ int main(int argc, char *argv[]) {
 	exit(-1);
     }
 
-    gettimeofday(&start_time, NULL);
+   if (!(average = calloc(nelements, sizeof(char)))) {
+       printf("Couldn't Allocate Average Image Buffer\n");
+       exit(-1);
+   }
+
+   gettimeofday(&start_time, NULL);
 
     f = 0;
 
     while (1) {
 	grab_frame(camera, buffer, nelements*sizeof(char));
-
+//	for (j=0; j<nelements; j++) {
+//	    average[j] += 0.1*(buffer[j]-average[j]);
+//	}
 	fits_create_file(&fptr, "!video.fits", &fstatus);
 	fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
 	fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
 	fits_close_file(fptr, &fstatus);
 	fits_report_error(stdout, fstatus);
 
- 	if (f % 160 == 0) {
+// 	if (f % 160 == 0) {
 	  status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
 			  buffer, nelements, names, messages, NXPA);
 	  sprintf(xpastr, "image; box 160.0 120.0 60 20 0.0");
           status = XPASet(xpa, "timDIMM", "regions", "ack=false",
                           xpastr, strlen(xpastr), names, messages, NXPA);
-	}
+//	}
 	f++;
     }
 
