@@ -7,7 +7,10 @@ require 'turbina'
 s = GTO900.new('massdimm', 7001)
 t = Turbina.new
 
+s.clear
 lst = s.lst
+s.clear
+sleep(1)
 airmass = s.airmass
 s.close
 sleep(1)
@@ -19,6 +22,7 @@ else
   puts "Should move. Best HR number is #{best_hr}"
   puts t.stop
   system("./gto900_hr.rb #{best_hr}")
+  system("echo \"#{best_hr}\" > current_object")
   puts t.object(best_hr)
   puts t.run
 end

@@ -114,6 +114,10 @@ class Turbina
     get("flux")
   end
 
+  def lprofile
+    get("lprofile")
+  end
+
   def integral
     get("integral")
   end

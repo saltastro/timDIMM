@@ -580,14 +580,14 @@ int main(int argc, char *argv[]) {
 	dist_l[f] = stardist(0, 1);
 	sig_l[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
 
-	sprintf(filename, "!%s", froot);
-	fits_create_file(&fptr, "!seeing.fits", &fstatus);
-	fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
-	fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
-	fits_close_file(fptr, &fstatus);
-	fits_report_error(stdout, fstatus);
-
  	if (f % 160 == 0) {
+	  sprintf(filename, "!%s", froot);
+	  fits_create_file(&fptr, "!seeing.fits", &fstatus);
+	  fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
+	  fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
+	  fits_close_file(fptr, &fstatus);
+	  fits_report_error(stdout, fstatus);
+
 	  status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
 			  buffer, nelements, names, messages, NXPA);
 	  sprintf(xpastr, "image; box %f %f %d %d 0.0",

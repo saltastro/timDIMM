@@ -183,7 +183,8 @@ class GTO900
 
   # calculate current GTO900 airmass
   def airmass
-    ang = Math::PI*(90.0-hms2deg(alt))/180.0
+    a = alt
+    ang = Math::PI*(90.0-hms2deg(a))/180.0
     return 1.0/Math::cos(ang)
   end
 

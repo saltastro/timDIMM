@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     err = dc1394_format7_set_roi (camera, 
 				  DC1394_VIDEO_MODE_FORMAT7_1, 
 				  DC1394_COLOR_CODING_MONO8, // not sure why RAW8/16 don't work
-                                  DC1394_FRAMERATE_MIN,
+                                  DC1394_USE_MAX_AVAIL,
 				  0, 0, // left, top
 				  width, height); // width, height
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set roi");

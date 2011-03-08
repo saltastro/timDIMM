@@ -67,6 +67,6 @@ end
 
 sleep(1)
 scope.haltall
-
+sleep(1)
 scope.close
 
