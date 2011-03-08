@@ -9,10 +9,15 @@ ra_deg = 15.0*hms2deg(ra)
 dec_deg = hms2deg(dec)
 
 s = GTO900.new('massdimm', 7001)
+
 s.clear
 
-lst = 15*hms2deg(s.lst)
-h = lst - ra_deg
+r = s.ra
+l = s.lst
+
+lst = 15.0*hms2deg(l)
+
+h = calc_ha(lst, ra_deg)
 
 if h < 0.0
   puts "Pointing East."

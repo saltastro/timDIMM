@@ -15,6 +15,6 @@ secz = s.airmass
 ha = sexagesimal(calc_ha(15*hms2deg(lst), 15*hms2deg(r))/15.0)
 side = s.pier?
 
-puts "At RA = %s, Dec = %s, HA = %s, Alt = %s, Az = %s, secz = %.2f, on the %s side of the pier" % [r, d, ha, alt, az, secz, side]
+puts "At RA = %s, Dec = %s, HA = %s, LST = %s, Alt = %s, Az = %s, secz = %.2f, on the %s side of the pier" % [r, d, ha, lst, alt, az, secz, side]
 
 s.close
