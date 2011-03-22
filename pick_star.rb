@@ -22,6 +22,8 @@ sleep(1)
 az = hms2deg(az)
 alt = hms2deg(alt)
 
+# we want to keep things above airmass 1.5 and away from the 
+# weather mast next to the ox wagon
 if airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 295.0)
   puts "Fine to stay here."
   stat = t.status
@@ -42,11 +44,13 @@ else
   system("./gto900_hr.rb #{best_hr}")
   system("echo \"#{best_hr}\" > current_object")
   puts t.object(best_hr)
+  sleep(3)
   system("./gto900_offset.rb w")
   t.background
   system("./gto900_hr.rb #{best_hr}")
   sleep(3)
   system("./spiral_search_gto900.py")
+  sleep(1)
   system("./gto900_guide.rb")
   puts t.run
 
