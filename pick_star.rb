@@ -42,12 +42,16 @@ else
   system("./gto900_hr.rb #{best_hr}")
   system("echo \"#{best_hr}\" > current_object")
   puts t.object(best_hr)
-  system("./gto900_offset.rb w")
+  sleep(3)
+  system("./gto900_offset.rb s")
   t.background
+  sleep(3)
   system("./gto900_hr.rb #{best_hr}")
   sleep(3)
   system("./spiral_search_gto900.py")
+  sleep(3)
   system("./gto900_guide.rb")
+  sleep(3)
   puts t.run
 
 end
