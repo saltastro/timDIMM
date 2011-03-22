@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     XPA xpa;
     xpa = XPAOpen(NULL);
 
-    packet = atoi(argv[1]);
+    packet = 10;
 
     fstatus = 0;
     status = 0;
@@ -123,8 +123,8 @@ int main(int argc, char *argv[]) {
     err = dc1394_format7_set_roi(camera,
 				 mode,
 				 DC1394_COLOR_CODING_MONO8,
-//				 DC1394_USE_MAX_AVAIL,
-				 packet,
+				 DC1394_USE_MAX_AVAIL,
+//				 packet,
 				 winleft, wintop, // left, top
 				 xsize, ysize);
     DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
@@ -175,19 +175,19 @@ int main(int argc, char *argv[]) {
 //	for (j=0; j<nelements; j++) {
 //	    average[j] += 0.1*(buffer[j]-average[j]);
 //	}
-	fits_create_file(&fptr, "!video.fits", &fstatus);
-	fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
-	fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
-	fits_close_file(fptr, &fstatus);
-	fits_report_error(stdout, fstatus);
 
-// 	if (f % 160 == 0) {
+ 	if (f % 160 == 0) {
+	  fits_create_file(&fptr, "!video.fits", &fstatus);
+	  fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
+	  fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
+	  fits_close_file(fptr, &fstatus);
+	  fits_report_error(stdout, fstatus);
 	  status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
 			  buffer, nelements, names, messages, NXPA);
 	  sprintf(xpastr, "image; box 160.0 120.0 60 20 0.0");
           status = XPASet(xpa, "timDIMM", "regions", "ack=false",
                           xpastr, strlen(xpastr), names, messages, NXPA);
-//	}
+	}
 	f++;
     }
 
