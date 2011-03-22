@@ -42,7 +42,7 @@ if maxx > 320-tol
   print "Move South."
   scope.move('s')
 end
-if minx < 140
+if minx < tol
   print "Move North."
   scope.move('n')
 end
