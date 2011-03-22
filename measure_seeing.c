@@ -530,6 +530,7 @@ int main(int argc, char *argv[]) {
 	dist[f] = stardist(0, 1);
 	if (dist[f] > 60.0 || dist[f] < 10.0) {
 	  printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
+	  sleep(3);
 	  status = -1;
 	  return(status);
 	}
