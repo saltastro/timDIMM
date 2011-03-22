@@ -1,6 +1,6 @@
 # read in HR catalog list used by turbina
 def hr_catalog
-  file = File.new("/Users/timdimm/MASSDIMM/star.lst", "r")
+  file = File.new("star.lst", "r")
 
   stars = Hash.new
   star = Hash.new
@@ -125,7 +125,7 @@ def best_star(lst)
 
   }
 
-  sort = cat.sort { |a,b|  a[1][:airmass] <=> b[1][:airmass] }
+  sort = cat.sort { |a,b|  a[1][:vmag] <=> b[1][:vmag] }
 
   good = Array.new
   sort.each { |s|
@@ -133,5 +133,5 @@ def best_star(lst)
       good.push(s[0])
     end
   }
-  return good[0]
+  return good[0], good[1], good[2]
 end
