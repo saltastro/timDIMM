@@ -22,6 +22,7 @@ sleep(1)
 az = hms2deg(az)
 alt = hms2deg(alt)
 
+# add logic here to avoid the weather mast
 if airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 295.0)
   puts "Fine to stay here."
   stat = t.status
@@ -44,6 +45,9 @@ else
   puts t.object(best_hr)
   sleep(3)
   system("./gto900_offset.rb s")
+  sleep(3)
+  system("./gto900_offset.rb e")
+  sleep(1)
   t.background
   sleep(3)
   system("./gto900_hr.rb #{best_hr}")
