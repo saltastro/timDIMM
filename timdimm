@@ -24,12 +24,14 @@ def runvnc(b):
     b.config(command=lambda but=b,p=pid: killvnc(but, p))
 
 def park(b, pid):
+    b.config(relief=RAISED)
+    b.config(state=DISABLED)
     print "\nParking MASS and telescope....\n"
     os.system("./park")
-    b.config(relief=RAISED)
     b.config(text="Initialize")
     quit.config(state=NORMAL)
     main.config(state=DISABLED)
+    b.config(state=NORMAL)
     b.config(command=lambda c=b: init(c))
     
 def init(b):
@@ -56,16 +58,19 @@ def dimm9(b):
     b.config(command=lambda but=b,p=pid: killdimm9(but, p))
 
 def killmeasure_seeing(b, pid):
-    print "\nKilling main timDIMM process #%d\n" % pid
-    os.system("kill -9 %d" % pid)
     b.config(relief=RAISED)
+    print "\nKilling main timDIMM process #%d\n" % pid
+    b.config(state=DISABLED)
+    os.system("kill -9 %d" % pid)
+    os.system("./turbina.rb stop")
     b.config(text="Measure Seeing")
     initpark.config(state=NORMAL)
+    b.config(state=NORMAL)
     b.config(command=lambda c=b: measure_seeing(c))
     
 def measure_seeing(b):
-    pid = run("./timdimm.sh")
     b.config(relief=SUNKEN)
+    pid = run("./timdimm.sh")
     b.config(text="Stop Measuring Seeing")
     initpark.config(state=DISABLED)
     b.config(command=lambda but=b,p=pid: killmeasure_seeing(but, p))
