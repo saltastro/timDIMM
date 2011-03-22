@@ -58,9 +58,13 @@ class Turbina
       return resp
     else
       wait = read.to_i
-      puts "Waiting #{wait} sec for turbina to finish...."
-      sleep(wait+1)
-      return read
+      if wait > 1
+        puts "Waiting #{wait} sec for turbina to finish...."
+        sleep(wait+1)
+        return read
+      else
+        return wait
+      end
     end
   end
 
@@ -143,5 +147,5 @@ if $0 == __FILE__
     cmd = cmd + '(' + ARGV[1] + ')'
   end
   out = eval cmd
-  puts "Turbina: " + out
+  puts "Turbina: " + out.to_s
 end
