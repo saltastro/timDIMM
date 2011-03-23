@@ -37,7 +37,8 @@ else
   else
     best_hr = best_hrs[0]
   end
-  
+
+  # put plenty of sleeps in to make sure nothing trips...  
   puts "Should move. Best HR number is #{best_hr}"
   puts t.stop
   system("./gto900_hr.rb #{best_hr}")
