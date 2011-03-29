@@ -1,3 +1,3 @@
 #!/bin/sh
 
-/opt/local/bin/vncviewer massdimm.suth
+/opt/local/bin/vncviewer -noraiseonbeep massdimm.suth
