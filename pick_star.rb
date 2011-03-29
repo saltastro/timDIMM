@@ -12,10 +12,12 @@ t = Turbina.new
 best_hr = ""
 
 s.clear
+s.clear
+s.clear
 lst = s.lst
-airmass = s.airmass
-az = s.az
-alt = s.alt
+airmass = s.airmass.to_f
+az = s.az.to_f
+alt = s.alt.to_f
 s.close
 sleep(1)
 
@@ -44,7 +46,7 @@ else
   sleep(3)
   system("./gto900_offset.rb s")
   sleep(3)
-  system("./gto900_offset.rb e")
+  system("./gto900_offset.rb w")
   sleep(1)
   t.background
   sleep(3)
