@@ -432,6 +432,7 @@ class GTO900
   # startup procedure
   def startup
     clear
+    clear
     long_format
 #    set_RA_backlash(0)
 #    set_Dec_backlash(0)
