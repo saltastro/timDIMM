@@ -15,6 +15,7 @@ s.clear
 s.clear
 s.clear
 lst = s.lst
+side = s.pier?
 airmass = s.airmass.to_f
 az = s.az.to_f
 alt = s.alt.to_f
@@ -22,7 +23,7 @@ s.close
 sleep(1)
 
 # add logic here to avoid the weather mast
-if airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 295.0)
+if side =~ /East/ && airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 295.0)
   puts "Fine to stay here."
   stat = t.status
   if stat =~ /READY/
@@ -31,7 +32,8 @@ if airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 295.0)
 else 
 
   best_hrs = best_star(lst)
-  if best_hr == best_hrs[0]
+  current_hr = `cat current_object`.to_i
+  if best_hrs[0].to_i == current_hr
     best_hr = best_hrs[1]
   else
     best_hr = best_hrs[0]
