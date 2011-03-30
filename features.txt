@@ -1,0 +1,120 @@
+Using camera with GUID b09d0100a03a79
+I: video mode is format7_0
+I: max image size is: height = 240, width = 320
+I: current image size is: height = 240, width = 320
+I: roi is (0, 0) - (320, 240)
+I: total bytes per frame are 76800
+------ Features report ------
+OP   - one push capable
+RC   - readout capable
+O/OC - on/off capable
+AC   - auto capable
+MC   - manual capable
+ABS  - absolute capable
+-----------------------------
+Brightness:
+	RC  MC  (active is: MAN)  ABS  
+	min: 0 max 1023
+	current value is: 0
+	absolute settings:
+	 value: 0.000000
+	 min: 0.000000
+	 max: 6.243896
+Exposure:
+	RC  O/OC  MC  (active is: AUTO)  AC  (active is: AUTO)  OP  (active is: AUTO)  ABS  
+	Feature: ON  min: 1 max 1023
+	current value is: 1
+	absolute settings:
+	 value: -7.584961
+	 min: -7.584961
+	 max: 2.413635
+Sharpness:
+	RC  O/OC  MC  (active is: AUTO)  AC  (active is: AUTO)  
+	Feature: ON  min: 0 max 4095
+	current value is: 512
+White Balance:
+	NOT AVAILABLE
+Hue:
+	NOT AVAILABLE
+Saturation:
+	NOT AVAILABLE
+Gamma:
+	RC  O/OC  MC  (active is: MAN)  ABS  
+	Feature: OFF  min: 512 max 4095
+	current value is: 1024
+	absolute settings:
+	 value: 1.000000
+	 min: 0.500000
+	 max: 3.999023
+Shutter:
+	RC  MC  (active is: AUTO)  AC  (active is: AUTO)  OP  (active is: AUTO)  ABS  
+	min: 61 max 4095
+	current value is: 327
+	absolute settings:
+	 value: 0.003017
+	 min: 0.000080
+	 max: 0.003017
+Gain:
+	RC  MC  (active is: AUTO)  AC  (active is: AUTO)  OP  (active is: AUTO)  ABS  
+	min: 48 max 730
+	current value is: 730
+	absolute settings:
+	 value: 24.000074
+	 min: -1.689251
+	 max: 24.000074
+Iris:
+	NOT AVAILABLE
+Focus:
+	NOT AVAILABLE
+Temperature:
+	RC  
+	min: 2231 max 4095
+	Target temp: 12005376 Current Temp: 3321
+Trigger:
+	RC  O/OC  
+	Feature: OFF  
+	AvailableTriggerModes: 384 385 387 391 
+	AvailableTriggerSources: 576 577 578 579 580 
+	Polarity Change Capable: True
+	Current Polarity: NEG
+	current mode: 384
+
+	current source: 576
+Trigger Delay:
+	RC  O/OC  MC  (active is: MAN)  ABS  
+	Feature: OFF  min: 0 max 4095
+	current value is: 0
+	absolute settings:
+	 value: 0.000000
+	 min: 0.000000
+	 max: 0.003012
+White Shading:
+	NOT AVAILABLE
+Frame Rate:
+	RC  O/OC  MC  (active is: AUTO)  AC  (active is: AUTO)  ABS  
+	Feature: ON  min: 448 max 4095
+	current value is: 480
+	absolute settings:
+	 value: 332.000427
+	 min: 1.868603
+	 max: 343.326538
+Zoom:
+	NOT AVAILABLE
+Pan:
+	NOT AVAILABLE
+Tilt:
+	NOT AVAILABLE
+Optical Filter:
+	NOT AVAILABLE
+Capture Size:
+	NOT AVAILABLE
+Capture Quality:
+	NOT AVAILABLE
+camera reports allowed packet size from 36 - 4032 bytes
+camera reports actual packet size = 4032 bytes
+Start capture:
+End capture.
+Elapsed time = 0.0325601 seconds.
+Framerate = 307.124 fps.
+wrote: blah.fits
+Readout is 8 bits/pixel.
