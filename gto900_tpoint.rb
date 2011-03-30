@@ -22,22 +22,22 @@ h = calc_ha(lst, ra_deg)
 if h < 0.0
   puts "Pointing East."
 
-  ih = 1087.6/3600.0
-  id = 101.2/3600.0
+  ih = 107.6/3600.0
+  id = 301.2/3600.0
   ch = 221.5/3600.0
-  me = 45.3/3600.0
-  ma = -261.4/3600.0
+  me = -305.3/3600.0
+  ma = -108.1/3600.0
 
   ra_deg = ra_deg + ih + ch/Math::cos(dec_deg*Math::PI/180.0) - ma*Math::cos(h*Math::PI/180.0)*Math::tan(dec_deg*Math::PI/180.0) + me*Math::sin(h*Math::PI/180.0)*Math::tan(dec_deg*Math::PI/180.0)
   dec_deg = dec_deg - id - ma*Math::sin(h*Math::PI/180.0) - me*Math::cos(h*Math::PI/180.0)
 else
   puts "Pointing West."
 
-  ih = 1132.0/3600.0
-  id = -7.65/3600.0
-  ch = -284.9/3600.0
-  me = 86.8/3600.0
-  ma = -339.1/3600.0
+  ih =  96.0/3600.0
+  id = 315.16/3600.0
+  ch = -120.8/3600.0
+  me = -308.1/3600.0
+  ma = -108.1/3600.0
 
   ra_deg = ra_deg + ih + ch/Math::cos(dec_deg*Math::PI/180.0) - ma*Math::cos(h*Math::PI/180.0)*Math::tan(dec_deg*Math::PI/180.0) + me*Math::sin(h*Math::PI/180.0)*Math::tan(dec_deg*Math::PI/180.0)
   dec_deg = dec_deg - id - ma*Math::sin(h*Math::PI/180.0) - me*Math::cos(h*Math::PI/180.0)
