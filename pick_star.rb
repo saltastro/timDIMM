@@ -47,9 +47,9 @@ else
   system("./gto900_offset.rb s")
   sleep(3)
   system("./gto900_offset.rb w")
-  sleep(1)
-  t.background
   sleep(3)
+  t.background
+  sleep(10)
   system("./gto900_hr.rb #{best_hr}")
   sleep(3)
   system("./spiral_search_gto900.py")
