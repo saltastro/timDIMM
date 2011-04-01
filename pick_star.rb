@@ -28,6 +28,8 @@ if side =~ /East/ && airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 295.0)
   stat = t.status
   if stat =~ /READY/
     puts t.run
+  elsif stat =~ /OFFLINE/
+    puts t.reboot
   end
 else 
 
