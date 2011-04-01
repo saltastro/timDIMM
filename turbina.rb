@@ -8,42 +8,58 @@ require 'socket'
 ### turbina routines
 class Turbina
   def initialize
+    @status = "OFFLINE"
     @port = sockopen('massdimm.suth', 16007)
+    status
   end
 
   # wrapper for opening socket and dealing with timeouts
   def sockopen(host, port)
     socket = nil
-    status = nil
+    msg = nil
     timeout = 5.0
     begin
       timeout(5) {
         socket = TCPSocket.open(host, port)
+        @status = "ONLINE"
       }
     rescue TimeoutError
-      status = "Timeout"
-      return nil
+      msg = "Turbina Error: Timeout"
+      @status = "OFFLINE"
     rescue Errno::ECONNREFUSED
-      status = "Refusing connection"
-      return nil
+      msg = "Turbina Error: Refusing connection"
+      @status = "OFFLINE"
     rescue => why
-      status = "Error: #{why}"
-      return nil
+      msg = "Turbina Error: #{why}"
+      @status = "OFFLINE"
     end
+    puts msg if msg
     return socket
   end
 
   def close
-    @port.close
+    @port.close if @port
     @port = nil
+    @status = "OFFLINE"
   end
 
   def read
-    @port.gets.split('=')[1]
+    if @port
+      return @port.gets.split('=')[1]
+    else
+      @status = "OFFLINE"
+      return nil
+    end
   end
 
   def command(string)
-    @port.send("1001 #{string}\r\n", 0)
+    if @port
+      @port.send("1001 #{string}\r\n", 0)
+    else
+      puts "No connection to turbina."
+      @status = "OFFLINE"
+      return nil
+    end
   end
 
   def get(cmd)
@@ -54,45 +70,82 @@ class Turbina
   def stop
     command("stop")
     resp = read
-    if resp =~ /PARKED/ || resp =~ /READY/
-      return resp
-    else
-      wait = read.to_i
-      if wait > 1
-        puts "Waiting #{wait} sec for turbina to finish...."
-        sleep(wait+1)
-        return read
+    if resp
+      if resp =~ /PARKED/ || resp =~ /READY/
+        @status = resp
+        return resp
       else
-        return wait
+        wait = read.to_i
+        if wait > 1
+          puts "Waiting #{wait} sec for turbina to finish...."
+          sleep(wait+1)
+          puts "...done"
+          return read
+        else
+          return wait
+        end
       end
+    else
+      return @status
     end
   end
 
   def stop_now
     command("stop now")
-    wait = read.to_i
-    puts "Waiting #{wait} sec for turbina to finish...."
-    sleep(wait+1)
-    return read
+    sleep(1)
+    resp = read
+    if resp
+      if resp =~ /PARKED/ || resp =~ /READY/
+        @status = resp
+        return resp
+        else
+        wait = read.to_i
+        if wait > 1
+          puts "Waiting #{wait} sec for turbina to finish...."
+          sleep(wait+1)
+          puts "...done"
+          return read
+          else
+          return wait
+        end
+      end
+      else
+      return @status
+    end
+
   end
 
   def status
     command("get status")
-    return read
+    resp = read
+    if resp
+      @status = resp
+    end
+    return @status
   end
 
   def run
     command("run")
-    return read
+    resp = read
+    if resp
+      return resp
+    else
+      return @status
+    end
   end
 
   def background
     command("run scen1")
-    wait = read.to_i
-    puts "Running background measurement...."
-    sleep(wait+1)
-    puts "....done."
-    return read
+    resp = read
+    if resp
+      wait = resp.to_i
+      puts "Running background measurement...."
+      sleep(wait+1)
+      puts "....done."
+      return read
+    else
+      return @status
+    end
   end
 
   def object(star)
@@ -102,16 +155,25 @@ class Turbina
 
   def park
     command("park")
-    wait = read.to_i
-    puts "Parking turbina...."
-    sleep(wait)
-    puts "...done"
-    return read
+    resp = read
+    if resp
+      wait = resp.to_i
+      puts "Parking turbina...."
+      sleep(wait)
+      puts "...done"
+      return read
+    else
+      return @status
+    end
   end
 
   def init
     command("init")
-    return read
+    resp = read
+    if resp
+      @status = resp
+    end
+    return @status
   end
 
   def flux
@@ -136,6 +198,15 @@ class Turbina
 
   def ident
     get("ident")
+  end
+  
+  def reboot
+    puts "Rebooting Turbina host computer....."
+    system('ssh massdimm@massdimm.suth "sudo /sbin/shutdown -r now"')
+    sleep(120)
+    puts "....done."
+    initialize
+    return @status
   end
 
 end
