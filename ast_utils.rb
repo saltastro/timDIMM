@@ -129,7 +129,7 @@ def best_star(lst)
 
   good = Array.new
   sort.each { |s|
-    if s[1][:airmass] < 1.5 && s[1][:vmag] < 2.3 && s[1][:vmag] > 0.0 && hms2deg(s[1][:ha]) > 1.0
+    if s[1][:airmass] < 1.5 && s[1][:vmag] < 2.3 && s[1][:vmag] > -2.0 && hms2deg(s[1][:ha]) > 1.0
       good.push(s[0])
     end
   }
