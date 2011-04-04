@@ -41,7 +41,7 @@ has_stars = check_image()
 if has_stars:
     print "Got stars right away!"
 else:
-    while n < 50:
+    while n < 10:
         n = n + 1
 
         for i in range(n):
