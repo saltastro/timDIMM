@@ -1,0 +1,2 @@
+5 9 * * *	$HOME/MASSDIMM/timDIMM/rotate.cron >> $HOME/cron.log
+1 8-17 * * *	$HOME/MASSDIMM/timDIMM/park >> $HOME/cron.log
