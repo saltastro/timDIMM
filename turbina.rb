@@ -154,16 +154,18 @@ class Turbina
   end
 
   def park
-    command("park")
-    resp = read
-    if resp
-      wait = resp.to_i
-      puts "Parking turbina...."
-      sleep(wait)
-      puts "...done"
-      return read
-    else
-      return @status
+    unless @status =~ /PARKED/
+      command("park")
+      resp = read
+      if resp
+        wait = resp.to_i
+        puts "Parking turbina...."
+        sleep(wait)
+        puts "...done"
+        return read
+      else
+        return @status
+      end
     end
   end
 
