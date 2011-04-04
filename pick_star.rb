@@ -56,10 +56,10 @@ else
   sleep(10)
   system("./gto900_hr.rb #{best_hr}")
   sleep(3)
-  system("./spiral_search_gto900.py")
-  sleep(3)
-  system("./gto900_guide.rb")
-  sleep(3)
+#  system("./spiral_search_gto900.py")
+#  sleep(3)
+#  system("./gto900_guide.rb")
+#  sleep(3)
   puts t.run
 
 end
