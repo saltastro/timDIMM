@@ -58,8 +58,8 @@ def dimm9(b):
     b.config(command=lambda but=b,p=pid: killdimm9(but, p))
 
 def killmeasure_seeing(b, pid):
-    b.config(relief=RAISED)
     print "\nKilling main timDIMM process #%d\n" % pid
+    b.config(text="Stopping...")
     b.config(state=DISABLED)
     os.system("kill -9 %d" % pid)
     os.system("./turbina.rb stop")
@@ -69,7 +69,6 @@ def killmeasure_seeing(b, pid):
     b.config(command=lambda c=b: measure_seeing(c))
     
 def measure_seeing(b):
-    b.config(relief=SUNKEN)
     pid = run("./timdimm.sh")
     b.config(text="Stop Measuring Seeing")
     initpark.config(state=DISABLED)
@@ -97,7 +96,6 @@ initpark.config(command=lambda b=initpark: init(b))
 main = Button(frame, text="Measure Seeing", width=180)
 main.pack(padx=10, pady=5, expand=True, fill=X)
 main.config(command=lambda b=main: measure_seeing(b))
-main.config(state=DISABLED)
 
 quit = Button(frame, text="QUIT", fg="red", command=frame.quit)
 quit.pack(pady=20, padx=10, fill=BOTH)
