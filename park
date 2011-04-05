@@ -1,4 +1,5 @@
 #!/bin/sh
+cd /Users/timdimm/MASSDIMM/timDIMM
 
 ./turbina.rb stop
 ./turbina.rb park
