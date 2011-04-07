@@ -10,6 +10,10 @@
 #include <string.h>
 #include <inttypes.h>
 
+#define REG_CAMERA_ABS_MIN                  0x000U
+#define REG_CAMERA_ABS_MAX                  0x004U
+#define REG_CAMERA_ABS_VALUE                0x008U
+
 #define NXPA 10
 
 int grab_frame(dc1394camera_t *c, char *buf, int nbytes) {
@@ -51,7 +55,7 @@ int main(int argc, char *argv[]) {
   FILE *init, *out, *cenfile;
   float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
   double *dist, *sig, *dist_l, *sig_l, *weight, *weight_l;
-  double mean, var, var_l, avesig, airmass;
+  double mean, var, var_l, avesig, airmass, exp, exptime, rate;
   double r0, seeing_short, seeing_long, seeing_ave;
   struct timeval start_time, end_time;
   struct tm ut;
@@ -59,7 +63,7 @@ int main(int argc, char *argv[]) {
   suseconds_t start_usec, end_usec;
   float elapsed_time, fps;
   
-  unsigned int actual_bytes;
+  unsigned int actual_bytes, gain;
   char *names[NXPA];
   char *messages[NXPA];
   int packet;
@@ -81,6 +85,10 @@ int main(int argc, char *argv[]) {
   naxes[0] = xsize;
   naxes[1] = ysize;
   fpixel = 1;
+  
+  gain = atoi(argv[1]);
+  exptime = atof(argv[2]);
+  rate = atof(argv[3]);
   
   nelements = naxes[0]*naxes[1];
   
@@ -132,16 +140,28 @@ int main(int argc, char *argv[]) {
   printf("I: ROI is (%d, %d) - (%d, %d)\n", 
          winleft, wintop, winleft+xsize, wintop+ysize);
   
-  err=dc1394_video_set_framerate(camera, DC1394_FRAMERATE_MAX);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
+  err = dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_MANUAL);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to manual");
+  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_FRAME_RATE, DC1394_TRUE);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to absolute mode");
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, rate);
+  printf("I: framerate is %f fps\n", rate);
   
-  err = dc1394_feature_set_value (camera, DC1394_FEATURE_SHUTTER, 61);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf ("I: shutter is 61\n");
+  err = dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER, DC1394_FEATURE_MODE_MANUAL);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to manual");
   
-  err = dc1394_feature_set_value (camera, DC1394_FEATURE_GAIN, 48);
+  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
+  exp = exptime*1.0e-3;
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exp);
+  printf("I: exptime is %f ms\n", exptime);
+  
+  err = dc1394_feature_set_mode(camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain to manual");
+  
+  err = dc1394_feature_set_value(camera, DC1394_FEATURE_GAIN, gain);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf ("I: gain is 48\n");
+  printf ("I: gain is %d\n", gain);
   
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
@@ -163,13 +183,13 @@ int main(int argc, char *argv[]) {
   /*-----------------------------------------------------------------------                           
    *  report camera's features
    *-----------------------------------------------------------------------*/
-  err=dc1394_feature_get_all(camera,&features);
-  if (err!=DC1394_SUCCESS) {
-    dc1394_log_warning("Could not get feature set");
-  }
-  else {
-    dc1394_feature_print_all(&features, stdout);
-  }
+//  err=dc1394_feature_get_all(camera,&features);
+//  if (err!=DC1394_SUCCESS) {
+//    dc1394_log_warning("Could not get feature set");
+//  }
+//  else {
+//    dc1394_feature_print_all(&features, stdout);
+//  }
   
   printf("Camera successfully initialized.\n");
   
@@ -193,18 +213,16 @@ int main(int argc, char *argv[]) {
     //	    average[j] += 0.1*(buffer[j]-average[j]);
     //	}
     
-    if (f % 160 == 0) {
-      fits_create_file(&fptr, "!video.fits", &fstatus);
-      fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
-      fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
-      fits_close_file(fptr, &fstatus);
-      fits_report_error(stdout, fstatus);
-      status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-                      buffer, nelements, names, messages, NXPA);
-      sprintf(xpastr, "image; box 160.0 120.0 60 20 0.0");
-      status = XPASet(xpa, "timDIMM", "regions", "ack=false",
-                      xpastr, strlen(xpastr), names, messages, NXPA);
-    }
+    fits_create_file(&fptr, "!video.fits", &fstatus);
+    fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
+    fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
+    fits_close_file(fptr, &fstatus);
+    fits_report_error(stdout, fstatus);
+    status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
+                    buffer, nelements, names, messages, NXPA);
+    sprintf(xpastr, "image; box 160.0 120.0 60 20 0.0");
+    status = XPASet(xpa, "timDIMM", "regions", "ack=false",
+                    xpastr, strlen(xpastr), names, messages, NXPA);
     f++;
   }
   
