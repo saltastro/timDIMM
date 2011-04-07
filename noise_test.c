@@ -4,11 +4,16 @@
 #include <dc1394/dc1394.h>
 #include <math.h>
 #include <fitsio.h>
+#include <gsl/gsl_statistics.h>
 #include <xpa.h>
 #include <time.h>
 #include <sys/time.h>
 #include <string.h>
 #include <inttypes.h>
+
+#define REG_CAMERA_ABS_MIN                  0x000U
+#define REG_CAMERA_ABS_MAX                  0x004U
+#define REG_CAMERA_ABS_VALUE                0x008U
 
 #define NXPA 10
 
@@ -42,7 +47,7 @@ int main(int argc, char *argv[]) {
   uint64_t total_bytes = 0;
   
   unsigned char *buffer, *buffer2;
-  unsigned char *average;
+  double *average, *diff;
   fitsfile *fptr;
   int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
   int nbad = 0, nbad_l = 0;
@@ -51,7 +56,7 @@ int main(int argc, char *argv[]) {
   FILE *init, *out, *cenfile;
   float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
   double *dist, *sig, *dist_l, *sig_l, *weight, *weight_l;
-  double mean, var, var_l, avesig, airmass;
+  double mean, var, var_l, avesig, airmass, exp;
   double r0, seeing_short, seeing_long, seeing_ave;
   struct timeval start_time, end_time;
   struct tm ut;
@@ -64,7 +69,7 @@ int main(int argc, char *argv[]) {
   char *messages[NXPA];
   int packet;
   
-  stderr = freopen("video.log", "w", stderr);
+  stderr = freopen("noise_test.log", "w", stderr);
   
   srand48((unsigned)time(NULL));
   
@@ -115,8 +120,6 @@ int main(int argc, char *argv[]) {
   
   err = dc1394_format7_get_max_image_size(camera, mode, &max_width, &max_height);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size.");
-  printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
-  printf ("I: current image size is: height = %d, width = %d\n", ysize, xsize);
   
   winleft = 0;
   wintop = 0;
@@ -129,35 +132,22 @@ int main(int argc, char *argv[]) {
                                winleft, wintop, // left, top
                                xsize, ysize);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
-  printf("I: ROI is (%d, %d) - (%d, %d)\n", 
-         winleft, wintop, winleft+xsize, wintop+ysize);
   
   err=dc1394_video_set_framerate(camera, DC1394_FRAMERATE_MAX);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
-  
-  err = dc1394_feature_set_mode (camera, DC1394_FEATURE_EXPOSURE, DC1394_FEATURE_MODE_MANUAL);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set exposure to manual");
-  
-  err = dc1394_feature_set_value (camera, DC1394_FEATURE_EXPOSURE, 1022);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set exposure");
-  
+    
   err = dc1394_feature_set_mode (camera, DC1394_FEATURE_SHUTTER, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to manual");
   
-  err = dc1394_feature_set_value (camera, DC1394_FEATURE_SHUTTER, 300);
+  err = dc1394_feature_set_value (camera, DC1394_FEATURE_SHUTTER, 61);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf ("I: shutter is 61\n");
   
   err = dc1394_feature_set_mode (camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain to manual");
   
   err = dc1394_feature_set_value (camera, DC1394_FEATURE_GAIN, 730);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf ("I: gain is 48\n");
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain");
   
-  err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
-  DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
-  printf("I: total bytes per frame are %"PRIu64"\n", total_bytes);
   
   err = dc1394_capture_setup(camera, 16, DC1394_CAPTURE_FLAGS_DEFAULT);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Error capturing.");
@@ -171,18 +161,6 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   
-  
-  /*-----------------------------------------------------------------------                           
-   *  report camera's features
-   *-----------------------------------------------------------------------*/
-  err=dc1394_feature_get_all(camera,&features);
-  if (err!=DC1394_SUCCESS) {
-    dc1394_log_warning("Could not get feature set");
-  }
-  else {
-    dc1394_feature_print_all(&features, stdout);
-  }
-  
   printf("Camera successfully initialized.\n");
   
   if (!(buffer = malloc(nelements*sizeof(char)))) {
@@ -190,8 +168,18 @@ int main(int argc, char *argv[]) {
     exit(-1);
   }
   
-  if (!(average = calloc(nelements, sizeof(char)))) {
+  if (!(buffer2 = malloc(nelements*sizeof(char)))) {
+    printf("Couldn't Allocate Image2 Buffer\n");
+    exit(-1);
+  }
+  
+  if (!(average = calloc(nelements, sizeof(double)))) {
     printf("Couldn't Allocate Average Image Buffer\n");
+    exit(-1);
+  }
+  
+  if (!(diff = calloc(nelements, sizeof(double)))) {
+    printf("Couldn't Allocate Diff Image Buffer\n");
     exit(-1);
   }
   
@@ -199,27 +187,49 @@ int main(int argc, char *argv[]) {
   
   f = 0;
   
-  while (1) {
-    grab_frame(camera, buffer, nelements*sizeof(char));
-    //	for (j=0; j<nelements; j++) {
-    //	    average[j] += 0.1*(buffer[j]-average[j]);
-    //	}
-    
-    if (f % 40 == 0) {
-      fits_create_file(&fptr, "!video.fits", &fstatus);
-      fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
-      fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
-      fits_close_file(fptr, &fstatus);
-      fits_report_error(stdout, fstatus);
-      status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-                      buffer, nelements, names, messages, NXPA);
-      sprintf(xpastr, "image; box 160.0 120.0 60 20 0.0");
-      status = XPASet(xpa, "timDIMM", "regions", "ack=false",
-                      xpastr, strlen(xpastr), names, messages, NXPA);
-    }
-    f++;
-  }
+  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
+  exp = 8.0*1.0e-5;
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exp);
+  grab_frame(camera, buffer, nelements*sizeof(char));
+  grab_frame(camera, buffer, nelements*sizeof(char));
   
+  for (f=8; f<300; f++) {
+    exp = f*1.0e-5;
+    err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exp);
+    DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
+    
+    grab_frame(camera, buffer, nelements*sizeof(char));
+    grab_frame(camera, buffer2, nelements*sizeof(char));
+    for (j=0; j<nelements; j++) {
+      average[j] = (buffer[j]+buffer2[j])/2.0;
+    }
+    for (j=0; j<nelements; j++) {
+      diff[j] = buffer[j] - buffer2[j];
+    }
+    
+    var = gsl_stats_variance(diff, 1, nelements);
+    mean = gsl_stats_mean(average, 1, nelements);
+    
+    var = var/2.0;
+    
+    printf("%e %10.2f %10.3f\n", exp, mean, var);
+    
+//    filename = sprintf("!noise_test_%d_1.fits", f);
+//    fits_create_file(&fptr, filename, &fstatus);
+//    fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
+//    fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
+//    fits_close_file(fptr, &fstatus);
+//    fits_report_error(stdout, fstatus);
+//    filename = sprintf("!noise_test_%d_2.fits", f);
+//    fits_create_file(&fptr, filename, &fstatus);
+//    fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
+//    fits_write_img(fptr, TBYTE, fpixel, nelements, buffer2, &fstatus);
+//    fits_close_file(fptr, &fstatus);
+//    fits_report_error(stdout, fstatus);
+
+  }
+
   gettimeofday(&end_time, NULL);
   printf("End capture.\n");
   
