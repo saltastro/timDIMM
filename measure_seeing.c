@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
-  printf ("I: brightness is %d\n", 50);
+  printf ("I: brightness is %d\n", 100);
 
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
