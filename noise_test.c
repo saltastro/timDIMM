@@ -145,9 +145,15 @@ int main(int argc, char *argv[]) {
   err = dc1394_feature_set_mode (camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain to manual");
   
-  err = dc1394_feature_set_value (camera, DC1394_FEATURE_GAIN, 730);
+  err = dc1394_feature_set_value (camera, DC1394_FEATURE_GAIN, 48);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain");
   
+  // set brightness manually.  use relative value in range 0 to 1023.
+  err = dc1394_feature_set_mode(camera, DC1394_FEATURE_BRIGHTNESS, DC1394_FEATURE_MODE_MANUAL);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
+  err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 500);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
+  printf ("I: brightness is %d\n", 500);
   
   err = dc1394_capture_setup(camera, 16, DC1394_CAPTURE_FLAGS_DEFAULT);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Error capturing.");
@@ -194,7 +200,7 @@ int main(int argc, char *argv[]) {
   grab_frame(camera, buffer, nelements*sizeof(char));
   grab_frame(camera, buffer, nelements*sizeof(char));
   
-  for (f=8; f<300; f++) {
+  for (f=8; f<320; f++) {
     exp = f*1.0e-5;
     err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exp);
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
