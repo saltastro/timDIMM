@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
   unsigned int actual_bytes, gain;
   char *names[NXPA];
   char *messages[NXPA];
-  int packet;
+  int brightness;
   
   stderr = freopen("video.log", "w", stderr);
   
@@ -74,8 +74,6 @@ int main(int argc, char *argv[]) {
   
   XPA xpa;
   xpa = XPAOpen(NULL);
-  
-  packet = 10;
   
   fstatus = 0;
   status = 0;
@@ -89,6 +87,7 @@ int main(int argc, char *argv[]) {
   gain = atoi(argv[1]);
   exptime = atof(argv[2]);
   rate = atof(argv[3]);
+  brightness = atoi(argv[4]);
   
   nelements = naxes[0]*naxes[1];
   
@@ -133,35 +132,44 @@ int main(int argc, char *argv[]) {
                                mode,
                                DC1394_COLOR_CODING_MONO8,
                                DC1394_USE_MAX_AVAIL,
-                               //				 packet,
                                winleft, wintop, // left, top
                                xsize, ysize);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
   printf("I: ROI is (%d, %d) - (%d, %d)\n", 
          winleft, wintop, winleft+xsize, wintop+ysize);
   
+  // set the frame rate to absolute value in frames/sec and get value from commandline
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to manual");
   err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_FRAME_RATE, DC1394_TRUE);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to absolute mode");
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, rate);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
   printf("I: framerate is %f fps\n", rate);
   
+  // set the shutter speed to absolute value in seconds (input ms on commandline)
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to manual");
-  
   err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
   exp = exptime*1.0e-3;
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exp);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
   printf("I: exptime is %f ms\n", exptime);
   
+  // set gain manually.  use relative value here in range 48 to 730. 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain to manual");
-  
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_GAIN, gain);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain");
   printf ("I: gain is %d\n", gain);
+  
+  // set brightness manually.  use relative value in range 0 to 1023.
+  err = dc1394_feature_set_mode(camera, DC1394_FEATURE_BRIGHTNESS, DC1394_FEATURE_MODE_MANUAL);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
+  err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, brightness);
+  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
+  printf ("I: brightness is %d\n", brightness);
   
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
