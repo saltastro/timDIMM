@@ -1,2 +1,2 @@
 #!/bin/sh
-ds9 -view info no -view panner no -view magnifier no -view buttons no -view colorbar no -view layout horizontal -geometry 652x540-0+0 -zoom 2 -scale sqrt -title timDIMM $*
+ds9 -view info no -view panner no -view magnifier no -view buttons no -view colorbar no -view layout horizontal -geometry 652x540-0+0 -zoom 2 -scale linear -title timDIMM $*

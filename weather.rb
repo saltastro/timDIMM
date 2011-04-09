@@ -41,7 +41,7 @@ module Weather
     wx["Wind dir"] = doc.xpath("//table")[0].xpath("//td")[6].content
     wx["Wind speed"] = doc.xpath("//table")[0].xpath("//td")[5].content.to_f
     wx["Rain"] = doc.xpath("//table")[0].xpath("//td")[4].content
-    wx["UT"] = doc.xpath("//table")[0].xpath("//td")[3].content
+    wx["UT"] = doc.xpath("//table")[0].xpath("//td")[3].content.chomp
     return wx
   end
 
