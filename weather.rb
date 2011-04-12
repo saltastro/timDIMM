@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'rubygems'
 gem 'nokogiri'
 require 'nokogiri'
@@ -5,7 +7,7 @@ require 'open-uri'
 
 module Weather
 
-  def salt_wx
+  def salt
     wx = IO.popen("curl -s http://www.salt.ac.za/~saltmet/weather.txt").readlines
 
     keys = wx[0].chomp.split("\t")
@@ -31,7 +33,7 @@ module Weather
     return now
   end
 
-  def wasp_wx
+  def wasp
     doc = Nokogiri::HTML(open("http://swaspgateway.suth/"))
     wx = Hash.new
     wx["Sky"] = doc.xpath("//table")[0].xpath("//td")[10].content
@@ -45,7 +47,7 @@ module Weather
     return wx
   end
 
-  def ness_wx
+  def ness
     doc = Nokogiri.HTML(open("http://ystar1.suth/weather_log.php"))
     wx = Hash.new
     wx["SAST"] = doc.xpath("//table")[13].xpath("//td")[53].content
@@ -56,7 +58,7 @@ module Weather
     return wx
   end
 
-  def grav_wx
+  def grav
     kan11 = Nokogiri.HTML(open("http://sg1.suth/tmp/kan11.htm"))
     kan16 = Nokogiri.HTML(open("http://sg1.suth/tmp/kan16.htm"))
     wx = Hash.new
@@ -68,4 +70,12 @@ module Weather
     return wx
   end
 
+end
+
+if $0 == __FILE__
+  include Weather
+  wx = eval ARGV[0]
+  wx.keys.each { |k|
+    puts "%15s %20s" % [k, wx[k]]
+  }
 end
