@@ -19,7 +19,7 @@ def daofind(im):
     mean = stats.mean
     sig = stats.stddev
 
-    smooth = nd.gaussian_filter(im, 2.5)
+    smooth = nd.gaussian_filter(im, 2.0)
     
     clip = smooth >= (mean + 0.6)
     labels, num = nd.label(clip)

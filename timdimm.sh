@@ -2,7 +2,7 @@
 
 while [ 1 ]; do 
     ./pick_star.rb
-    ./ave_frames 3 \!center.fits
+    ./ave_frames 10 \!center.fits
     ./find_boxes.py center.fits
     cat center.fits | xpaset timDIMM fits
     ./gto900_log.rb >> gto900.log
