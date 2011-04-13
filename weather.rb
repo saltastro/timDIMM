@@ -4,10 +4,51 @@ require 'rubygems'
 gem 'nokogiri'
 require 'nokogiri'
 require 'open-uri'
+require 'REXML/document'
 
 module Weather
 
   def salt
+    doc = REXML::Document.new(open("http://sgs.salt/xml/salt-tcs-icd.xml").read)
+    doubles = doc.elements.to_a("//DBL")
+    strings = doc.elements.to_a("//String")
+    dbl = Hash.new
+    str = Hash.new
+    doubles.each { |d| 
+      key = d.elements["Name"].text
+      val = d.elements["Val"].text
+      dbl[key] = val.to_f
+    }
+    strings.each { |s|
+      key = s.elements["Name"].text
+      val = s.elements["Val"].text
+      str[key] = val
+    }
+    ntemps = 7
+    doc.elements.each("*/Cluster/Array/Dimsize") { |e| ntemps = e.text.to_i }
+    temp = 0.0
+    doc.elements.each("*/Cluster/Array/DBL/Val") { |e|
+      temp = temp + e.text.to_f
+    }
+    temp = temp/ntemps
+    
+    wx = Hash.new
+    wx["SAST"] = str["SAST"].split(' ')[1]
+    wx["Date"] = str["SAST"].split(' ')[0]
+    wx["Air Pressure"] = "%.1f" % (dbl["Air pressure"]*10.0)
+    wx["Dewpoint"] = "%.2f" % dbl["Dewpoint"]
+    wx["RH"] = "%.1f" % dbl["Rel Humidity"]
+    wx["Wind Speed (30m)"] = "%.1f" % (dbl["Wind mag 30m"]*3.6)
+    wx["Wind Speed (10m)"] = "%.1f" % (dbl["Wind mag 10m"]*3.6)
+    wx["Wind Dir (30m)"] = "%.1f" % dbl["Wind dir 30m"]
+    wx["Wind Dir (10m)"] = "%.1f" % dbl["Wind dir 10m"]
+    wx["Temp"] = "%.1f" % temp
+    t = temp - dbl["Dewpoint"]
+    wx["T - DP"] = "%.1f" % t
+    return wx
+  end
+  
+  def salt_txt
     wx = IO.popen("curl -s http://www.salt.ac.za/~saltmet/weather.txt").readlines
 
     keys = wx[0].chomp.split("\t")
@@ -62,7 +103,8 @@ module Weather
     kan11 = Nokogiri.HTML(open("http://sg1.suth/tmp/kan11.htm"))
     kan16 = Nokogiri.HTML(open("http://sg1.suth/tmp/kan16.htm"))
     wx = Hash.new
-    wx["SAST"] = kan11.xpath("//td")[12].content
+    wx["SAST"] = kan11.xpath("//td")[12].content.split(' ')[1]
+    wx["Date"] = kan11.xpath("//td")[12].content.split(' ')[0]
     wx["Temp"] = kan11.xpath("//td")[14].content.to_f
     wx["RH"] = kan11.xpath("//td")[15].content.to_f
     wx["Wind dir"] = kan16.xpath("//td")[13].content.to_i
@@ -75,7 +117,7 @@ end
 if $0 == __FILE__
   include Weather
   wx = eval ARGV[0]
-  wx.keys.each { |k|
-    puts "%15s %20s" % [k, wx[k]]
+  wx.keys.sort.each { |k|
+    puts "%20s %25s" % [k, wx[k]]
   }
 end
