@@ -25,7 +25,6 @@ module Weather
       str[key] = val
     }
     ntemps = 7
-    doc.elements.each("*/Cluster/Array/Dimsize") { |e| ntemps = e.text.to_i }
     temp = 0.0
     doc.elements.each("*/Cluster/Array/DBL/Val") { |e|
       temp = temp + e.text.to_f
@@ -103,7 +102,7 @@ module Weather
     kan11 = Nokogiri.HTML(open("http://sg1.suth/tmp/kan11.htm"))
     kan16 = Nokogiri.HTML(open("http://sg1.suth/tmp/kan16.htm"))
     wx = Hash.new
-    wx["SAST"] = kan11.xpath("//td")[12].content.split(' ')[1]
+    wx["UT"] = kan11.xpath("//td")[12].content.split(' ')[1]
     wx["Date"] = kan11.xpath("//td")[12].content.split(' ')[0]
     wx["Temp"] = kan11.xpath("//td")[14].content.to_f
     wx["RH"] = kan11.xpath("//td")[15].content.to_f
