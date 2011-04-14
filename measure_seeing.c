@@ -47,7 +47,7 @@ typedef struct _Back {
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
-int boxsize = 20;
+int boxsize = 10;
 /* timdimm values
  double pixel_scale = 1.22;
  double d = 0.060;
