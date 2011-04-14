@@ -175,7 +175,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
   double  gain = 0.8;
   double  rmom;
   double  dist, dx;
-  double nsigma = 3.5;
+  double nsigma = 3.0;
   int low_y, up_y, low_x, up_x;
   int sourcepix = 0;
   dx = pixel_scale/206265.0;
