@@ -24,7 +24,6 @@ def runvnc(b):
     b.config(command=lambda but=b,p=pid: killvnc(but, p))
 
 def park(b, pid):
-    b.config(relief=RAISED)
     b.config(state=DISABLED)
     print "\nParking MASS and telescope....\n"
     os.system("./park")
@@ -37,7 +36,6 @@ def park(b, pid):
 def init(b):
     print "\nInitializing mount and MASS....\n"
     pid = run("./init")
-    b.config(relief=SUNKEN)
     quit.config(state=DISABLED)
     main.config(state=NORMAL)
     b.config(text="Park")
