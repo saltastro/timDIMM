@@ -47,7 +47,7 @@ typedef struct _Back {
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
-int boxsize = 10;
+int boxsize = 15;
 /* timdimm values
  double pixel_scale = 1.22;
  double d = 0.060;
@@ -417,16 +417,16 @@ int main(int argc, char *argv[]) {
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to manual");
   err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
-  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, 2.0e-3);
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, 3.0e-3);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf("I: exptime is %f ms\n", 2.0e-3);
+  printf("I: exptime is %f s\n", 3.0e-3);
   
   // set gain manually.  use relative value here in range 48 to 730. 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain to manual");
-  err = dc1394_feature_set_value(camera, DC1394_FEATURE_GAIN, 200);
+  err = dc1394_feature_set_value(camera, DC1394_FEATURE_GAIN, 400);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain");
-  printf ("I: gain is %d\n", 200);
+  printf ("I: gain is %d\n", 400);
   
   // set brightness manually.  use relative value in range 0 to 1023.
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_BRIGHTNESS, DC1394_FEATURE_MODE_MANUAL);
@@ -515,6 +515,9 @@ int main(int argc, char *argv[]) {
   gettimeofday(&start_time, NULL);
   
   /* get initial frame */
+  grab_frame(camera, buffer2, nelements*sizeof(char));
+  grab_frame(camera, buffer2, nelements*sizeof(char));
+  grab_frame(camera, buffer2, nelements*sizeof(char));
   grab_frame(camera, buffer2, nelements*sizeof(char));
   // add_gaussian(buffer2, 195.0, 130.0, 140.0, 1.5);
   // add_gaussian(buffer2, 140.0, 115.0, 140.0, 1.5);
