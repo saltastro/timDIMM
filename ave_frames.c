@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, 1.0e-2);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf("I: exptime is %f ms\n", 1.0e-2);
+  printf("I: exptime is %f s\n", 1.0e-2);
   
   // set gain manually.  use relative value here in range 48 to 730. 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
