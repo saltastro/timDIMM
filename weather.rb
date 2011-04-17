@@ -76,6 +76,7 @@ module Weather
   def wasp
     doc = Nokogiri::HTML(open("http://swaspgateway.suth/"))
     wx = Hash.new
+    wx["Lightning"] = doc.xpath("//table")[0].xpath("//td")[11].content
     wx["Sky"] = doc.xpath("//table")[0].xpath("//td")[10].content
     wx["T - DP"] = doc.xpath("//table")[0].xpath("//td")[9].content.to_f
     wx["RH"] = doc.xpath("//table")[0].xpath("//td")[8].content.to_f
@@ -84,6 +85,7 @@ module Weather
     wx["Wind speed"] = doc.xpath("//table")[0].xpath("//td")[5].content.to_f
     wx["Rain"] = doc.xpath("//table")[0].xpath("//td")[4].content
     wx["UT"] = doc.xpath("//table")[0].xpath("//td")[3].content.chomp
+    wx["Status"] = doc.xpath("//table")[0].xpath("//td")[32].content
     return wx
   end
 
