@@ -2,5 +2,6 @@
 cd /Users/timdimm/MASSDIMM/timDIMM
 
 ./turbina.rb stop
-./turbina.rb park
 ./gto900_park.rb
+./turbina.rb park
+
