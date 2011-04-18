@@ -387,8 +387,8 @@ int main(int argc, char *argv[]) {
   
   err = dc1394_format7_get_max_image_size(camera, mode, &max_width, &max_height);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size.");
-  printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
-  printf ("I: current image size is: height = %d, width = %d\n", ysize, xsize);
+  //  printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
+  //  printf ("I: current image size is: height = %d, width = %d\n", ysize, xsize);
   
   winleft = 0;
   wintop = 0;
@@ -400,8 +400,8 @@ int main(int argc, char *argv[]) {
                                winleft, wintop, // left, top
                                xsize, ysize);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
-  printf("I: ROI is (%d, %d) - (%d, %d)\n", 
-         winleft, wintop, winleft+xsize, wintop+ysize);
+  //  printf("I: ROI is (%d, %d) - (%d, %d)\n", 
+  //     winleft, wintop, winleft+xsize, wintop+ysize);
   
   // set the frame rate to absolute value in frames/sec
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_MANUAL);
@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
 
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
-  printf("I: total bytes per frame are %"PRIu64"\n", total_bytes);
+  // printf("I: total bytes per frame are %"PRIu64"\n", total_bytes);
   
   err = dc1394_capture_setup(camera, 16, DC1394_CAPTURE_FLAGS_DEFAULT);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Error capturing.");
