@@ -27,8 +27,6 @@ rh = 0.25*(wasp_wx["RH"].to_f +
            grav_wx["RH"].to_f +
            salt_wx["RH"].to_f)
 
-end
-
 if rh < 85.0
   puts "\033[0;32mHumidity OK: %.1f\033[0;39m" % rh
   else
