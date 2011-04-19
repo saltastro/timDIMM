@@ -4,6 +4,9 @@ require 'GTO900'
 require 'ast_utils'
 require 'turbina'
 require 'timeout'
+require 'weather'
+
+include Weather
 
 def check_turbina(tb)
   stat = tb.status
@@ -12,6 +15,24 @@ def check_turbina(tb)
     elsif stat =~ /OFFLINE/
     puts tb.reboot
   end
+end
+
+salt_wx = salt
+wasp_wx = wasp
+grav_wx = grav
+ness_wx = ness
+
+rh = 0.25*(wasp_wx["RH"].to_f + 
+           ness_wx["RH"].to_f +
+           grav_wx["RH"].to_f +
+           salt_wx["RH"].to_f)
+
+end
+
+if rh < 85.0
+  puts "\033[0;32mHumidity OK: %.1f\033[0;39m" % rh
+  else
+  puts "\033[0;31mHigh Humidity ALERT: %.1f\033[0;39m" % rh
 end
 
 sleep(2)
@@ -32,7 +53,7 @@ s.close
 sleep(1)
 
 # add logic here to avoid the weather mast
-if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 295.0)
+if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 300.0)
   puts "Fine to stay here."
   check_turbina(t)
 else 
