@@ -81,8 +81,8 @@ module Weather
     wx["T - DP"] = doc.xpath("//table")[0].xpath("//td")[9].content.to_f
     wx["RH"] = doc.xpath("//table")[0].xpath("//td")[8].content.to_f
     wx["Temp"] = doc.xpath("//table")[0].xpath("//td")[7].content.to_f
-    wx["Wind dir"] = doc.xpath("//table")[0].xpath("//td")[6].content
-    wx["Wind speed"] = doc.xpath("//table")[0].xpath("//td")[5].content.to_f
+    wx["Wind Dir"] = doc.xpath("//table")[0].xpath("//td")[6].content
+    wx["Wind Speed"] = doc.xpath("//table")[0].xpath("//td")[5].content.to_f
     wx["Rain"] = doc.xpath("//table")[0].xpath("//td")[4].content
     wx["UT"] = doc.xpath("//table")[0].xpath("//td")[3].content.chomp
     wx["Status"] = doc.xpath("//table")[0].xpath("//td")[32].content
@@ -95,8 +95,8 @@ module Weather
     wx["SAST"] = doc.xpath("//table")[13].xpath("//td")[53].content
     wx["RH"] = doc.xpath("//table")[13].xpath("//td")[54].content.to_f
     wx["Temp"] = doc.xpath("//table")[13].xpath("//td")[58].content.to_f
-    wx["Wind speed"] = doc.xpath("//table")[13].xpath("//td")[59].content.to_f*3.6
-    wx["Wind dir"] = doc.xpath("//table")[13].xpath("//td")[60].content.to_f
+    wx["Wind Speed"] = doc.xpath("//table")[13].xpath("//td")[59].content.to_f*3.6
+    wx["Wind Dir"] = doc.xpath("//table")[13].xpath("//td")[60].content.to_f
     return wx
   end
 
@@ -108,8 +108,8 @@ module Weather
     wx["Date"] = kan11.xpath("//td")[12].content.split(' ')[0]
     wx["Temp"] = kan11.xpath("//td")[14].content.to_f
     wx["RH"] = kan11.xpath("//td")[15].content.to_f
-    wx["Wind dir"] = kan16.xpath("//td")[13].content.to_i
-    wx["Wind speed"] = kan16.xpath("//td")[14].content.to_f*3.6
+    wx["Wind Dir"] = kan16.xpath("//td")[13].content.to_i
+    wx["Wind Speed"] = kan16.xpath("//td")[14].content.to_f*3.6
     return wx
   end
 
