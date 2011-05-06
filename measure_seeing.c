@@ -691,8 +691,8 @@ int main(int argc, char *argv[]) {
   printf("Bad samples:  %d for short, %d for long.\n", nbad, nbad_l);
   
   seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
-  printf("\033[0;31mExposure corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_ave);
-  printf("\033[0;31mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
+  printf("\033[0;33mExposure corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_ave);
+  printf("\033[0;33mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
   
   timestr = ctime(&end_sec);
   gmtime_r(&end_sec, &ut);
