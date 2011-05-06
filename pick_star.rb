@@ -9,7 +9,10 @@ require 'weather'
 include Weather
 
 def check_turbina(tb)
-  stat = tb.status
+  stat = "UNKNOWN"
+  timeout(5) {
+    stat = tb.status
+  }
   if stat =~ /READY/
     puts tb.run
     elsif stat =~ /OFFLINE/
@@ -22,10 +25,10 @@ wasp_wx = wasp
 grav_wx = grav
 ness_wx = ness
 
-rh = 0.25*(wasp_wx["RH"].to_f + 
-           ness_wx["RH"].to_f +
-           grav_wx["RH"].to_f +
-           salt_wx["RH"].to_f)
+rh = (wasp_wx["RH"].to_f + 
+      ness_wx["RH"].to_f +
+      salt_wx["RH"].to_f +
+      grav_wx["RH"].to_f)/4.0
 
 if rh < 85.0
   puts "\033[0;32mHumidity OK: %.1f\033[0;39m" % rh
