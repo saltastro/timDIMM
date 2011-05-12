@@ -140,7 +140,7 @@ class Turbina
     if resp
       wait = resp.to_i
       puts "Running background measurement...."
-      sleep(wait+1)
+      sleep(10)
       puts "....done."
       return read
     else
