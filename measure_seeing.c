@@ -434,7 +434,7 @@ int main(int argc, char *argv[]) {
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
   printf ("I: brightness is %d\n", 100);
-
+  
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
   // printf("I: total bytes per frame are %"PRIu64"\n", total_bytes);
@@ -531,17 +531,20 @@ int main(int argc, char *argv[]) {
     xsum = 0.0;
     ysum = 0.0;
     for (i=0; i<nboxes; i++) {
-	    xsum += box[i].cenx;
-	    ysum += box[i].ceny;
+      xsum += box[i].cenx;
+      ysum += box[i].ceny;
     }
     back.x = xsum/nboxes;
     back.y = ysum/nboxes;
     background(buffer, naxes[0], naxes[1]);
     
     for (i=0; i<nboxes; i++) {
-	    box[i].r = boxsize/2.0;
-	    centroid(buffer, naxes[0], naxes[1], i);
-	    if (box[i].fwhm > 0.0) {
+      box[i].r = boxsize/2.0;
+      centroid(buffer, naxes[0], naxes[1], i);
+    }
+    
+    if (box[0].fwhm > 0.0 && box[1].fwhm > 0.0) {
+      for (i=0; i<nboxes; i++) {
         fprintf(cenfile,
                 "%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f %.2f\t ",
                 box[i].cenx,
@@ -552,18 +555,19 @@ int main(int argc, char *argv[]) {
                 box[i].noise,
                 box[i].sigmaxy,
                 box[i].snr, 
-                box[i].strehl);
-	    }
+                box[i].strehl
+                );
+      }
     }
     
     if (box[0].snr < box[1].snr) {
-	    weight[f] = (box[0].snr/box[0].counts)*(box[0].snr/box[0].counts);
+      weight[f] = (box[0].snr/box[0].counts)*(box[0].snr/box[0].counts);
     } else {
-	    weight[f] = (box[1].snr/box[1].counts)*(box[1].snr/box[1].counts);
+      weight[f] = (box[1].snr/box[1].counts)*(box[1].snr/box[1].counts);
     }
     
     if (weight[f] == 0.0) {
-	    nbad++;
+      nbad++;
     }
     
     dist[f] = stardist(0, 1);
@@ -575,7 +579,6 @@ int main(int argc, char *argv[]) {
     }
     sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
     fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);
-    
     
     /* now average two exposures */
     for (j=0; j<nelements; j++) {
