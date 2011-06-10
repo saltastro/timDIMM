@@ -20,15 +20,22 @@ def check_turbina(tb)
   end
 end
 
-salt_wx = salt
-wasp_wx = wasp
-grav_wx = grav
-ness_wx = ness
+wx = Array.new
+wx.push(salt)
+wx.push(wasp)
+wx.push(grav)
+wx.push(ness)
 
-rh = (wasp_wx["RH"].to_f + 
-      ness_wx["RH"].to_f +
-      salt_wx["RH"].to_f +
-      grav_wx["RH"].to_f)/4.0
+ngood = 0
+sum = 0
+wx.each { |w|
+  if w
+    sum = sum + w["RH"].to_f
+    ngood = ngood + 1
+  end
+}
+
+rh = sum/ngood
 
 if rh < 85.0
   puts "\033[0;32mHumidity OK: %.1f\033[0;39m" % rh
