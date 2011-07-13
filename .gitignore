@@ -9,7 +9,8 @@ init_cen_all
 *.log
 *.dSYM
 *.fits
-*.dat
+centroids.dat
+seeing.dat
 *~
 *.o
 ave_frames
