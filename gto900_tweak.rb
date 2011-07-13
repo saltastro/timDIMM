@@ -8,7 +8,7 @@ dir = ARGV[0]
 s = GTO900.new('massdimm', 7001)
 
 s.clear
-s.set_center_rate(3)
+s.set_center_rate(2)
 s.move(dir)
 sleep(1)
 s.clear

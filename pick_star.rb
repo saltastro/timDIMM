@@ -24,7 +24,7 @@ wx = Array.new
 wx.push(salt)
 wx.push(wasp)
 wx.push(grav)
-wx.push(ness)
+#wx.push(ness)
 
 ngood = 0
 sum = 0
