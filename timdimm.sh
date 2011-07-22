@@ -8,7 +8,11 @@ while [ 1 ]; do
     ./gto900_log.rb >> gto900.log
     ./measure_seeing 10000 `tail -1 gto900.log | cut -d ' ' -f 8`
     ./gto900_guide.rb
-    mv centroids.dat data/centroids_`date -u '+%Y%m%d-%H%M%S'`.dat
+    TIME=`date -u '+%Y%m%d-%H%M%S'`
+    mv centroids.dat data/centroids_$TIME.dat
+    cd data
+    ../dimm_stats.py centroids_$TIME.dat
+    cd ..
     ./plot.gnu
     echo "image;text 25 5 # text={Seeing = `cat seeing.out`\"}" | xpaset timDIMM regions
     echo "image;text 290 5 # text={R0 = `cat r0.out` cm}" | xpaset timDIMM regions
