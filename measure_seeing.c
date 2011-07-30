@@ -543,23 +543,6 @@ int main(int argc, char *argv[]) {
       centroid(buffer, naxes[0], naxes[1], i);
     }
     
-    if (box[0].fwhm > 0.0 && box[1].fwhm > 0.0) {
-      for (i=0; i<nboxes; i++) {
-        fprintf(cenfile,
-                "%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f %.2f\t ",
-                box[i].cenx,
-                box[i].ceny,
-                box[i].fwhm,
-                box[i].counts,
-                back.background,
-                box[i].noise,
-                box[i].sigmaxy,
-                box[i].snr, 
-                box[i].strehl
-                );
-      }
-    }
-    
     if (box[0].snr < box[1].snr) {
       weight[f] = (box[0].snr/box[0].counts)*(box[0].snr/box[0].counts);
     } else {
@@ -577,6 +560,24 @@ int main(int argc, char *argv[]) {
       status = -1;
       return(status);
     }
+
+    if (box[0].fwhm > 0.0 && box[1].fwhm > 0.0) {
+      for (i=0; i<nboxes; i++) {
+        fprintf(cenfile,
+                "%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f %.2f\t ",
+                box[i].cenx,
+                box[i].ceny,
+                box[i].fwhm,
+                box[i].counts,
+                back.background,
+                box[i].noise,
+                box[i].sigmaxy,
+                box[i].snr, 
+                box[i].strehl
+                );
+      }
+    }
+    
     sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
     fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);
     
