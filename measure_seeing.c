@@ -575,11 +575,10 @@ int main(int argc, char *argv[]) {
                 box[i].snr, 
                 box[i].strehl
                 );
+	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
+	fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);    
       }
     }
-    
-    sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
-    fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);
     
     /* now average two exposures */
     for (j=0; j<nelements; j++) {
