@@ -8,7 +8,7 @@ def hr_catalog
   file.each_line { |line|
     star = { }
     next if line =~ /#/
-    hr = line[0..3]
+    hr = line[0..3].strip
     name = line[5..11]
     h = "%02d" % line[13..14].to_i
     m = "%02d" % line[16..17].to_i
