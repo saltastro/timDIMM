@@ -7,12 +7,12 @@ import numpy as np
 from find_boxes import *
 
 def check_image():
-    os.system("./ave_frames 3 \!spiral.fits")
+    os.system("./ave_frames 10 \!spiral.fits")
     os.system("cat spiral.fits | xpaset timDIMM fits")
     hdu = rfits("spiral.fits")
     image = hdu.data
     n, stars = daofind(image)
-    
+
     if n == 2:
         print "Found the stars!"
         return True
@@ -41,7 +41,7 @@ has_stars = check_image()
 if has_stars:
     print "Got stars right away!"
 else:
-    while n < 10:
+    while n < 50:
         n = n + 1
 
         for i in range(n):
