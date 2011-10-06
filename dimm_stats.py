@@ -4,9 +4,7 @@ import sys
 import os
 import numpy as np
 
-labels = ["X1", "Y1", "FWHM1", "Flux1", "Back1", "Noise1", "SigXY1", "SNR1", "Strehl1",
-          "X2", "Y2", "FWHM2", "Flux2", "Back2", "Noise2", "SigXY2", "SNR2", "Strehl2",
-          "Sep", "Sig_Sep"]
+labels = ["X1", "Y1", "FWHM1", "Flux1", "Back1", "Noise1", "SigXY1", "SNR1", "Strehl1", "X2", "Y2", "FWHM2", "Flux2", "Back2", "Noise2", "SigXY2", "SNR2", "Strehl2", "Sep", "Sig_Sep"]
 
 file = sys.argv[1]
 
