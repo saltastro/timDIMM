@@ -4,4 +4,5 @@ cd /Users/timdimm/MASSDIMM/timDIMM
 ./turbina.rb stop
 ./gto900_park.rb
 ./turbina.rb park
+./gto900_init.rb
 
