@@ -9,16 +9,23 @@ while [ 1 ]; do
     ./measure_seeing 10000 `tail -1 gto900.log | cut -d ' ' -f 8`
     ./gto900_guide.rb
     TIME=`date -u '+%Y%m%d-%H%M%S'`
-    mv centroids.dat data/centroids_$TIME.dat
-    cd data
-    ../dimm_stats.py centroids_$TIME.dat
-    cd ..
-    ./plot.gnu
-    echo "image;text 25 5 # text={Seeing = `cat seeing.out`\"}" | xpaset timDIMM regions
-    echo "image;text 290 5 # text={R0 = `cat r0.out` cm}" | xpaset timDIMM regions
-    scp seeing.out seeing.dat massdimm@massdimm:~/seeing/suthdimm/.
-    date +'%Y-%m-%dT%H:%M:%S%z' >> seeing.out
-    cp seeing.out ~/Sites/seeing.txt
+    if [[ -s seeing.out ]]; then
+	mv centroids.dat data/centroids_$TIME.dat
+	cd data
+	../dimm_stats.py centroids_$TIME.dat
+	cd ..
+	./plot.gnu
+	echo "image;text 25 5 # text={Seeing = `cat seeing.out`\"}" | xpaset timDIMM regions
+	echo "image;text 290 5 # text={R0 = `cat r0.out` cm}" | xpaset timDIMM regions
+	scp seeing.out seeing.dat massdimm@massdimm:~/seeing/suthdimm/.
+	date +'%Y-%m-%dT%H:%M:%S%z' >> seeing.out
+	mv seeing.out ~/Sites/seeing.txt
+    else
+	echo "FAIL!"
+	echo "image;text 125 5 # text={Unsuccessful Measurement}" | xpaset timDIMM regions
+	rm centroids.dat
+	rm seeing.out
+    fi
     xpaset -p timDIMM saveimage png ds9.png
     mv ds9.png /Users/timdimm/Sites/images/.
 done
