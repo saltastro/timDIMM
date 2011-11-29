@@ -37,17 +37,17 @@ for i in range(len(lines1)):
     std.append([sqrt(float(d1[3])**2 + float(d2[3])**2)])
 
 ut = array(time)
-mag = -2.5*np.log10(array(flux))
+mag = -2.5*np.log10(array(flux)) + 7.4
 std1 = array(std)
 
 
 fig = figure()
 ax = fig.add_subplot(111)
-ax.set_ylabel("Flux")
+ax.set_ylabel("Mag")
 ax.set_xlabel("UT")
 
 ax.xaxis.set_major_formatter(ticker.FuncFormatter(format_time))
 
-plot_date(ut, flux)
+plot_date(ut, mag)
 
 show()
