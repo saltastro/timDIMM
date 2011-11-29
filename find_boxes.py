@@ -4,7 +4,6 @@ import sys
 import numpy as np
 import scipy.ndimage as nd
 import pyfits
-import imagestats
 
 def rfits(file):
     f = pyfits.open(file, memmap=True)
@@ -14,10 +13,8 @@ def rfits(file):
     return hdu
 
 def daofind(im):
-    allstats = imagestats.ImageStats(im)
-    stats = imagestats.ImageStats(im, nclip=3)
-    mean = stats.mean
-    sig = stats.stddev
+    mean = np.mean(im)
+    sig = np.std(im)
 
     smooth = nd.gaussian_filter(im, 2.0)
     
