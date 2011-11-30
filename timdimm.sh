@@ -1,6 +1,7 @@
 #!/bin/sh
 
 while [ 1 ]; do 
+    ./ox_wagon.py OPEN
     ./pick_star.rb
     ./ave_frames 10 \!center.fits
     ./find_boxes.py center.fits
