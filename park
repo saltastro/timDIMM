@@ -1,6 +1,6 @@
 #!/bin/sh
 cd /Users/timdimm/MASSDIMM/timDIMM
-
+./ox_wagon.py CLOSE
 ./turbina.rb stop
 ./gto900_park.rb
 ./turbina.rb park
