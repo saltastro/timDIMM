@@ -73,11 +73,12 @@ if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 300.0)
 else 
 
   best_hrs = best_star(lst)
+  current_hr = `cat current_object`.to_i
+  
   if best_hrs[0] && best_hrs[1]
-    current_hr = `cat current_object`.to_i
     if best_hrs[0].to_i == current_hr
       best_hr = best_hrs[1]
-      else
+    else
       best_hr = best_hrs[0]
     end
 
