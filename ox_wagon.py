@@ -60,9 +60,10 @@ reg_106f_map = ['Watchdog Tripped',
                 'Proximity Open Slide Roof',
                 'Lights On']
 
-commands = { 'RESET': "38008000",
-             'OPEN':  "14428C00",
-             'CLOSE': "14218000"
+commands = { 'RESET':  "28008000",
+             'OPEN':   "1C428C00",
+             'CLOSE':  "14218000",
+             'STATUS': "04008000"
            }
 
 cmd_header = ":01101064000408"
@@ -77,24 +78,26 @@ sio.flush()
 
 resp = sio.readline()
 
-reg_106e = hex2bin(resp[7:11])
-reg_106f = hex2bin(resp[11:15])
+if sys.argv[1] == 'STATUS':
+   reg_106e = hex2bin(resp[7:11])
+   reg_106f = hex2bin(resp[11:15])
 
-for i in range(16):
-   if reg_106e_map[i]:
-      print "%s : %s" % (reg_106e[i], reg_106e_map[i])
+   for i in range(16):
+      if reg_106e_map[i]:
+         print "%s : %s" % (reg_106e[i], reg_106e_map[i])
 
-for i in range(16):
-   if reg_106f_map[i]:
-      print "%s : %s" % (reg_106f[i], reg_106f_map[i])
+   for i in range(16):
+      if reg_106f_map[i]:
+         print "%s : %s" % (reg_106f[i], reg_106f_map[i])
+
+else:
+   print "Commanding OX wagon to %s...." % sys.argv[1]
 
 cmd = cmd_header + commands[sys.argv[1]] + watch_delay + pwr_delay
 
 sum = checksum(cmd + "0000")
 to_send = "%s%x\n" % (cmd, sum)
 to_send = to_send.upper()
-
-print "Commanding OX wagon...."
 
 sio.write(unicode(to_send))
 sio.flush()
