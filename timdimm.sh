@@ -1,7 +1,7 @@
 #!/bin/sh
 
 while [ 1 ]; do 
-    ./ox_wagon.py STATUS > ox_wagon.txt
+    ./ox_wagon OPEN
     ./pick_star.rb
     ./ave_frames 10 \!center.fits
     ./find_boxes.py center.fits
