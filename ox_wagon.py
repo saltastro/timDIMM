@@ -66,6 +66,12 @@ commands = { 'RESET':  "28008000",
              'STATUS': "04008000"
            }
 
+commands = { 'RESET':  "2C008000",
+             'OPEN':   "10428C00",
+             'CLOSE':  "10218000",
+             'STATUS': "10008000"
+           }
+
 cmd_header = ":01101064000408"
 pwr_delay = "0300"
 watch_delay = "0900"
@@ -93,15 +99,15 @@ if sys.argv[1] == 'STATUS':
 else:
    print "Commanding OX wagon to %s...." % sys.argv[1]
 
-cmd = cmd_header + commands[sys.argv[1]] + watch_delay + pwr_delay
+   cmd = cmd_header + commands[sys.argv[1]] + watch_delay + pwr_delay
 
-sum = checksum(cmd + "0000")
-to_send = "%s%x\n" % (cmd, sum)
-to_send = to_send.upper()
+   sum = checksum(cmd + "0000")
+   to_send = "%s%x\n" % (cmd, sum)
+   to_send = to_send.upper()
 
-sio.write(unicode(to_send))
-sio.flush()
+   sio.write(unicode(to_send))
+   sio.flush()
 
-resp = sio.readline()
+   resp = sio.readline()
 
 
