@@ -1,8 +1,0 @@
-unbinned 16bpp -> 330 
-unbinned  8bpp ->   1.3
-
-binned   16bpp -> 112
-binned    8bpp -> 0.43
-
-noise values are STDDEV reported by iraf.imstat()
-
