@@ -60,7 +60,6 @@ def killmeasure_seeing(b, pid):
     b.config(text="Stopping...")
     b.config(state=DISABLED)
     os.system("kill -9 %d" % pid)
-    os.system("/bin/kill -9 `ps auwx | grep pick_star | grep -v grep | awk '{print $2}' | xargs`")
     os.system("./turbina.rb stop")
     b.config(text="Measure Seeing")
     initpark.config(state=NORMAL)

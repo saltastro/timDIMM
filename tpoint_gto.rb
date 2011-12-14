@@ -10,13 +10,13 @@ hr = ARGV[0]
 s = GTO900.new('massdimm', 7001)
 
 s.clear
-r = s.ra.sub(':', ' ')
-d = s.dec.sub(':', ' ')
+r = s.ra.gsub(':', ' ')
+d = s.dec.gsub(':', ' ')
 l = s.lst.split(':')
 lst = l[0] + ' ' + l[1]
 
-cat_r = cat[hr][:ra].sub(':', ' ')
-cat_d = cat[hr][:dec].sub(':', ' ')
+cat_r = cat[hr][:ra].gsub(':', ' ')
+cat_d = cat[hr][:dec].gsub(':', ' ')
 
 puts cat_r + ' ' + cat_d + ' 0.0 0.0 J2000 ' + r + ' ' + d + ' ' + lst
 

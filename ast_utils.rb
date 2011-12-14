@@ -102,6 +102,8 @@ def eqazel(ha, dec)
   else 
     airmass = 50.0
   end
+  el = 180.0*el/Math::PI
+  az = 180.0*az/Math::PI
   return az, el, airmass
 end
 
@@ -134,4 +136,36 @@ def best_star(lst)
     end
   }
   return good[0], good[1], good[2]
+end
+
+def vis_strip(lst)
+  lst = 15*hms2deg(lst)
+  cat = hr_catalog
+
+  cat.keys.each { |star|
+
+    r = 15*hms2deg(cat[star][:ra])
+    d = hms2deg(cat[star][:dec])
+
+    ha = calc_ha(lst, r)
+
+    az, el, airmass = eqazel(ha, d)
+
+    cat[star][:ha] = sexagesimal(ha/15.0)
+    cat[star][:az] = az
+    cat[star][:el] = el
+    cat[star][:airmass] = airmass
+
+  }
+
+  sort = cat.sort { |a,b|  a[1][:vmag] <=> b[1][:vmag] }
+
+  good = Array.new
+  sort.each { |s|
+    if s[1][:el] < 65.0 && s[1][:el] > 43.0 
+      good.push(s[0])
+    end
+  }
+  return good
+
 end
