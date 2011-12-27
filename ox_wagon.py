@@ -1,21 +1,31 @@
 #!/usr/bin/env python
 
+"""
+the OxWagon class implements the most important features required to control
+the ox wagon enclosure.  
+"""
+
 import serial
 import io 
 import sys
 from binutils import *
 
 class OxWagon:
-   '''Class variables'''
+   # set a 5 minute power outage delay
    pwr_delay = "0300"
+   # set a 15 minute watchdog timer delay
    watch_delay = "0900"
+
+   # cache the state when status() is queried
    state = {}
-   
+
+   # dict of most commonly used commands
    commands = { 'RESET':  "2C008000",
                 'OPEN':   "10428C00",
-                'CLOSE':  "10218000",
+                'CLOSE':  "14218000",
               }
 
+   # bit map for the first 16-bit register used to monitor status
    reg_106e_map = ['Manual Close Drop Roof', 
                    'Manual Open Drop Roof', 
                    'Manual Close Slide Roof', 
@@ -33,6 +43,7 @@ class OxWagon:
                    'Slide Roof Opened', 
                    'Slide Roof Closed']
 
+   # bit map for the second register
    reg_106f_map = ['Watchdog Tripped', 
                    False, 
                    False, 
@@ -50,15 +61,21 @@ class OxWagon:
                    'Proximity Open Slide Roof',
                    'Lights On']
 
+   # beware, the port may change if the USB-RS232 cable is ever moved to a different port
    def __init__(self, port="/dev/tty.PL2303-00002006"):
+      # we use the py27-serial package to implement RS232 communication
       self.ser = serial.Serial(port, bytesize=7, parity=serial.PARITY_EVEN, timeout=1)
+      # use this trick to make sure the CR-LF conversions are handled correctly
       self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser), newline='\r\n')
       self.status()
 
+   # take a hexadecimal string, build a command out of it by tacking on the delay parameters,
+   # and calculating the checksum. 
    def command(self, cmd):
       cmd_header = ":01101064000408"
       cmd = cmd_header + cmd + self.watch_delay + self.pwr_delay
 
+      # use checksum from binutils.py
       sum = checksum(cmd + "0000")
       to_send = "%s%x\n" % (cmd, sum)
       to_send = to_send.upper()
@@ -69,24 +86,31 @@ class OxWagon:
       resp = self.sio.readline()
       return resp
 
+   # use pre-defined open command to open the ox wagon
    def open(self):
       self.command(self.commands['OPEN'])
 
+   # use pre-defined open command to close the ox wagon
    def close(self):
       self.command(self.commands['CLOSE'])
 
+   # use pre-defined command to reset the ox wagon controller and clear forced closure bits
    def reset(self):
       self.command(self.commands['RESET'])
 
+   # send pre-defined command to query status and parse response into dict that is cached into
+   # state{} and also returned to caller.
    def status(self):
       self.sio.write(unicode(":0103106E000579\n"))
       self.sio.flush()
 
       resp = self.sio.readline()
 
+      # use hex2bin from binutils.py
       reg_106e = hex2bin(resp[7:11])
       reg_106f = hex2bin(resp[11:15])
 
+      # use bit maps and parse into dict of boolean values
       for i in range(16):
          if self.reg_106e_map[i]:
             if reg_106e[i] == '1':
@@ -103,6 +127,7 @@ class OxWagon:
 
       return self.state
 
+# handle running this as a standalone script.  
 if __name__=='__main__':
    o = OxWagon()
    if len(sys.argv) == 1:
@@ -113,4 +138,5 @@ if __name__=='__main__':
          for k,v in state.items():
             print "%30s : \t %s" % (k,v)
       else:
+         # eval is your friend!
          eval("o.%s()" % sys.argv[1].lower())
