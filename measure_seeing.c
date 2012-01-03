@@ -32,6 +32,7 @@ typedef struct _Box {
   double  sigmafwhmthresh;
   double  sigmafwhm;
   double  strehl;
+  double  max;
   int     r;
 } Box;
 
@@ -227,6 +228,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
     box[num].counts = 1.0;
     box[num].strehl = 0.0;
   } else {
+    box[num].max = max;
     box[num].strehl = (max/sum)*(4.0/3.14159)*pow( lambda/(d*dx), 2);
     rmom = ( sumxx - sumx * sumx / sum + sumyy - sumy * sumy / sum ) / sum;
     
@@ -319,7 +321,7 @@ int main(int argc, char *argv[]) {
   FILE *init, *out, *cenfile;
   float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
   double *dist, *sig, *dist_l, *sig_l, *weight, *weight_l;
-  double mean, var, var_l, avesig, airmass;
+    double mean, var, var_l, avesig, airmass, exptime;
   double r0, seeing_short, seeing_long, seeing_ave;
   struct timeval start_time, end_time;
   struct tm ut;
@@ -338,13 +340,14 @@ int main(int argc, char *argv[]) {
   
   stderr = freopen("measure_seeing.log", "w", stderr);
   
-  if (argc <= 1) {
-    printf("Must specifiy number of measurements.\n");
+  if (argc <= 3) {
+    printf("Usage: measure_seeing <n> <airmass> <exptime>\n");
     exit(-1);
   }
   
   nimages = atoi(argv[1]);
   airmass = atof(argv[2]);
+  exptime = atof(argv[3]);
   fstatus = 0;
   status = 0;
   anynul = 0;
@@ -417,9 +420,9 @@ int main(int argc, char *argv[]) {
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to manual");
   err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
-  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, 1.0e-3);
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exptime);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf("I: exptime is %f s\n", 1.0e-3);
+  printf("I: exptime is %f s\n", exptime);
   
   // set gain manually.  use relative value here in range 48 to 730. 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
@@ -577,7 +580,7 @@ int main(int argc, char *argv[]) {
                 );
 	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
       }
-      fprintf(cenfile, "%.2f %.2f\n", dist[f], sig[f]);    
+      fprintf(cenfile, "%.2f %.2f %.1e\n", dist[f], sig[f], exptime);    
     }
     
     /* now average two exposures */
