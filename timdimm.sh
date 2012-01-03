@@ -7,7 +7,7 @@ while [ 1 ]; do
     ./find_boxes.py center.fits
     cat center.fits | xpaset timDIMM fits
     ./gto900_log.rb >> gto900.log
-    ./measure_seeing 10000 `tail -1 gto900.log | cut -d ' ' -f 8`
+    ./measure_seeing 10000 `tail -1 gto900.log | cut -d ' ' -f 8` 1.0e-3
     ./gto900_guide.rb
     TIME=`date -u '+%Y%m%d-%H%M%S'`
     if [[ -s seeing.out ]]; then
