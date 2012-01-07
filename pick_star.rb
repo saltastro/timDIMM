@@ -22,24 +22,22 @@ end
 
 rh = 0.0
 
-timeout(15) {
-  wx = Array.new
-  wx.push(salt)
-  wx.push(wasp)
-  wx.push(grav)
-  #wx.push(ness)
+wx = Array.new
+wx.push(salt)
+wx.push(wasp)
+wx.push(grav)
+#wx.push(ness)
 
-  ngood = 0
-  sum = 0
-  wx.each { |w|
-    if w
-      sum = sum + w["RH"].to_f
-      ngood = ngood + 1
-    end
-  }
-
-  rh = sum/ngood
+ngood = 0
+sum = 0
+wx.each { |w|
+  if w
+    sum = sum + w["RH"].to_f
+    ngood = ngood + 1
+  end
 }
+
+rh = sum/ngood
 
 if rh == 0.0
   puts "\033[0;31mNo Humidity Readind ALERT: %.1f\033[0;39m" % rh
