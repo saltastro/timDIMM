@@ -15,7 +15,7 @@ def salt():
     bol = {}
     try:
         url = "http://sgs.salt/xml/salt-tcs-icd.xml"
-        doc = xml.dom.minidom.parse(urllib2.urlopen(url))
+        doc = xml.dom.minidom.parse(urllib2.urlopen(url, timeout=1))
         doubles = doc.getElementsByTagName("DBL")
         strings = doc.getElementsByTagName("String")
         bools = doc.getElementsByTagName("Boolean")
@@ -65,7 +65,7 @@ def wasp():
     wx = {}
     try:
         p = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("dom"))
-        doc = p.parse(urllib2.urlopen("http://swaspgateway.suth/").read())
+        doc = p.parse(urllib2.urlopen("http://swaspgateway.suth/", timeout=1).read())
         t = doc.getElementsByTagName("table")[0]
         tds = t.getElementsByTagName("td")
         wx["Lightning"] = tds[11].firstChild.nodeValue
@@ -91,14 +91,34 @@ def wasp():
     except:
         return False
 
+def grav():
+    wx = {}
+    p = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("dom"))
+    kan11 = p.parse(urllib2.urlopen("http://sg1.suth/tmp/kan11.htm", timeout=1).read())
+    kan16 = p.parse(urllib2.urlopen("http://sg1.suth/tmp/kan16.htm", timeout=1).read())
+    kan11_tds = kan11.getElementsByTagName("td")
+    kan16_tds = kan16.getElementsByTagName("td")
+    wx["Date"], wx["UT"] = kan11_tds[12].firstChild.nodeValue.split()
+    kan11_tds[14].normalize()
+    kan11_tds[15].normalize()
+    wx["Temp"] = float(kan11_tds[14].firstChild.nodeValue)
+    wx["RH"] = float(kan11_tds[15].firstChild.nodeValue)
+    kan16_tds[13].normalize()
+    kan16_tds[14].normalize()
+    wx["Wind Dir"] = int(kan16_tds[13].firstChild.nodeValue)
+    wx["Wind Speed"] = float(kan16_tds[14].firstChild.nodeValue)*3.6
+    return wx
+    
 if __name__=='__main__':
     if len(sys.argv) == 1:
-        print "Usage: weather.py <salt|wasp>"
+        print "Usage: weather.py <salt|wasp|grav>"
     else:
         wx = eval("%s()" % sys.argv[1].lower())
         if wx:
             for k,v in sorted(wx.items()):
                 print "%20s : \t %s" % (k,v)
+        else:
+            print "No information received."
         
 
 
