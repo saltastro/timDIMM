@@ -68,14 +68,17 @@ def wasp():
         doc = p.parse(urllib2.urlopen("http://swaspgateway.suth/", timeout=1).read())
         t = doc.getElementsByTagName("table")[0]
         tds = t.getElementsByTagName("td")
-        wx["Lightning"] = tds[11].firstChild.nodeValue
-        sky, stemp = tds[10].firstChild.nodeValue.split()
-        stemp = stemp[1:-1]
-        wx["Sky"] = sky
-        wx["Sky Temp"] = stemp
+        wx["Temp"] = float(tds[7].firstChild.nodeValue)
+        if tds[10].firstChild.nodeValue == "RAIN":
+            wx["Sky"] = "Rain"
+            wx["Sky Temp"] = wx["Temp"]
+        else:
+            sky, stemp = tds[10].firstChild.nodeValue.split('(')
+            stemp = stemp[0:-1]
+            wx["Sky"] = sky
+            wx["Sky Temp"] = stemp
         wx["T - DP"] = float(tds[9].firstChild.nodeValue)
         wx["RH"] = float(tds[8].firstChild.nodeValue)
-        wx["Temp"] = float(tds[7].firstChild.nodeValue)
         tds[6].normalize()
         wx["Wind Dir"] = tds[6].firstChild.nodeValue[1:]
         wx["Wind Speed"] = float(tds[5].firstChild.nodeValue)
@@ -85,8 +88,8 @@ def wasp():
         else:
             wx["Raining"] = True
         wx["UT"] = tds[3].firstChild.nodeValue.strip()
-        tds[32].normalize()
-        wx["Status"] = tds[32].firstChild.nodeValue.strip()
+        tds[31].normalize()
+        wx["Status"] = tds[31].firstChild.nodeValue.strip()
         return wx
     except:
         return False
