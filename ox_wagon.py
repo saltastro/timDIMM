@@ -11,10 +11,10 @@ import sys
 from binutils import *
 
 class OxWagon:
-   # set a 5 minute power outage delay
-   pwr_delay = "0300"
-   # set a 15 minute watchdog timer delay
-   watch_delay = "0900"
+   # set a 2 minute power outage delay
+   pwr_delay = "0120"
+   # set a 3 minute watchdog timer delay
+   watch_delay = "0180"
 
    # cache the state when status() is queried
    state = {}
