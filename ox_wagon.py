@@ -67,6 +67,7 @@ class OxWagon:
       self.ser = serial.Serial(port, bytesize=7, parity=serial.PARITY_EVEN, timeout=1)
       # use this trick to make sure the CR-LF conversions are handled correctly
       self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser), newline='\r\n')
+      self.sio.flush()
       self.status()
 
    # take a hexadecimal string, build a command out of it by tacking on the delay parameters,
