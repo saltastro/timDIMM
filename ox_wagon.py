@@ -23,6 +23,7 @@ class OxWagon:
    commands = { 'RESET':  "2C008000",
                 'OPEN':   "10428C00",
                 'CLOSE':  "14218000",
+                'MONITOR': "14228C00",
               }
 
    # bit map for the first 16-bit register used to monitor status
@@ -62,7 +63,7 @@ class OxWagon:
                    'Lights On']
 
    # beware, the port may change if the USB-RS232 cable is ever moved to a different port
-   def __init__(self, port="/dev/tty.PL2303-00002006"):
+   def __init__(self, port="/dev/tty.usbserial-A700dz6N"):
       # we use the py27-serial package to implement RS232 communication
       self.ser = serial.Serial(port, bytesize=7, parity=serial.PARITY_EVEN, timeout=1)
       # use this trick to make sure the CR-LF conversions are handled correctly
@@ -87,11 +88,15 @@ class OxWagon:
       resp = self.sio.readline()
       return resp
 
-   # use pre-defined open command to open the ox wagon
+   # use pre-defined command to open the ox wagon completely
    def open(self):
       self.command(self.commands['OPEN'])
 
-   # use pre-defined open command to close the ox wagon
+   # use pre-defined command to open the ox wagon slide roof only
+   def monitor(self):
+      self.command(self.commands['MONITOR'])
+
+   # use pre-defined command to close the ox wagon
    def close(self):
       self.command(self.commands['CLOSE'])
 
