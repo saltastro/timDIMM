@@ -6,6 +6,8 @@ require 'ast_utils'
 s = GTO900.new('massdimm', 7001)
 
 s.clear
+s.clear
+s.clear
 r = s.ra
 d = s.dec
 az = s.az
