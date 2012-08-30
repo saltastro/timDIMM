@@ -8,6 +8,7 @@ mv -f data/* ../timDIMM_data/$1
 mv -f *.log seeing.dat ../timDIMM_data/$1
 mv -f *.fits ../timDIMM_data/$1
 /usr/bin/rsync -av ../timDIMM_data/20* nfs4::seeingdata/massdimm/.
+touch SYNCME
 
 # now rotate skycam data
 mkdir -p /Library/WebServer/Documents/skycam/`date -v -1d +'%Y/%m%d'`/

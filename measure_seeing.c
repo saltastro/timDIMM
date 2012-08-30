@@ -48,7 +48,7 @@ typedef struct _Back {
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
-int boxsize = 15;
+int boxsize = 20;
 /* timdimm values
  double pixel_scale = 1.22;
  double d = 0.060;
@@ -173,7 +173,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
   double  sumy   = 0.0;
   double  sumyy  = 0.0;
   double  val = 0.0;
-  double  gain = 0.7;
+  double  gain = 0.95;
   double  rmom;
   double  dist, dx;
   double nsigma = 3.0;
@@ -434,7 +434,7 @@ int main(int argc, char *argv[]) {
   // set brightness manually.  use relative value in range 0 to 1023.
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_BRIGHTNESS, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
-  err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 200);
+  err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
   printf ("I: brightness is %d\n", 200);
   
@@ -545,7 +545,12 @@ int main(int argc, char *argv[]) {
       box[i].r = boxsize/2.0;
       centroid(buffer, naxes[0], naxes[1], i);
     }
-    
+
+    /* fix both boxes to the same Y */
+    ysum = (box[0].y + box[1].y)/2.0;
+    box[0].y = ysum;
+    box[1].y = ysum; 
+     
     if (box[0].snr < box[1].snr) {
       weight[f] = (box[0].snr/box[0].counts)*(box[0].snr/box[0].counts);
     } else {
@@ -557,11 +562,14 @@ int main(int argc, char *argv[]) {
     }
     
     dist[f] = stardist(0, 1);
-    if (dist[f] > 60.0 || dist[f] < 10.0) {
+    if (dist[f] > 55.0 || dist[f] < 15.0) {
+      weight[f] == 0.0;
+      /* 
       printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
       sleep(3);
       status = -1;
       return(status);
+      */ 
     }
 
     if (box[0].fwhm > 0.0 && box[1].fwhm > 0.0) {
@@ -696,37 +704,41 @@ int main(int argc, char *argv[]) {
   
   printf("Bad samples:  %d for short, %d for long.\n", nbad, nbad_l);
   
-  seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
-  printf("\033[0;33mAirmass corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_short);
-  printf("\033[0;33mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
+  if (nbad < 20) {
+    seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
+    printf("\033[0;33mAirmass corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_short);
+    printf("\033[0;33mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
+    
+    timestr = ctime(&end_sec);
+    gmtime_r(&end_sec, &ut);
+    fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f %f\n", 
+	    ut.tm_year+1900, 
+	    ut.tm_mon+1, 
+	    ut.tm_mday, 
+	    ut.tm_hour, 
+	    ut.tm_min, 
+	    ut.tm_sec, 
+	    var, 
+	    var_l, 
+	    seeing_short, 
+	    seeing_long, 
+	    seeing_ave,
+	    airmass);
   
-  timestr = ctime(&end_sec);
-  gmtime_r(&end_sec, &ut);
-  fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f %f\n", 
-          ut.tm_year+1900, 
-          ut.tm_mon+1, 
-          ut.tm_mday, 
-          ut.tm_hour, 
-          ut.tm_min, 
-          ut.tm_sec, 
-          var, 
-          var_l, 
-          seeing_short, 
-          seeing_long, 
-          seeing_ave,
-          airmass);
-  
-  init = fopen("init_cen_all", "w");
-  for (i=0; i<nboxes; i++) {
-    fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
+    init = fopen("init_cen_all", "w");
+    for (i=0; i<nboxes; i++) {
+      fprintf(init, "%f %f\n", box[i].cenx, box[i].ceny);
+    }
+    fclose(init);
+    init = fopen("seeing.out", "w");
+    fprintf(init, "%.2f\n", seeing_short);
+    fclose(init);
+    init = fopen("r0.out", "w");
+    fprintf(init, "%.1f\n", 100*r0);
+    fclose(init);
+  } else {
+    printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
   }
-  fclose(init);
-  init = fopen("seeing.out", "w");
-  fprintf(init, "%.2f\n", seeing_short);
-  fclose(init);
-  init = fopen("r0.out", "w");
-  fprintf(init, "%.1f\n", 100*r0);
-  fclose(init);
   fclose(cenfile);
   fclose(out);
   
