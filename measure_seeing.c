@@ -436,7 +436,7 @@ int main(int argc, char *argv[]) {
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
-  printf ("I: brightness is %d\n", 200);
+  printf ("I: brightness is %d\n", 100);
   
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
@@ -685,6 +685,9 @@ int main(int argc, char *argv[]) {
   
   var = gsl_stats_wvariance_m(weight, 1, dist, 1, nimages, mean);
   var = var - avesig*avesig;
+  if (var < 0.0) {
+    var = 0.0;
+  }
   seeing_short = seeing(var)/pow(airmass,0.6);
   r0 = old_seeing(var);
   printf("sigma = %f, seeing = %f\n", sqrt(var), seeing_short);
@@ -699,6 +702,9 @@ int main(int argc, char *argv[]) {
   
   var_l = gsl_stats_wvariance_m(weight_l, 1, dist_l, 1, nimages, mean);
   var_l = var_l - avesig*avesig;
+  if (var_l < 0.0) {
+    var_l = 0.0;
+  }
   seeing_long = seeing(var_l)/pow(airmass,0.6);
   printf("sigma_l = %f, seeing_l = %f\n", sqrt(var_l), seeing_long);
   
