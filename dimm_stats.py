@@ -24,5 +24,15 @@ for i in range(len(data)):
     fp.write("%s %s \t  %10.3f \t %7.3f\n" % (date, time, np.mean(data[i]), np.std(data[i])) )
     fp.close()
 
+f1 = data[3]
+f2 = data[12]
+scin1 = ( (f1/f1.mean())**2 ).mean() - 1
+scin2 = ( (f2/f2.mean())**2 ).mean() - 1
+scin12 = ( (f1/f1.mean() - f2/f2.mean())**2 ).mean()
+
+fp = open("Scin.dat", 'a')
+fp.write("%s %s \t  %6.3f \t %6.3f \t %6.3f\n" % (date, time, scin1, scin2, scin12))
+fp.close()
+
 out.close()
 
