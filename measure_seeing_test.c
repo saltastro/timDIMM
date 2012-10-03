@@ -280,8 +280,8 @@ int add_gaussian(char *buffer, float cenx, float ceny, float a, float sigma) {
   xoff = 2.0*drand48() - 1.0;
   yoff = 2.0*drand48() - 1.0;
   
-  cenx += 0.5*xoff;
-  ceny += 0.5*yoff;
+  // cenx += 0.5*xoff;
+  // ceny += 0.5*yoff;
   
   size = 30;
   low_x = (int)(cenx-size);
@@ -436,7 +436,7 @@ int main(int argc, char *argv[]) {
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
-  printf ("I: brightness is %d\n", 100);
+  printf ("I: brightness is %d\n", 200);
   
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
@@ -522,13 +522,13 @@ int main(int argc, char *argv[]) {
   grab_frame(camera, buffer2, nelements*sizeof(char));
   grab_frame(camera, buffer2, nelements*sizeof(char));
   grab_frame(camera, buffer2, nelements*sizeof(char));
-  // add_gaussian(buffer2, 195.0, 130.0, 140.0, 1.5);
-  // add_gaussian(buffer2, 140.0, 115.0, 140.0, 1.5);
+  add_gaussian(buffer2, 175.0, 120.0, 30.0, 1.0);
+  add_gaussian(buffer2, 140.0, 118.0, 30.0, 1.0);
   
   for (f=0; f<nimages; f++) {
     grab_frame(camera, buffer, nelements*sizeof(char));
-    // add_gaussian(buffer, 195.0, 130.0, 140.0, 1.5);
-    // add_gaussian(buffer, 140.0, 115.0, 140.0, 1.5);
+    add_gaussian(buffer, 175.0, 120.0, 30.0, 1.0);
+    add_gaussian(buffer, 140.0, 118.0, 30.0, 1.0);
     
     // find center of star images and calculate background
     xsum = 0.0;
@@ -684,10 +684,7 @@ int main(int argc, char *argv[]) {
   printf("\n");
   
   var = gsl_stats_wvariance_m(weight, 1, dist, 1, nimages, mean);
-  var = var - avesig*avesig;
-  if (var < 0.0) {
-    var = 0.0;
-  }
+  //var = var - avesig*avesig;
   seeing_short = seeing(var)/pow(airmass,0.6);
   r0 = old_seeing(var);
   printf("sigma = %f, seeing = %f\n", sqrt(var), seeing_short);
@@ -701,16 +698,13 @@ int main(int argc, char *argv[]) {
   printf("\n");
   
   var_l = gsl_stats_wvariance_m(weight_l, 1, dist_l, 1, nimages, mean);
-  var_l = var_l - avesig*avesig;
-  if (var_l < 0.0) {
-    var_l = 0.0;
-  }
+  //var_l = var_l - avesig*avesig;
   seeing_long = seeing(var_l)/pow(airmass,0.6);
   printf("sigma_l = %f, seeing_l = %f\n", sqrt(var_l), seeing_long);
   
   printf("Bad samples:  %d for short, %d for long.\n", nbad, nbad_l);
   
-  if (nbad < 50) {
+  if (nbad < 20) {
     seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
     printf("\033[0;33mAirmass corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_short);
     printf("\033[0;33mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
