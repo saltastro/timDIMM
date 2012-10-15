@@ -5,58 +5,36 @@ import sys
 import html5lib
 import urllib2
 import xml.dom.minidom
+import numpy as np
+from xml_icd import *
 
 from html5lib import treebuilders
 
 def salt():
     wx = {}
-    dbl = {}
-    st = {}
-    bol = {}
     try:
-        url = "http://sgs.salt/xml/salt-tcs-icd.xml"
-        doc = xml.dom.minidom.parse(urllib2.urlopen(url, timeout=1))
-        doubles = doc.getElementsByTagName("DBL")
-        strings = doc.getElementsByTagName("String")
-        bools = doc.getElementsByTagName("Boolean")
-        arrays = doc.getElementsByTagName("Array")
-        temps = arrays[0].getElementsByTagName("DBL")
-        temp = 0
-        n = 0
-        for t in temps:
-            val = float(t.getElementsByTagName("Val")[0].firstChild.nodeValue)
-            temp = temp + val
-            n = n + 1
-        temp = temp/n
-        wx["Temp"] = temp
-        for d in doubles:
-            key = d.getElementsByTagName("Name")[0].firstChild.nodeValue
-            val = float(d.getElementsByTagName("Val")[0].firstChild.nodeValue)
-            dbl[key] = val
-        for s in strings:
-            key = s.getElementsByTagName("Name")[0].firstChild.nodeValue
-            if s.getElementsByTagName("Val")[0].firstChild:
-                val = s.getElementsByTagName("Val")[0].firstChild.nodeValue
-                st[key] = val
-        for b in bools:
-            key = b.getElementsByTagName("Name")[0].firstChild.nodeValue
-            val = int(b.getElementsByTagName("Val")[0].firstChild.nodeValue)
-            if val == 0:
-                bol[key] = False
-            else:
-                bol[key] = True
+        tcs = parseICD("http://sgs.salt/xml/salt-tcs-icd.xml")
+        time = tcs['tcs xml time info']
+        bms = tcs['bms external conditions']
+        temps = np.array(bms['Temperatures'])
 
-        wx["SAST"] = st["SAST"].split()[1]
-        wx["Date"] = st["SAST"].split()[0]
-        wx["Air Pressure"] = dbl["Air pressure"]*10.0
-        wx["Dewpoint"] = dbl["Dewpoint"]
-        wx["RH"] = dbl["Rel Humidity"]
-        wx["Wind Speed (30m)"] = dbl["Wind mag 30m"]*3.6
-        wx["Wind Speed"] = dbl["Wind mag 10m"]*3.6
-        wx["Wind Dir (30m)"] = dbl["Wind dir 30m"]
-        wx["Wind Dir"] = dbl["Wind dir 10m"]
-        wx["T - DP"] = temp - dbl["Dewpoint"]
-        wx["Raining"] = bol["Rain detected"]
+        # get temps and take median of the BMS output of 7 values
+        wx["Temp"] = np.median(temps)
+
+        # get time
+        wx["SAST"] = time["SAST"].split()[1]
+        wx["Date"] = time["SAST"].split()[0]
+
+        # set up other values of interest
+        wx["Air Pressure"] = bms["Air pressure"]*10.0
+        wx["Dewpoint"] = bms["Dewpoint"]
+        wx["RH"] = bms["Rel Humidity"]
+        wx["Wind Speed (30m)"] = bms["Wind mag 30m"]*3.6
+        wx["Wind Speed"] = bms["Wind mag 10m"]*3.6
+        wx["Wind Dir (30m)"] = bms["Wind dir 30m"]
+        wx["Wind Dir"] = bms["Wind dir 10m"]
+        wx["T - DP"] = wx["Temp"] - bms["Dewpoint"]
+        wx["Raining"] = bms["Rain detected"]
         return wx
     except:
         return False
