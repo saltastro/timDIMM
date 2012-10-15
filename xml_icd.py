@@ -113,12 +113,20 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
         # loop through the ints
         for i in ints:
             (key, val) = parseElement(i)
-            tcs[cls_name][key] = int(val)
+            if val:
+                tcs[cls_name][key] = int(val)
+            else:
+                tcs[cls_name][key] = None
 
         # loop through the floats
         for f in floats:
             (key, val) = parseElement(f)
-            tcs[cls_name][key] = float(val)
+            # temperatures have tagNames of Numeric so ignore
+            if key != "Numeric":
+                if val:
+                    tcs[cls_name][key] = float(val)
+                else:
+                    tcs[cls_name][key] = None
 
         # loop through the strings
         for s in strings:
@@ -128,10 +136,12 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
         # loop through the bools
         for b in bools:
             (key, val) = parseElement(b)
-            if val:
-                tcs[cls_name][key] = bool(int(val))
-            else:
-                tcs[cls_name][key] = False
+            # lamp power status is an array of Booleans.  make sure those tagNames are ignored.
+            if key != "Boolean":
+                if val:
+                    tcs[cls_name][key] = bool(int(val))
+                else:
+                    tcs[cls_name][key] = False
 
         # loop through the EW elements and make them into ICD_EW objects
         for l in lists:
@@ -151,13 +161,16 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
             abools = a.getElementsByTagName("Boolean")
             for i in aints:
                 (k, v) = parseElement(i)
-                vals.append(int(v))
+                if v:
+                    vals.append(int(v))
             for f in afloats:
                 (k, v) = parseElement(f)
-                vals.append(float(v))
+                if v:
+                    vals.append(float(v))
             for s in astrings:
                 (k, v) = parseElement(s)
-                vals.append(str(v))
+                if v:
+                    vals.append(str(v))
             for b in abools:
                 (k, v) = parseElement(b)
                 if v:
