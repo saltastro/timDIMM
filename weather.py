@@ -5,7 +5,7 @@ import sys
 import html5lib
 import urllib2
 import xml.dom.minidom
-import numpy as np
+from numpy import median, array
 from xml_icd import *
 
 from html5lib import treebuilders
@@ -16,10 +16,10 @@ def salt():
         tcs = parseICD("http://sgs.salt/xml/salt-tcs-icd.xml")
         time = tcs['tcs xml time info']
         bms = tcs['bms external conditions']
-        temps = np.array(bms['Temperatures'])
+        temps = array(bms['Temperatures'])
 
         # get temps and take median of the BMS output of 7 values
-        wx["Temp"] = np.median(temps)
+        wx["Temp"] = median(temps)
 
         # get time
         wx["SAST"] = time["SAST"].split()[1]
