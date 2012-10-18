@@ -25,7 +25,7 @@ class ICD_EW:
     ICD_EW(choices, index)
 
     Create an ICD_EW object from an array of choices and an index. The choices
-    and index come from an <EW> tag in SALT's XML ICD.  An example:
+    and index come from an <EW> Enum tag in SALT's XML ICD.  An example:
     <EW>
       <Name>tcs mode</Name>
       <Choice>OFF</Choice>
@@ -66,6 +66,15 @@ class ICD_EW:
         else:
             self.val = None
 
+def safeType(x, typ):
+    """
+    need some way to take a type as an argument and safely transform first argument into it
+    """
+    try:
+        return typ(x)
+    except:
+        return None
+
 def parseElement(e):
     """
     almost every element has a Name and a Val so pull these out and handle null Vals
@@ -80,7 +89,7 @@ def parseElement(e):
 def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
     """
     parser to take the XML ICD and turn it into a dict of clusters.  each cluster in turn is a
-    dict of values within the cluster.  the values can be in one of five different data types:
+    dict of values within the cluster.  the values can be in one of six different data types:
        U32 - mapped to a python int
        DBL - mapped to a python float
        String - left as python unicode
@@ -93,8 +102,19 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
     # the root element will be a Cluster containing all other clusters
     root = doc.getElementsByTagName("Cluster")[0]
 
+    # main dict we'll populate and return
     tcs = {}
 
+    # easy types where we just turn a string into the type we want, safely
+    types = ["U32", "DBL", "String", "Boolean"]
+    lambdas = [lambda x: safeType(x, int),
+               lambda x: safeType(x, float),
+               lambda x: safeType(x, str),
+               lambda x: safeType(safeType(x, int), bool),
+               ]
+    simples = zip(types, lambdas)
+
+    # get clusters
     clusters = root.getElementsByTagName("Cluster")
 
     # loop through each cluster
@@ -102,46 +122,18 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
         cls_name = cluster.getElementsByTagName("Name")[0].firstChild.data
         tcs[cls_name] = {}
 
-        # pull out the six datatypes we handle. 
-        ints = cluster.getElementsByTagName("U32")
-        floats = cluster.getElementsByTagName("DBL")
-        strings = cluster.getElementsByTagName("String")
-        bools = cluster.getElementsByTagName("Boolean")
+        # pull out the complex datatypes we handle differently. 
         lists = cluster.getElementsByTagName("EW")
         arrays = cluster.getElementsByTagName("Array")
 
-        # loop through the ints
-        for i in ints:
-            (key, val) = parseElement(i)
-            if val:
-                tcs[cls_name][key] = int(val)
-            else:
-                tcs[cls_name][key] = None
-
-        # loop through the floats
-        for f in floats:
-            (key, val) = parseElement(f)
-            # temperatures have tagNames of Numeric so ignore
-            if key != "Numeric":
-                if val:
-                    tcs[cls_name][key] = float(val)
-                else:
-                    tcs[cls_name][key] = None
-
-        # loop through the strings
-        for s in strings:
-            (key, val) = parseElement(s)
-            tcs[cls_name][key] = str(val)
-
-        # loop through the bools
-        for b in bools:
-            (key, val) = parseElement(b)
-            # lamp power status is an array of Booleans.  make sure those tagNames are ignored.
-            if key != "Boolean":
-                if val:
-                    tcs[cls_name][key] = bool(int(val))
-                else:
-                    tcs[cls_name][key] = False
+        # go through the simple data types
+        for s in simples:
+            typ = s[0]
+            func = s[1]
+            tags = cluster.getElementsByTagName(typ)
+            for t in tags:
+                (key, val) = parseElement(t)
+                tcs[cls_name][key] = func(val)
 
         # loop through the EW elements and make them into ICD_EW objects
         for l in lists:
@@ -149,36 +141,30 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
             choices = []
             for c in l.getElementsByTagName("Choice"):
                 choices.append(c.firstChild.data)
-            tcs[cls_name][key] = ICD_EW(choices, int(val))
+            tcs[cls_name][key] = ICD_EW(choices, safeType(val, int))
 
         # loop through the arrays
         for a in arrays:
             key = a.getElementsByTagName("Name")[0].firstChild.data
+            # pull this out since we need it for clean-up
+            tag = a.getElementsByTagName("Name")[1].firstChild.data
             vals = []
-            aints = a.getElementsByTagName("U32")
-            afloats = a.getElementsByTagName("DBL")
-            astrings = a.getElementsByTagName("String")
-            abools = a.getElementsByTagName("Boolean")
-            for i in aints:
-                (k, v) = parseElement(i)
-                if v:
-                    vals.append(int(v))
-            for f in afloats:
-                (k, v) = parseElement(f)
-                if v:
-                    vals.append(float(v))
-            for s in astrings:
-                (k, v) = parseElement(s)
-                if v:
-                    vals.append(str(v))
-            for b in abools:
-                (k, v) = parseElement(b)
-                if v:
-                    vals.append(bool(int(v)))
-                else:
-                    vals.append(False)
+            for s in simples:
+                typ = s[0]
+                func = s[1]
+                tags = a.getElementsByTagName(typ)
+                for t in tags:
+                    (k, v) = parseElement(t)
+                    vals.append(func(v))
+
             tcs[cls_name][key] = vals
             
+            # getElementsByTagName is fully recursive so Arrays generate spurious entries to the
+            # dict of the cluster. e.g., 'lamp power' Array creates an entry called 'Boolean' and
+            # 'Temperatures' one called 'Numeric'. use the tag we pulled out to remove it if it's there.
+            try:
+                del tcs[cls_name][tag]
+            except:
+                pass
+            
     return tcs
-
-
