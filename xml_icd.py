@@ -128,8 +128,7 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
 
         # go through the simple data types
         for s in simples:
-            typ = s[0]
-            func = s[1]
+            (typ, func) = s
             tags = cluster.getElementsByTagName(typ)
             for t in tags:
                 (key, val) = parseElement(t)
@@ -150,8 +149,7 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
             tag = a.getElementsByTagName("Name")[1].firstChild.data
             vals = []
             for s in simples:
-                typ = s[0]
-                func = s[1]
+                (typ, func) = s
                 tags = a.getElementsByTagName(typ)
                 for t in tags:
                     (k, v) = parseElement(t)
