@@ -3,7 +3,7 @@
 require 'GTO900'
 require 'ast_utils'
 
-scope = GTO900.new('massdimm.suth', 7001)
+scope = GTO900.new('localhost', 7001)
 
 alt = scope.alt
 az = scope.az

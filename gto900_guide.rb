@@ -3,7 +3,7 @@
 require 'GTO900'
 require 'ast_utils'
 
-scope = GTO900.new('massdimm.suth', 7001)
+scope = GTO900.new('localhost', 7001)
 
 lines = IO.readlines("init_cen_all")
 

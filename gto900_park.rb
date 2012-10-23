@@ -3,7 +3,7 @@
 require 'GTO900'
 require 'ast_utils'
 
-s = GTO900.new('massdimm', 7001)
+s = GTO900.new('localhost', 7001)
 
 s.clear
 s.shutdown

@@ -8,7 +8,7 @@ ra, dec = `precess.py #{ARGV[0]} #{ARGV[1]}`.split(' ')
 ra_deg = 15.0*hms2deg(ra)
 dec_deg = hms2deg(dec)
 
-s = GTO900.new('massdimm', 7001)
+s = GTO900.new('localhost', 7001)
 
 s.clear
 

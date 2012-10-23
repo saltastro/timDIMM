@@ -5,7 +5,7 @@ require 'ast_utils'
 
 dir = ARGV[0]
 
-s = GTO900.new('massdimm', 7001)
+s = GTO900.new('localhost', 7001)
 
 s.clear
 s.set_center_rate(2)

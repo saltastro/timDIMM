@@ -4,7 +4,7 @@ require 'GTO900'
 require 'ast_utils'
 require 'turbina'
 require 'timeout'
-require 'weather'
+require 'OLD/weather'
 
 include Weather
 
@@ -48,7 +48,7 @@ else
 end
 
 sleep(2)
-s = GTO900.new('massdimm', 7001)
+s = GTO900.new('localhost', 7001)
 #t = Turbina.new
 
 best_hr = ""
