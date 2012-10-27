@@ -15,7 +15,7 @@ def check_turbina(tb)
   }
   if stat =~ /READY/
     puts tb.run
-    elsif stat =~ /OFFLINE/
+  elsif stat =~ /OFFLINE/
     puts tb.reboot
   end
 end
@@ -49,7 +49,12 @@ end
 
 sleep(2)
 s = GTO900.new('localhost', 7001)
-#t = Turbina.new
+t = Turbina.new
+
+temp = t.temperature
+puts "\033[0;32mMASS Temperature: %s\033[0;39m" % temp
+flux = t.flux
+puts "\033[0;32mMASS Flux: %s\033[0;39m" % flux
 
 best_hr = ""
 
@@ -67,7 +72,7 @@ sleep(1)
 # add logic here to avoid the weather mast
 if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 300.0)
   puts "Fine to stay here."
-#  check_turbina(t)
+  check_turbina(t)
 else 
 
   best_hrs = best_star(lst)
@@ -82,27 +87,23 @@ else
 
     # put plenty of sleeps in to make sure nothing trips...  
     puts "Should move. Best HR number is #{best_hr}"
-#    puts t.stop
+    puts t.stop
     system("./gto900_hr.rb #{best_hr}")
     system("echo \"#{best_hr}\" > current_object")
-#    puts t.object(best_hr)
-#    sleep(3)
-#    system("./gto900_offset.rb s")
-#    sleep(3)
-#    system("./gto900_offset.rb w")
-#    sleep(3)
-#    t.background
-#    sleep(10)
-#    system("./gto900_hr.rb #{best_hr}")
+    puts t.object(best_hr)
     sleep(3)
-    #  system("./spiral_search_gto900.py")
-    #  sleep(3)
-    #  system("./gto900_guide.rb")
-    #  sleep(3)
-#    puts t.run
+    system("./gto900_offset.rb s")
+    sleep(3)
+    system("./gto900_offset.rb w")
+    sleep(3)
+    t.background
+    system("./gto900_hr.rb #{best_hr}")
+    sleep(2)
+    puts t.flux
+    puts t.run
   else
     puts "No better stars available.  Staying put...."
-#    check_turbina(t)
+    check_turbina(t)
   end
 
 end

@@ -1,9 +1,9 @@
 #!/bin/sh
 cd /Users/timdimm/MASSDIMM/timDIMM
 ./ox_wagon.py CLOSE
-#./turbina.rb stop
+./turbina.rb stop_now 
 ./gto900_park.rb
-#./turbina.rb park
+./turbina.rb park
 sleep 2
 ./gto900_init.rb
 
