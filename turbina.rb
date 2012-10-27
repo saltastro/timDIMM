@@ -9,7 +9,7 @@ require 'socket'
 class Turbina
   def initialize
     @status = "OFFLINE"
-    @port = sockopen('massdimm.suth', 16007)
+    @port = sockopen('massdimm.suth', 16201)
     status
   end
 
@@ -134,15 +134,31 @@ class Turbina
     end
   end
 
+  def test_flux
+    command("run flux")
+    resp = read
+    if resp
+       wait = resp.to_i
+       puts "Running flux measurement...."
+       sleep(wait)
+       puts "....done."
+       read
+       return flux
+    else
+       return @status
+    end
+  end
+
   def background
-    command("run scen1")
+    command("run background")
     resp = read
     if resp
       wait = resp.to_i
       puts "Running background measurement...."
       sleep(10)
       puts "....done."
-      return read
+      read
+      return flux
     else
       return @status
     end
@@ -151,6 +167,48 @@ class Turbina
   def object(star)
     command("set object=#{star.to_s}")
     return read
+  end
+
+  def dtest
+    command("run dtest")
+    resp = read
+    if resp
+       wait = resp.to_i
+       puts "Running detector test...."
+       sleep(wait)
+       puts "....done."
+       return @port.gets
+    else
+       return @status
+    end
+  end
+
+  def etest
+    command("run etest")
+    resp = read
+    if resp
+       wait = resp.to_i
+       puts "Running exchange test...."
+       sleep(wait)
+       puts "....done."
+       return @port.gets
+    else
+       return @status
+    end
+  end
+
+  def stest
+    command("run stest")
+    resp = read
+    if resp
+       wait = resp.to_i
+       puts "Running statistics test...."
+       sleep(wait)
+       puts "....done."
+       return @port.gets
+    else
+       return @status
+    end
   end
 
   def park
@@ -179,23 +237,45 @@ class Turbina
   end
 
   def flux
-    get("flux")
+    command("get flux")
+    return @port.gets
   end
 
-  def lprofile
-    get("lprofile")
+  def data
+    command("get data")
+    return @port.gets
   end
 
-  def integral
-    get("integral")
+  def temperature
+    get("temperature")
   end
 
-  def scind
-    get("scind")
+  def hv
+    get("hv")
   end
 
-  def bkgr
-    get("bkgr")
+  def set_hv(sw)
+    if sw == "on" or sw == "off"
+       command("set hv=#{sw}")
+    end
+  end
+
+  def mirror
+    get("mirror")
+  end
+
+  def illum
+    get("illum")
+  end
+
+  def set_illum(sw)
+    if sw == "on" or sw == "off"
+       command("set illum=#{sw}")
+    end
+  end
+
+  def light
+    get("light")
   end
 
   def ident

@@ -17,7 +17,7 @@ def daofind(im):
 
     smooth = nd.gaussian_filter(im, 2.0)
     
-    clip = smooth >= (mean + 0.6)
+    clip = smooth >= (mean + 1.0)
     labels, num = nd.label(clip)
     pos = nd.center_of_mass(im, labels, range(num+1))
     print num 
