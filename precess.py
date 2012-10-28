@@ -20,4 +20,3 @@ star = ephem.readdb("HR,f|V|A0," + ra + "," + dec + ",10.0,2000")
 star.compute(salt)
 
 print star.ra, star.dec
-

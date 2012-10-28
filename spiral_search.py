@@ -8,13 +8,13 @@ import LX200
 from LX200.LX200Utils import *
 from find_boxes import *
 
+
 def check_image():
     os.system("./ave_frames 3 \!spiral.fits")
     os.system("cat spiral.fits | xpaset timDIMM fits")
     hdu = rfits("spiral.fits")
     image = hdu.data
     n, stars = daofind(image)
-    
     if n == 2:
         print "Found the stars!"
         return True
@@ -22,25 +22,30 @@ def check_image():
         print "No dice."
         return False
 
+
 def stop(s):
     s.AbortSlew()
     s.AbortSlew()
     time.sleep(2)
-    
+
+
 def plus_x(s):
     s.move_West()
     time.sleep(0.4)
     stop(s)
+
 
 def minus_x(s):
     s.move_East()
     time.sleep(0.4)
     stop(s)
 
+
 def plus_y(s):
     s.move_North()
     time.sleep(0.2)
     stop(s)
+
 
 def minus_y(s):
     s.move_South()
@@ -68,7 +73,7 @@ else:
         for i in range(n):
             y = y - 1
             minus_y(scope)
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d,%d)" % (x, y)
             if check_image():
                 has_stars = True
                 break
@@ -80,7 +85,7 @@ else:
         for i in range(n):
             x = x + 1
             plus_x(scope)
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d,%d)" % (x, y)
             if check_image():
                 has_stars = True
                 break
@@ -94,7 +99,7 @@ else:
         for i in range(n):
             y = y + 1
             plus_y(scope)
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d,%d)" % (x, y)
             if check_image():
                 stars = True
                 break
@@ -106,7 +111,7 @@ else:
         for i in range(n):
             x = x - 1
             minus_x(scope)
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d,%d)" % (x, y)
             if check_image():
                 stars = True
                 break
@@ -119,4 +124,3 @@ print "Found stars after %d iterations." % n
 
 time.sleep(2)
 port.close()
-

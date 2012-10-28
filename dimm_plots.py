@@ -9,9 +9,11 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as dates
 import datetime
 
+
 def converttime(date, time):
-    s="%s %s" % (date,time)
-    return datetime.datetime.strptime(s,"%Y%m%d %H%M%S")
+    s = "%s %s" % (date, time)
+    return datetime.datetime.strptime(s, "%Y%m%d %H%M%S")
+
 
 def format_time(x, pos=None):
     return dates.num2date(x).strftime('%H')
@@ -33,11 +35,11 @@ for i in range(len(lines1)):
     ut = converttime(d1[0], d1[1])
     time.append([ut])
 
-    flux.append([float(d1[2])+float(d2[2])])
-    std.append([sqrt(float(d1[3])**2 + float(d2[3])**2)])
+    flux.append([float(d1[2]) + float(d2[2])])
+    std.append([sqrt(float(d1[3]) ** 2 + float(d2[3]) ** 2)])
 
 ut = array(time)
-mag = -2.5*np.log10(array(flux)) + 7.4
+mag = -2.5 * np.log10(array(flux)) + 7.4
 std1 = array(std)
 
 

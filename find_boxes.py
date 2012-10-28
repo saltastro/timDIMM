@@ -6,21 +6,21 @@ import numpy as np
 import scipy.ndimage as nd
 import pyfits
 
+
 def rfits(file):
     f = pyfits.open(file, memmap=True)
     hdu = f[0]
     return hdu
 
+
 def daofind(im):
     mean = np.mean(im)
     sig = np.std(im)
-
     smooth = nd.gaussian_filter(im, 2.0)
-    
     clip = smooth >= (mean + 1.0)
     labels, num = nd.label(clip)
-    pos = nd.center_of_mass(im, labels, range(num+1))
-    print num 
+    pos = nd.center_of_mass(im, labels, range(num + 1))
+    print num
     return num, pos[1:]
 
 
@@ -39,11 +39,13 @@ if __name__ == '__main__':
             (y, x) = star
             xsum += x
             ysum += y
-            output.write("%8.3f   %8.3f\n" % (x,y))
+            output.write("%8.3f   %8.3f\n" % (x, y))
         output.close()
-        x = xsum/2
-        y = ysum/2
-        if np.abs(x-160.0) < 20 and np.abs(y-120.0) < 20 and os.path.exists("SYNCME"):
+        x = xsum / 2
+        y = ysum / 2
+        if np.abs(x - 160.0) < 20 and \
+               np.abs(y - 120.0) < 20 and \
+               os.path.exists("SYNCME"):
             print "\033[0;32mSYNCING TARGET!\033[0;39m"
             os.system("sync")
             os.system("rm SYNCME")
@@ -54,4 +56,3 @@ if __name__ == '__main__':
         output.write("160.0   120.0\n")
         output.write("198.0   120.0\n")
         output.close()
-

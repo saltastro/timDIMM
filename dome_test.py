@@ -1,7 +1,14 @@
 import serial
 from time import sleep
 
-port=serial.Serial('/dev/ttyS0',9600,parity='N',bytesize=8,stopbits=1,rtscts=0,xonxoff=0,timeout=1) 
+port=serial.Serial("/dev/ttyS0",
+                   9600,
+                   parity = "N",
+                   bytesize = 8,
+                   stopbits = 1,
+                   rtscts = 0,
+                   xonxoff = 0,
+                   timeout = 1)
 
 port.write('c')        # Get dome status
 print port.readline()

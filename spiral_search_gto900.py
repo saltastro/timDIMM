@@ -6,6 +6,7 @@ import sys
 import numpy as np
 from find_boxes import *
 
+
 def check_image():
     os.system("./ave_frames 10 \!spiral.fits")
     os.system("cat spiral.fits | xpaset timDIMM fits")
@@ -20,14 +21,18 @@ def check_image():
         print "No dice."
         return False
 
+
 def plus_x():
     os.system("./gto900_nudge.rb s")
+
 
 def minus_x():
     os.system("./gto900_nudge.rb n")
 
+
 def plus_y():
     os.system("./gto900_nudge.rb e")
+
 
 def minus_y():
     os.system("./gto900_nudge.rb w")
@@ -47,7 +52,7 @@ else:
         for i in range(n):
             y = y + 1
             plus_y()
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d, %d)" % (x, y)
             if check_image():
                 has_stars = True
                 break
@@ -58,7 +63,7 @@ else:
         for i in range(n):
             x = x - 1
             minus_x()
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d, %d)" % (x, y)
             if check_image():
                 has_stars = True
                 break
@@ -71,7 +76,7 @@ else:
         for i in range(n):
             y = y - 1
             minus_y()
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d, %d)" % (x, y)
             if check_image():
                 has_stars = True
                 break
@@ -82,7 +87,7 @@ else:
         for i in range(n):
             x = x + 1
             plus_x()
-            print "At (x,y) = (%d,%d)" % (x,y)
+            print "At (x, y) = (%d, %d)" % (x, y)
             if check_image():
                 has_stars = True
                 break
