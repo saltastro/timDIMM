@@ -163,8 +163,8 @@ if __name__ == '__main__':
     else:
         if sys.argv[1].lower() == 'status':
             state = o.status()
-        for k, v in state.items():
-            print "%30s : \t %s" % (k, v)
+            for k, v in state.items():
+                print "%30s : \t %s" % (k, v)
         else:
             # eval is your friend!
             eval("o.%s()" % sys.argv[1].lower())
