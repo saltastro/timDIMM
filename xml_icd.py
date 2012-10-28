@@ -2,7 +2,8 @@
 """
                                xml_icd
 
-a collection of classes and functions for parsing the XML produced by SALT's TCS ICD.
+a collection of classes and functions for parsing the XML produced by SALT's
+TCS ICD.
 
 Author                     Version             Date
 --------------------------------------------------------
@@ -19,6 +20,7 @@ Updates
 import xml
 import urllib2
 import xml.dom.minidom
+
 
 class ICD_EW:
     """
@@ -53,7 +55,7 @@ class ICD_EW:
     ICD_EW.choices - list of choices (as input)
     ICD_EW.index - index of current choice (as input)
     ICD_EW.val - choice denoted by provided index
-    
+
     """
     def __init__(self, choices, index):
         self.choices = choices
@@ -66,18 +68,22 @@ class ICD_EW:
         else:
             self.val = None
 
+
 def safeType(x, typ):
     """
-    need some way to take a type as an argument and safely transform first argument into it
+    need some way to take a type as an argument and safely transform
+    first argument into it
     """
     try:
         return typ(x)
     except:
         return None
 
+
 def parseElement(e):
     """
-    almost every element has a Name and a Val so pull these out and handle null Vals
+    almost every element has a Name and a Val so pull these out and
+    handle null Vals
     """
     k = e.getElementsByTagName("Name")[0].firstChild.data
     if e.getElementsByTagName("Val")[0].firstChild:
@@ -86,10 +92,12 @@ def parseElement(e):
         v = None
     return (k, v)
 
+
 def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
     """
-    parser to take the XML ICD and turn it into a dict of clusters.  each cluster in turn is a
-    dict of values within the cluster.  the values can be in one of six different data types:
+    parser to take the XML ICD and turn it into a dict of clusters.
+    each cluster in turn is a dict of values within the cluster.
+    the values can be in one of six different data types:
        U32 - mapped to a python int
        DBL - mapped to a python float
        String - left as python unicode
@@ -97,7 +105,7 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
        EW - mapped to a ICD_EW object defined here
        Array - mapped to a python list
     """
-    doc = xml.dom.minidom.parse(urllib2.urlopen(url, timeout=1))
+    doc = xml.dom.minidom.parse(urllib2.urlopen(url, timeout=3))
 
     # the root element will be a Cluster containing all other clusters
     root = doc.getElementsByTagName("Cluster")[0]
@@ -122,7 +130,7 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
         cls_name = cluster.getElementsByTagName("Name")[0].firstChild.data
         tcs[cls_name] = {}
 
-        # pull out the complex datatypes we handle differently. 
+        # pull out the complex datatypes we handle differently.
         lists = cluster.getElementsByTagName("EW")
         arrays = cluster.getElementsByTagName("Array")
 
@@ -156,13 +164,15 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
                     vals.append(func(v))
 
             tcs[cls_name][key] = vals
-            
-            # getElementsByTagName is fully recursive so Arrays generate spurious entries to the
-            # dict of the cluster. e.g., 'lamp power' Array creates an entry called 'Boolean' and
-            # 'Temperatures' one called 'Numeric'. use the tag we pulled out to remove it if it's there.
+
+            # getElementsByTagName is fully recursive so Arrays generate
+            # spurious entries to the dict of the cluster. e.g.,
+            # 'lamp power' Array creates an entry called 'Boolean' and
+            # 'Temperatures' one called 'Numeric'. use the tag we pulled
+            # out to remove it if it's there.
             try:
                 del tcs[cls_name][tag]
             except:
                 pass
-            
+
     return tcs
