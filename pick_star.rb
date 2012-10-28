@@ -99,7 +99,6 @@ else
     t.background
     system("./gto900_hr.rb #{best_hr}")
     sleep(2)
-    puts t.flux
     puts t.run
   else
     puts "No better stars available.  Staying put...."
