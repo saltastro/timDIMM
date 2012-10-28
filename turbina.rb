@@ -165,7 +165,15 @@ class Turbina
   end
 
   def object(star)
-    command("set object=#{star.to_s}")
+    star = star.to_s
+    dat = `grep "^ *#{star}" star.lst`.split(' ')
+    str = [dat[0],
+           dat[1..2].join('_'),
+           dat[3..5],
+           dat[6..7].join(),
+           dat[8..12]].join(' ')
+    puts str
+    command("set object=\"#{str}\"")
     return read
   end
 
