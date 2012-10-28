@@ -125,6 +125,16 @@ class Turbina
   end
 
   def run
+    command("run scenario=100*N")
+    resp = read
+    if resp
+      return resp
+    else
+      return @status
+    end
+  end
+
+  def run_once
     command("run")
     resp = read
     if resp
