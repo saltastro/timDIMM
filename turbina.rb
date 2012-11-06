@@ -319,4 +319,5 @@ if $0 == __FILE__
   end
   out = eval cmd
   puts "Turbina: " + out.to_s
+  t.close
 end
