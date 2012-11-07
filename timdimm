@@ -9,19 +9,9 @@ def run(program, *args):
        os.execvp(program, (program,) + args)
     return pid
 
-def killvnc(b, pid):
-    print "\nKilling vncviewer process #%d\n" % pid
-    os.system("kill -9 %d" % pid)
-    os.system("killall vncviewer")
-    b.config(relief=RAISED)
-    b.config(text="VNC to MASS computer")
-    b.config(command=lambda c=b: runvnc(c))
-    
-def runvnc(b):
-    pid = run("./vnc.sh")
-    b.config(relief=SUNKEN)
-    b.config(text="Kill VNC")
-    b.config(command=lambda but=b,p=pid: killvnc(but, p))
+def massreboot(b):
+    print "Sending shutdown to MASS computer..."
+    os.system("ssh massdimm@massdimm \"sudo shutdown -r now\"")
 
 def park(b, pid):
     b.config(state=DISABLED)
@@ -79,9 +69,9 @@ root.geometry("200x250+100+0")
 frame = Frame(root)
 frame.pack()
 
-vnc = Button(frame, text="VNC to MASS computer")
-vnc.pack(padx=10, pady=5, fill=X)
-vnc.config(command=lambda b=vnc: runvnc(b))
+reboot = Button(frame, text="Reboot MASS Computer")
+reboot.pack(padx=10, pady=5, fill=X)
+reboot.config(command=lambda b=reboot: massreboot(b))
 
 ds9 = Button(frame, text="DS9")
 ds9.pack(padx=10, pady=5, fill=X)

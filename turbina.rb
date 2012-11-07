@@ -13,14 +13,13 @@ class Turbina
     status
   end
 
-  # wrapper for opening socket and dealing with timeouts
-  def sockopen(host, port)
-    socket = nil
+  # method for wrapping a bit of code into a timeout
+  def turbina_timeout(t, code)
     msg = nil
-    timeout = 5.0
+    result = nil
     begin
-      timeout(5) {
-        socket = TCPSocket.open(host, port)
+      timeout(t) {
+        result = code.call
         @status = "ONLINE"
       }
     rescue TimeoutError
@@ -34,18 +33,27 @@ class Turbina
       @status = "OFFLINE"
     end
     puts msg if msg
+    return result
+  end
+
+  # wrapper for opening socket 
+  def sockopen(host, port)
+    socket = nil
+    msg = nil
+    timeout = 5.0
+    socket = turbina_timeout(timeout, proc {TCPSocket.open(host, port)})
     return socket
   end
 
   def close
-    @port.close if @port
+    turbina_timeout(1, proc {@port.close if @port})
     @port = nil
     @status = "OFFLINE"
   end
 
   def read
     if @port
-      return @port.gets.split('=')[1]
+      return turbina_timeout(5, proc {@port.gets.split('=')[1]})
     else
       @status = "OFFLINE"
       return nil
@@ -54,7 +62,7 @@ class Turbina
 
   def command(string)
     if @port
-      @port.send("1001 #{string}\r\n", 0)
+      turbina_timeout(5, proc {@port.send("1001 #{string}\r\n", 0)})
     else
       puts "No connection to turbina."
       @status = "OFFLINE"
