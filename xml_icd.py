@@ -175,4 +175,13 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
             except:
                 pass
 
+    # the BMS returns temperatures as an array.  let's make this a dict
+    # so we know what's what.
+    temp_map = ["2m", "5m", "10m", "15m", "20m", "25m", "30m"]
+    try:
+        temps = tcs['bms external conditions']['Temperatures']
+        tcs['bms external conditions']['Temperatures'] = dict(zip(temp_map,
+                                                                  temps))
+    except:
+        pass
     return tcs

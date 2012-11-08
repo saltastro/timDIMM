@@ -17,10 +17,11 @@ def salt():
         tcs = parseICD("http://sgs.salt/xml/salt-tcs-icd.xml")
         time = tcs['tcs xml time info']
         bms = tcs['bms external conditions']
-        temps = array(bms['Temperatures'])
+        temps = bms['Temperatures']
 
-        # get temps and take median of the BMS output of 7 values
-        wx["Temp"] = median(temps)
+        wx["Temp"] = median(array(temps.values()))
+        wx["Temp 2m"] = temps["2m"]
+        wx["Temp 30m"] = temps["30m"]
 
         # get time
         wx["SAST"] = time["SAST"].split()[1]
@@ -34,7 +35,7 @@ def salt():
         wx["Wind Speed"] = bms["Wind mag 10m"] * 3.6
         wx["Wind Dir (30m)"] = bms["Wind dir 30m"]
         wx["Wind Dir"] = bms["Wind dir 10m"]
-        wx["T - DP"] = wx["Temp"] - bms["Dewpoint"]
+        wx["T - DP"] = wx["Temp 2m"] - bms["Dewpoint"]
         wx["Raining"] = bms["Rain detected"]
         return wx
     except:
