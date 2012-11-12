@@ -7,7 +7,7 @@ TCS ICD.
 
 Author                     Version             Date
 --------------------------------------------------------
-TE Pickering                 0.1             20121012
+TE Pickering                 0.2             20121012
 
 TODO
 --------------------------------------------------------
@@ -15,11 +15,13 @@ will need to expand as more of the ICD is made available
 
 Updates
 --------------------------------------------------------
+20121112 - switched from xml.dom.minidom to lxml.etree for XML parsing.
+           etree is MUCH cleaner and easier to use.
 
 """
 import xml
 import urllib2
-import xml.dom.minidom
+from lxml import etree
 
 
 class ICD_EW:
@@ -85,9 +87,9 @@ def parseElement(e):
     almost every element has a Name and a Val so pull these out and
     handle null Vals
     """
-    k = e.getElementsByTagName("Name")[0].firstChild.data
-    if e.getElementsByTagName("Val")[0].firstChild:
-        v = e.getElementsByTagName("Val")[0].firstChild.data
+    k = e.find("Name").text
+    if e.find("Val") is not None:
+        v = e.find("Val").text
     else:
         v = None
     return (k, v)
@@ -105,10 +107,10 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
        EW - mapped to a ICD_EW object defined here
        Array - mapped to a python list
     """
-    doc = xml.dom.minidom.parse(urllib2.urlopen(url, timeout=3))
+    doc = etree.parse(urllib2.urlopen(url, timeout=3))
 
     # the root element will be a Cluster containing all other clusters
-    root = doc.getElementsByTagName("Cluster")[0]
+    root = doc.getroot()
 
     # main dict we'll populate and return
     tcs = {}
@@ -122,22 +124,22 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
                ]
     simples = zip(types, lambdas)
 
-    # get clusters
-    clusters = root.getElementsByTagName("Cluster")
+    # get clusters. first is the root cluster so leave it and take the rest.
+    clusters = [c for c in root.iter("Cluster")][1:-1]
 
     # loop through each cluster
     for cluster in clusters:
-        cls_name = cluster.getElementsByTagName("Name")[0].firstChild.data
+        cls_name = cluster.find("Name").text
         tcs[cls_name] = {}
 
         # pull out the complex datatypes we handle differently.
-        lists = cluster.getElementsByTagName("EW")
-        arrays = cluster.getElementsByTagName("Array")
+        lists = cluster.findall("EW")
+        arrays = cluster.findall("Array")
 
         # go through the simple data types
         for s in simples:
             (typ, func) = s
-            tags = cluster.getElementsByTagName(typ)
+            tags = cluster.findall(typ)
             for t in tags:
                 (key, val) = parseElement(t)
                 tcs[cls_name][key] = func(val)
@@ -146,34 +148,22 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
         for l in lists:
             (key, val) = parseElement(l)
             choices = []
-            for c in l.getElementsByTagName("Choice"):
-                choices.append(c.firstChild.data)
+            for c in l.findall("Choice"):
+                choices.append(c.text)
             tcs[cls_name][key] = ICD_EW(choices, safeType(val, int))
 
         # loop through the arrays
         for a in arrays:
-            key = a.getElementsByTagName("Name")[0].firstChild.data
-            # pull this out since we need it for clean-up
-            tag = a.getElementsByTagName("Name")[1].firstChild.data
+            (key, tag) = parseElement(a)
             vals = []
             for s in simples:
                 (typ, func) = s
-                tags = a.getElementsByTagName(typ)
+                tags = a.findall(typ)
                 for t in tags:
                     (k, v) = parseElement(t)
                     vals.append(func(v))
 
             tcs[cls_name][key] = vals
-
-            # getElementsByTagName is fully recursive so Arrays generate
-            # spurious entries to the dict of the cluster. e.g.,
-            # 'lamp power' Array creates an entry called 'Boolean' and
-            # 'Temperatures' one called 'Numeric'. use the tag we pulled
-            # out to remove it if it's there.
-            try:
-                del tcs[cls_name][tag]
-            except:
-                pass
 
     # the BMS returns temperatures as an array.  let's make this a dict
     # so we know what's what.
