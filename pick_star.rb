@@ -97,8 +97,9 @@ else
     system("./gto900_offset.rb w")
     sleep(3)
     t.background
+    sleep(5)
     system("./gto900_hr.rb #{best_hr}")
-    sleep(2)
+    sleep(5)
     puts t.run
   else
     puts "No better stars available.  Staying put...."
