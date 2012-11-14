@@ -125,7 +125,7 @@ def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
     simples = zip(types, lambdas)
 
     # get clusters. first is the root cluster so leave it and take the rest.
-    clusters = [c for c in root.iter("Cluster")][1:-1]
+    clusters = [c for c in root.iter("Cluster")]
 
     # loop through each cluster
     for cluster in clusters:
