@@ -19,7 +19,7 @@ Updates
            etree is MUCH cleaner and easier to use.
 
 """
-import xml
+
 import urllib2
 from lxml import etree
 
