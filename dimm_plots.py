@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
@@ -41,7 +40,6 @@ for i in range(len(lines1)):
 ut = array(time)
 mag = -2.5 * np.log10(array(flux)) + 7.4
 std1 = array(std)
-
 
 fig = figure()
 ax = fig.add_subplot(111)
