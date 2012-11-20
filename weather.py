@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-import xml
 import sys
 import html5lib
 import urllib2
-import xml.dom.minidom
 from numpy import median, array
-from xml_icd import *
+from xml_icd import parseICD
 
 from html5lib import treebuilders
 
