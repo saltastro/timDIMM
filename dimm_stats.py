@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import os
 import numpy as np
 
 labels = ["X1", "Y1", "FWHM1", "Flux1", "Back1", "Noise1", "SigXY1", "SNR1",
