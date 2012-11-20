@@ -2,10 +2,7 @@
 
 import sys
 import numpy as np
-import scipy.ndimage as nd
-import pyfits
-import imagestats
-from find_boxes import *
+from find_boxes import rfits, daofind
 
 pixel_scale = 1.22
 dx = pixel_scale / 206265.0
@@ -38,7 +35,7 @@ def moments(data):
 def seeing(v):
     b = rd / d
     v = v * (pixel_scale / 206265.0) ** 2.0
-    k = 0.364 * (1.0 - 0.532 * b * *(-1.0 / 3.0) - 0.024 * b ** (-7.0 / 3.0))
+    k = 0.364 * (1.0 - 0.532 * b ** (-1.0 / 3.0) - 0.024 * b ** (-7.0 / 3.0))
     seeing = 206265.0 * 0.98 * ((d / lamb) ** 0.2) * ((v / k) ** 0.6)
     return seeing
 
