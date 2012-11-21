@@ -17,7 +17,7 @@ def run(program, *args):
 def get_stars(site, cat):
     good = []
     el_limit = 25.0 * ephem.pi / 180.0
-    az_limit = 180.0 * ephem.pi / 180.0
+    az_limit = 181.0 * ephem.pi / 180.0
     for key, star in cat.items():
         if star.az > az_limit and star.alt > el_limit:
             good.append(key)
@@ -27,7 +27,8 @@ def get_stars(site, cat):
 
 
 if __name__ == '__main__':
-    pid = run("./video_feed 400 10 3 100")
+    pid = run("./video_feed")
+    print "Video PID: %d" % pid
     now = datetime.datetime.today()
     file = "%4d%02d%02d_west.dat" % (now.year, now.month, now.day)
 
@@ -73,3 +74,5 @@ if __name__ == '__main__':
                 print "\tk to skip"
                 print "\ta to accept to move on"
                 print "\tx or q to exit"
+    os.system("kill -9 %d" % pid)
+    os.system("./gto900_park.rb")

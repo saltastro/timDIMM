@@ -84,10 +84,10 @@ int main(int argc, char *argv[]) {
   naxes[1] = ysize;
   fpixel = 1;
   
-  gain = atoi(argv[1]);
-  exptime = atof(argv[2]);
-  rate = atof(argv[3]);
-  brightness = atoi(argv[4]);
+  gain = 400;
+  exptime = 10.0e-3;
+  rate = 3;
+  brightness = 100;
   
   nelements = naxes[0]*naxes[1];
   
