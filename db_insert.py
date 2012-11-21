@@ -17,5 +17,6 @@ for l in fp.readlines():
          data[0], data[1], data[4])
         #print cmd
         os.system(cmd)
-    except:
-        pass
+    except Exception, e:
+        print "DB ERROR: %s" % e
+        break

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source /Users/timdimm/.massauth
+. /Users/timdimm/.massauth
 
 # first handle timDIMM data
 mkdir -p ../timDIMM_data/$1
