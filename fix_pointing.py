@@ -7,6 +7,13 @@ import timdimm
 import datetime
 
 
+def run(program, *args):
+    pid = os.fork()
+    if not pid:
+       os.execvp(program, (program,) + args)
+    return pid
+
+
 def get_stars(site, cat):
     good = []
     el_limit = 25.0 * ephem.pi / 180.0
@@ -20,7 +27,7 @@ def get_stars(site, cat):
 
 
 if __name__ == '__main__':
-
+    pid = run("./video_feed 400 10 3 100")
     now = datetime.datetime.today()
     file = "%4d%02d%02d_west.dat" % (now.year, now.month, now.day)
 
@@ -37,8 +44,10 @@ if __name__ == '__main__':
         lst = salt.sidereal_time()
         ha = ephem.hours(lst - star.ra)
         print "HA = %s;  Alt = %s;  Az = %s" % (ha, star.alt, star.az)
+        os.system("./ox_wagon.py open")
         os.system("./gto900_hr.rb %s" % s)
         while True:
+            os.system("./ox_wagon.py open")
             res = raw_input('---> ')
             if re.match('[NESW]', res):
                 print "Nudge %s" % res.lower()
@@ -55,6 +64,7 @@ if __name__ == '__main__':
                 break
             elif re.match('[qQxX]', res):
                 print "Exiting..."
+                os.system("kill -9 %d" % pid)
                 os.system("./gto900_park.rb")
                 exit()
             else:
