@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 print "Accept"
                 os.system("./tpoint_gto.rb %s >> %s" % (s, file))
                 break
-            elif re.match('[xX]', res):
+            elif re.match('[qQxX]', res):
                 print "Exiting..."
                 os.system("./gto900_park.rb")
                 exit()
@@ -62,4 +62,4 @@ if __name__ == '__main__':
                 print "\tnesw for little move"
                 print "\tk to skip"
                 print "\ta to accept to move on"
-                print "\tx to exit"
+                print "\tx or q to exit"
