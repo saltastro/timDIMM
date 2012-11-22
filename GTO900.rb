@@ -6,7 +6,7 @@ require 'ast_utils'
 
 ### GTO900 routines
 class GTO900
-  def initialize(host, port)
+  def initialize(host='localhost', port=7001)
     @port = sockopen(host, port)
     @catalog = hr_catalog
   end

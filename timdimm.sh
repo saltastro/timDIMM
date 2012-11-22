@@ -21,6 +21,7 @@ while [ 1 ]; do
 	scp seeing.out seeing.dat massdimm@massdimm:~/seeing/suthdimm/.
 	date +'%Y-%m-%dT%H:%M:%S%z' >> seeing.out
 	mv seeing.out ~/Sites/seeing.txt
+	./tpoint_gto.rb `cat current_object` >> pointing.log
     else
 	echo "FAIL!"
 	echo "image;text 125 5 # text={Unsuccessful Measurement}" | xpaset timDIMM regions

@@ -3,7 +3,7 @@
 require 'GTO900'
 require 'ast_utils'
 
-scope = GTO900.new('localhost', 7001)
+scope = GTO900.new()
 
 alt = scope.alt
 az = scope.az
