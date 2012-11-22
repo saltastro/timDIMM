@@ -47,8 +47,7 @@ else
   puts "\033[0;31mHigh Humidity ALERT: %.1f\033[0;39m" % rh
 end
 
-sleep(2)
-s = GTO900.new('localhost', 7001)
+s = GTO900.new()
 t = Turbina.new
 
 temp = t.temperature

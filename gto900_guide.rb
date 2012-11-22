@@ -3,13 +3,13 @@
 require 'GTO900'
 require 'ast_utils'
 
-scope = GTO900.new('localhost', 7001)
+scope = GTO900.new()
 
 lines = IO.readlines("init_cen_all")
 
-tol = 85.0
+tol = 100.0
 
-scope.set_center_rate(5)
+scope.set_center_rate(2)
 
 side = scope.pier?
 

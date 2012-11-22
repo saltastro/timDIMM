@@ -12,7 +12,7 @@ dec_deg = hms2deg(dec)
 rh, rm, rs = ra.split(':')
 dd, dm, ds = dec.split(':')
 
-s = GTO900.new('localhost', 7001)
+s = GTO900.new()
 
 s.clear
 s.command_ra(rh.to_i, rm.to_i, rs.to_i)
