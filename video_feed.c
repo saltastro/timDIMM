@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
   char *messages[NXPA];
   int brightness;
   
-  stderr = freopen("video.log", "w", stderr);
+  /*  stderr = freopen("video.log", "w", stderr); */
   
   srand48((unsigned)time(NULL));
   
@@ -84,8 +84,8 @@ int main(int argc, char *argv[]) {
   naxes[1] = ysize;
   fpixel = 1;
   
-  gain = 400;
-  exptime = 10.0e-3;
+  gain = 450;
+  exptime = 100.0e-3;
   rate = 3;
   brightness = 100;
   
