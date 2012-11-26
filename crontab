@@ -1,4 +1,0 @@
-15 7 * * *	$HOME/MASSDIMM/timDIMM/rotate.cron >> $HOME/cron.log
-1 8-17 * * *	$HOME/MASSDIMM/timDIMM/park >> $HOME/cron.log
-*/2 * * * *	$HOME/MASSDIMM/timDIMM/mkmovie.sh >> $HOME/cron.log
-* * * * *     $HOME/DB/wx.rb

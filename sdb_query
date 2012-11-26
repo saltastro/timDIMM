@@ -1,3 +1,0 @@
-#!/bin/sh
-
-mysql5 --user=massdimm --password=T1msB@by -h sdb.salt -D sdb -e "SELECT * FROM MassDimm;"
