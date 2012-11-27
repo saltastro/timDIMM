@@ -22,6 +22,7 @@ import serial
 import io
 import sys
 import ephem
+import datetime
 import struct
 
 
@@ -31,7 +32,11 @@ class NexStar:
     """
     
     tracking_modes = ["Off", "Alt/Az", "EQ North", "EQ South"]
-    
+    devices = {"AZ/RA Motor": 16, "ALT/DEC Motor": 17,
+               "GPS Unit": 176, "RTC": 178}
+    models = ["", "GPS Series", "", "i-Series", "i-Series SE", "CGE",
+              "Advanced GT", "SLT", "", "CPC", "GT", "4/5 SE", "6/8 SE"]
+
     def __init__(self, port="/dev/tty.usbserial"):
         self.ser = serial.Serial()
         self.ser.port = port
@@ -79,7 +84,7 @@ class NexStar:
             resp = self.ser.read(10)
             ra = resp[0:4]
             dec = resp[5:9]
-        return (self.hex2ang(ra, hours=True, precise=precise), 
+        return (self.hex2ang(ra, hours=True, precise=precise),
                 self.hex2ang(dec, precise=precise))
 
     def get_azel(self, precise=True):
@@ -96,7 +101,7 @@ class NexStar:
             resp = self.ser.read(10)
             az = resp[0:4]
             el = resp[5:9]
-        return (self.hex2ang(az, precise=precise), 
+        return (self.hex2ang(az, precise=precise),
                 self.hex2ang(el, precise=precise))
 
     def goto_radec(self, ra, dec, precise=True):
@@ -143,7 +148,7 @@ class NexStar:
         else:
             print "Error in slew command..."
             resp = self.ser.read(1)
-            return False        
+            return False
 
     def sync(self, ra, dec, precise=True):
         """
@@ -195,12 +200,12 @@ class NexStar:
         else:
             print "Error setting tracking mode."
             return False
-            
+
     def set_slew_rate(self, rate, fixed=True):
         """
         set the mount's slew rate.  fixed takes a range of 0-9 with 0 being
-        stop. the values mimic the hand control rates. otherwise the rate 
-        is given in arcseconds/second. 
+        stop. the values mimic the hand control rates. otherwise the rate
+        is given in arcseconds/second.
         """
         if fixed:
             assert rate in range(10), \
@@ -212,6 +217,7 @@ class NexStar:
                     self.ser.write(cmd)
                     resp = self.ser.read(1)
                     if resp != '#':
+                        err = self.ser.read(1)
                         print "Error setting slew rates."
                         return False
         else:
@@ -225,10 +231,11 @@ class NexStar:
                     self.ser.write(cmd)
                     resp = self.ser.read(1)
                     if resp != '#':
+                        err = self.ser.read(1)
                         print "Error setting slew rates."
                         return False
         return True
-        
+
     def get_location(self):
         """
         query the location from the handset (NOT the GPS).
@@ -248,7 +255,7 @@ class NexStar:
         lat = "%s%2d:%02d:%02d" % (latsign, a, b, c)
         lon = "%s%3d:%02d:%02d" % (lonsign, e, f, g)
         return ephem.degrees(lat), ephem.degrees(lon)
-        
+
     def get_time(self):
         """
         query the time from the handset (NOT the GPS).
@@ -261,5 +268,267 @@ class NexStar:
             w -= 256
         time = "20%02d-%02d-%02d %d:%02d:%02d UTC%+2d" % (v, t, u, q, r, s, w)
         return time
-        
-    
+
+    def set_location(self, lat, lon):
+        """
+        set the handset location
+        """
+        if lat >= 0:
+            d = 0
+        else:
+            d = 1
+        if lon >= 0:
+            h = 0
+        else:
+            h = 1
+        a, b, c = str(lat).split(':')
+        a = a.replace('+', '').replace('-', '')
+        c = c.split('.')[0]
+        e, f, g = str(lon).split(':')
+        e = e.replace('+', '').replace('-', '')
+        g = g.split('.')[0]
+        cmd = "W" + chr(a) + chr(b) + chr(c) + chr(d) + \
+                    chr(e) + chr(f) + chr(g) + chr(h)
+        self.ser.write(cmd)
+        resp = self.ser.read(1)
+        if resp != '#':
+            err = self.ser.read(1)
+            print "Error setting current location."
+            return False
+        return True
+
+    def set_time(self):
+        """
+        configure handset to use current universal time
+        """
+        t = datetime.datetime.utcnow()
+        w = 0
+        x = 0
+        q = t.hour
+        r = t.minute
+        s = t.second
+        t = t.month
+        u = t.day
+        v = t.year - 2000
+        cmd = "H" + chr(q) + chr(r) + chr(s) + chr(t) + \
+                    chr(u) + chr(v) + chr(w) + chr(x)
+        self.ser.write(cmd)
+        resp = self.ser.read(1)
+        if resp != '#':
+            err = self.ser.read(1)
+            print "Error setting current time."
+            return False
+        return True
+
+    def is_gps_linked(self):
+        """
+        check if the GPS unit in the NexStar mount is linked.
+        """
+        cmd = "P" + chr(1) + chr(176) + chr(55) + chr(0) + \
+                    chr(0) + chr(0) + chr(1)
+        self.ser.write(cmd)
+        resp = self.ser.read(2)
+        x = ord(resp[0])
+        if x > 0:
+            print "GPS is linked."
+            return True
+        else:
+            print "GPS is not linked."
+            return False
+
+    def get_gps_latitude(self):
+        """
+        query GPS unit for current latitude
+        """
+        cmd = "P" + chr(1) + chr(176) + chr(1) + chr(0) + \
+                    chr(0) + chr(0) + chr(3)
+        self.ser.write(cmd)
+        resp = self.ser.read(4)
+        x = ord(resp[0])
+        y = ord(resp[1])
+        z = ord(resp[2])
+        lat = (x * 65536.0 + y * 256.0 + z) / 2 ** 24
+        return ephem.degrees(2.0 * ephem.pi * lat).znorm
+
+    def get_gps_longitude(self):
+        """
+        query GPS unit for current longitude
+        """
+        cmd = "P" + chr(1) + chr(176) + chr(2) + chr(0) + \
+                    chr(0) + chr(0) + chr(3)
+        self.ser.write(cmd)
+        resp = self.ser.read(4)
+        x = ord(resp[0])
+        y = ord(resp[1])
+        z = ord(resp[2])
+        lon = (x * 65536.0 + y * 256.0 + z) / 2 ** 24
+        return ephem.degrees(2.0 * ephem.pi * lon).znorm
+
+    def get_gps_time(self):
+        """
+        query GPS unit for the current time
+        """
+        # first get the date
+        cmd = "P" + chr(1) + chr(176) + chr(3) + chr(0) + \
+                    chr(0) + chr(0) + chr(2)
+        self.ser.write(cmd)
+        resp = self.ser.read(3)
+        month = ord(resp[0])
+        day = ord(resp[1])
+
+        # now get the year
+        cmd = "P" + chr(1) + chr(176) + chr(4) + chr(0) + \
+                    chr(0) + chr(0) + chr(2)
+        self.ser.write(cmd)
+        resp = self.ser.read(3)
+        x = ord(resp[0])
+        y = ord(resp[1])
+        year = x * 256 + y
+
+        # and now get the time
+        cmd = "P" + chr(1) + chr(176) + chr(51) + chr(0) + \
+                    chr(0) + chr(0) + chr(3)
+        self.ser.write(cmd)
+        resp = self.ser.read(4)
+        hour = ord(resp[0])
+        minute = ord(resp[1])
+        second = ord(resp[2])
+        d = ephem.Date("%d/%02d/%02d %d:%02d:%02d" %
+                      (year, month, day, hour, minute, second))
+        return d
+
+    def get_rtc_time(self):
+        """
+        query mount's RTC unit for the current time
+        """
+        # first get the date
+        cmd = "P" + chr(1) + chr(178) + chr(3) + chr(0) + \
+                    chr(0) + chr(0) + chr(2)
+        self.ser.write(cmd)
+        resp = self.ser.read(3)
+        month = ord(resp[0])
+        day = ord(resp[1])
+
+        # now get the year
+        cmd = "P" + chr(1) + chr(178) + chr(4) + chr(0) + \
+                    chr(0) + chr(0) + chr(2)
+        self.ser.write(cmd)
+        resp = self.ser.read(3)
+        x = ord(resp[0])
+        y = ord(resp[1])
+        year = x * 256 + y
+
+        # and now get the time
+        cmd = "P" + chr(1) + chr(178) + chr(51) + chr(0) + \
+                    chr(0) + chr(0) + chr(3)
+        self.ser.write(cmd)
+        resp = self.ser.read(4)
+        hour = ord(resp[0])
+        minute = ord(resp[1])
+        second = ord(resp[2])
+        d = ephem.Date("%d/%02d/%02d %d:%02d:%02d" %
+                      (year, month, day, hour, minute, second))
+        return d
+
+    def set_rtc_time(self, t):
+        """
+        set the time in the mount's RTC unit. takes datetime object as
+        argument
+        """
+        # first set the date
+        cmd = "P" + chr(3) + chr(178) + chr(131) + chr(t.month) + \
+                    chr(t.day) + chr(0) + chr(0)
+        self.ser.write(cmd)
+        self.ser.read(1)
+
+        # now set the year
+        x = t.year/256
+        y = t.year % 256
+        cmd = "P" + chr(3) + chr(178) + chr(132) + chr(x) + \
+                    chr(y) + chr(0) + chr(0)
+        self.ser.write(cmd)
+        self.ser.read(1)
+
+        # and now set the time
+        cmd = "P" + chr(3) + chr(178) + chr(132) + chr(t.hour) + \
+                    chr(t.minute) + chr(t.second) + chr(0)
+        self.ser.write(cmd)
+        self.ser.read(1)
+        return True
+
+    def get_version(self):
+        """
+        get telescope version
+        """
+        self.ser.write("V")
+        resp = self.ser.read(3)
+        version = "%d.%d" % (ord(resp[0]), ord(resp[1]))
+        print "Version is %s"
+        return version
+
+    def get_device_versions(self):
+        """
+        query versions for the specific components of the telescope
+        """
+        versions = {}
+        for k, v in NexStar.devices.items():
+            cmd = "P" + chr(1) + chr(v) + chr(254) + chr(0) + \
+                        chr(0) + chr(0) + chr(2)
+            self.ser.write(cmd)
+            self.ser.read(3)
+            version = "%d.%d" % (ord(resp[0]), ord(resp[1]))
+            versions[k] = version
+        return versions
+
+    def get_model(self):
+        """
+        query telescope model
+        """
+        self.ser.write("m")
+        resp = self.ser.read(2)
+        i = ord(resp[0])
+        return NexStar.models[i]
+
+    def echo(self, s):
+        """
+        echo function to test communication
+        """
+        self.ser.write("K" + s[0])
+        resp = self.ser.read(2)
+        return resp[0]
+
+    def aligned(self):
+        """
+        check if alignment is complete
+        """
+        self.ser.write("J")
+        resp = self.ser.read(2)
+        align = ord(resp[0])
+        if align == 1:
+            return True
+        else:
+            return False
+
+    def goto_in_progress(self):
+        """
+        check if there is a GOTO in progress
+        """
+        self.ser.write("L")
+        resp = self.ser.read(2)
+        if resp[0] == "0":
+            return False
+        else:
+            return True
+
+    def cancel_goto(self):
+        """
+        cancel a GOTO command
+        """
+        self.ser.write("M")
+        resp = self.ser.read(1)
+        if resp == '#':
+            print "GOTO cancelled"
+            return True
+        else:
+            print "Error cancelling GOTO"
+            return False
