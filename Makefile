@@ -3,20 +3,14 @@
 CC = gcc
 CFLAGS = -O2 -I/opt/local/include
 LDFLAGS = -L/opt/local/lib -framework CoreFoundation -framework Carbon -lIOKit -lm -lcfitsio -lxpa -ldc1394
-EXECS = grab_cube grab_cube_16bpp_binned grab_cube_8bpp_binned measure_seeing ave_frames ave_frames_ff video_feed grab noise_test
+EXECS = grab_cube measure_seeing ave_frames video_feed grab noise_test
 
 all:	${EXECS}
 
 clean: 
 	rm -f *.o; rm -f *~; rm -f ${EXECS}
 
-grab_cube:	grab_cube.c
-	${CC} ${CFLAGS} grab_cube.c ${LDFLAGS} -o grab_cube
-
-grab_cube_16bpp_binned:	grab_cube_16bpp_binned.c
-	${CC} ${CFLAGS} grab_cube_16bpp_binned.c ${LDFLAGS} -o grab_cube_16bpp_binned
-
-grab_cube_8bpp_binned:	grab_cube_8bpp_binned.c
+grab_cube:	grab_cube_8bpp_binned.c
 	${CC} ${CFLAGS} grab_cube_8bpp_binned.c ${LDFLAGS} -o grab_cube_8bpp_binned
 
 measure_seeing:	measure_seeing.c
@@ -33,6 +27,3 @@ grab:	grab.c
 
 ave_frames:	ave_frames.c
 	${CC} ${CFLAGS} ave_frames.c ${LDFLAGS} -o ave_frames
-
-ave_frames_ff:	ave_frames_ff.c
-	${CC} ${CFLAGS} ave_frames_ff.c ${LDFLAGS} -o ave_frames_ff
