@@ -34,6 +34,10 @@ class NexStar:
                "GPS Unit": 176, "RTC": 178}
     models = ["", "GPS Series", "", "i-Series", "i-Series SE", "CGE",
               "Advanced GT", "SLT", "", "CPC", "GT", "4/5 SE", "6/8 SE"]
+    variable_slew = {"Right": (16, 6), "Left": (16, 7),
+                     "Up": (17, 6), "Down": (17, 7)}
+    fixed_slew = {"Right": (16, 36), "Left": (16, 37),
+                  "Up": (17, 36), "Down": (17, 37)}
 
     def __init__(self, port="/dev/tty.usbserial"):
         self.ser = serial.Serial()
@@ -199,7 +203,7 @@ class NexStar:
             print "Error setting tracking mode."
             return False
 
-    def set_slew_rate(self, rate, fixed=True):
+    def set_slew_rate(self, rate, dir, fixed=True):
         """
         set the mount's slew rate.  fixed takes a range of 0-9 with 0 being
         stop. the values mimic the hand control rates. otherwise the rate
@@ -207,30 +211,41 @@ class NexStar:
         """
         if fixed:
             assert rate in range(10), "Fixed slew rates must be in range 0-9."
-            for i in [36, 37]:
-                for j in [16, 17]:
-                    cmd = "P" + chr(2) + chr(j) + chr(i) \
-                              + chr(rate) + chr(0) + chr(0) + chr(0)
-                    self.ser.write(cmd)
-                    resp = self.ser.read(1)
-                    if resp != '#':
-                        self.ser.read(1)
-                        print "Error setting slew rates."
-                        return False
+            assert dir in NexStar.fixed_slew.keys(), \
+                "Direction must be one of Up, Down, Right, Left."
+            if rate > 0:
+                print "Moving %s at fixed rate %d." % (dir, rate)
+            else:
+                print "Stopping %s-ward motion." % dir
+            vals = NexStar.fixed_slew[dir]
+            cmd = "P" + chr(2) + chr(vals[0]) + chr(vals[1]) \
+                + chr(rate) + chr(0) + chr(0) + chr(0)
+            self.ser.write(cmd)
+            resp = self.ser.read(1)
+            if resp != '#':
+                self.ser.read(1)
+                print "Error setting slew rates."
+                return False
         else:
             assert rate >= 0, 'Slew rate must be >= 0!'
+            assert dir in NexStar.variable_slew.keys(), \
+                "Direction must be one of Up, Down, Right, Left."
+            if rate > 0:
+                print "Moving %s at variable rate of %d arcsec/sec." % \
+                    (dir, rate)
+            else:
+                print "Stopping %s-ward motion." % dir
+            vals = NexStar.variable_slew[dir]
             rateHigh = (int(rate) * 4) / 256
             rateLow = (int(rate) * 4) % 256
-            for i in [6, 7]:
-                for j in [16, 17]:
-                    cmd = "P" + chr(3) + chr(j) + chr(i) \
-                              + chr(rateHigh) + chr(rateLow) + chr(0) + chr(0)
-                    self.ser.write(cmd)
-                    resp = self.ser.read(1)
-                    if resp != '#':
-                        self.ser.read(1)
-                        print "Error setting slew rates."
-                        return False
+            cmd = "P" + chr(3) + chr(vals[0]) + chr(vals[1]) \
+                + chr(rateHigh) + chr(rateLow) + chr(0) + chr(0)
+            self.ser.write(cmd)
+            resp = self.ser.read(1)
+            if resp != '#':
+                self.ser.read(1)
+                print "Error setting slew rates."
+                return False
         return True
 
     def get_location(self):
@@ -460,7 +475,7 @@ class NexStar:
         self.ser.write("V")
         resp = self.ser.read(3)
         version = "%d.%d" % (ord(resp[0]), ord(resp[1]))
-        print "Version is %s"
+        print "Version is %s" % version
         return version
 
     def get_device_versions(self):
