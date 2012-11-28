@@ -1,5 +1,4 @@
 ave_frames_ff
-Makefile
 data
 LX200
 *.zip
@@ -33,3 +32,4 @@ noise_test
 python_test_code.py
 exptime
 SYNCME
+LightmeterMark2.3l/lightmeter_mark23l
