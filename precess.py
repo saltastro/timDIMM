@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-import os
 import ephem
-import numpy as np
 
 salt = ephem.Observer()
 salt.lat = "-32:22:32"

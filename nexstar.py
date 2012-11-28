@@ -19,8 +19,6 @@ Updates
 """
 
 import serial
-import io
-import sys
 import ephem
 import datetime
 import struct
@@ -30,7 +28,7 @@ class NexStar:
     """
     main class to encapsulate NexStar interface and operation
     """
-    
+
     tracking_modes = ["Off", "Alt/Az", "EQ North", "EQ South"]
     devices = {"AZ/RA Motor": 16, "ALT/DEC Motor": 17,
                "GPS Unit": 176, "RTC": 178}
@@ -64,7 +62,7 @@ class NexStar:
         take an angle in radians (which ephem provides by default) and convert
         to hex to send on to the NexStar
         """
-        rev = a.norm/(2.0 * ephem.pi)
+        rev = a.norm / (2.0 * ephem.pi)
         if precise:
             return "%8x" % int(rev * 4294967296)
         else:
@@ -195,7 +193,7 @@ class NexStar:
         resp = self.ser.read(1)
         if resp == '#':
             print "Successfully set tracking mode to: %s" % \
-                    NexStar.tracking_modes[mode]
+                NexStar.tracking_modes[mode]
             return True
         else:
             print "Error setting tracking mode."
@@ -208,8 +206,7 @@ class NexStar:
         is given in arcseconds/second.
         """
         if fixed:
-            assert rate in range(10), \
-            "Fixed slew rates must be integers in range 0-9."
+            assert rate in range(10), "Fixed slew rates must be in range 0-9."
             for i in [36, 37]:
                 for j in [16, 17]:
                     cmd = "P" + chr(2) + chr(j) + chr(i) \
@@ -217,7 +214,7 @@ class NexStar:
                     self.ser.write(cmd)
                     resp = self.ser.read(1)
                     if resp != '#':
-                        err = self.ser.read(1)
+                        self.ser.read(1)
                         print "Error setting slew rates."
                         return False
         else:
@@ -231,7 +228,7 @@ class NexStar:
                     self.ser.write(cmd)
                     resp = self.ser.read(1)
                     if resp != '#':
-                        err = self.ser.read(1)
+                        self.ser.read(1)
                         print "Error setting slew rates."
                         return False
         return True
@@ -288,11 +285,11 @@ class NexStar:
         e = e.replace('+', '').replace('-', '')
         g = g.split('.')[0]
         cmd = "W" + chr(a) + chr(b) + chr(c) + chr(d) + \
-                    chr(e) + chr(f) + chr(g) + chr(h)
+            chr(e) + chr(f) + chr(g) + chr(h)
         self.ser.write(cmd)
         resp = self.ser.read(1)
         if resp != '#':
-            err = self.ser.read(1)
+            self.ser.read(1)
             print "Error setting current location."
             return False
         return True
@@ -311,11 +308,11 @@ class NexStar:
         u = t.day
         v = t.year - 2000
         cmd = "H" + chr(q) + chr(r) + chr(s) + chr(t) + \
-                    chr(u) + chr(v) + chr(w) + chr(x)
+            chr(u) + chr(v) + chr(w) + chr(x)
         self.ser.write(cmd)
         resp = self.ser.read(1)
         if resp != '#':
-            err = self.ser.read(1)
+            self.ser.read(1)
             print "Error setting current time."
             return False
         return True
@@ -325,7 +322,7 @@ class NexStar:
         check if the GPS unit in the NexStar mount is linked.
         """
         cmd = "P" + chr(1) + chr(176) + chr(55) + chr(0) + \
-                    chr(0) + chr(0) + chr(1)
+            chr(0) + chr(0) + chr(1)
         self.ser.write(cmd)
         resp = self.ser.read(2)
         x = ord(resp[0])
@@ -341,7 +338,7 @@ class NexStar:
         query GPS unit for current latitude
         """
         cmd = "P" + chr(1) + chr(176) + chr(1) + chr(0) + \
-                    chr(0) + chr(0) + chr(3)
+            chr(0) + chr(0) + chr(3)
         self.ser.write(cmd)
         resp = self.ser.read(4)
         x = ord(resp[0])
@@ -355,7 +352,7 @@ class NexStar:
         query GPS unit for current longitude
         """
         cmd = "P" + chr(1) + chr(176) + chr(2) + chr(0) + \
-                    chr(0) + chr(0) + chr(3)
+            chr(0) + chr(0) + chr(3)
         self.ser.write(cmd)
         resp = self.ser.read(4)
         x = ord(resp[0])
@@ -370,7 +367,7 @@ class NexStar:
         """
         # first get the date
         cmd = "P" + chr(1) + chr(176) + chr(3) + chr(0) + \
-                    chr(0) + chr(0) + chr(2)
+            chr(0) + chr(0) + chr(2)
         self.ser.write(cmd)
         resp = self.ser.read(3)
         month = ord(resp[0])
@@ -378,7 +375,7 @@ class NexStar:
 
         # now get the year
         cmd = "P" + chr(1) + chr(176) + chr(4) + chr(0) + \
-                    chr(0) + chr(0) + chr(2)
+            chr(0) + chr(0) + chr(2)
         self.ser.write(cmd)
         resp = self.ser.read(3)
         x = ord(resp[0])
@@ -387,7 +384,7 @@ class NexStar:
 
         # and now get the time
         cmd = "P" + chr(1) + chr(176) + chr(51) + chr(0) + \
-                    chr(0) + chr(0) + chr(3)
+            chr(0) + chr(0) + chr(3)
         self.ser.write(cmd)
         resp = self.ser.read(4)
         hour = ord(resp[0])
@@ -403,7 +400,7 @@ class NexStar:
         """
         # first get the date
         cmd = "P" + chr(1) + chr(178) + chr(3) + chr(0) + \
-                    chr(0) + chr(0) + chr(2)
+            chr(0) + chr(0) + chr(2)
         self.ser.write(cmd)
         resp = self.ser.read(3)
         month = ord(resp[0])
@@ -411,7 +408,7 @@ class NexStar:
 
         # now get the year
         cmd = "P" + chr(1) + chr(178) + chr(4) + chr(0) + \
-                    chr(0) + chr(0) + chr(2)
+            chr(0) + chr(0) + chr(2)
         self.ser.write(cmd)
         resp = self.ser.read(3)
         x = ord(resp[0])
@@ -420,7 +417,7 @@ class NexStar:
 
         # and now get the time
         cmd = "P" + chr(1) + chr(178) + chr(51) + chr(0) + \
-                    chr(0) + chr(0) + chr(3)
+            chr(0) + chr(0) + chr(3)
         self.ser.write(cmd)
         resp = self.ser.read(4)
         hour = ord(resp[0])
@@ -437,21 +434,21 @@ class NexStar:
         """
         # first set the date
         cmd = "P" + chr(3) + chr(178) + chr(131) + chr(t.month) + \
-                    chr(t.day) + chr(0) + chr(0)
+            chr(t.day) + chr(0) + chr(0)
         self.ser.write(cmd)
         self.ser.read(1)
 
         # now set the year
-        x = t.year/256
+        x = t.year / 256
         y = t.year % 256
         cmd = "P" + chr(3) + chr(178) + chr(132) + chr(x) + \
-                    chr(y) + chr(0) + chr(0)
+            chr(y) + chr(0) + chr(0)
         self.ser.write(cmd)
         self.ser.read(1)
 
         # and now set the time
         cmd = "P" + chr(3) + chr(178) + chr(132) + chr(t.hour) + \
-                    chr(t.minute) + chr(t.second) + chr(0)
+            chr(t.minute) + chr(t.second) + chr(0)
         self.ser.write(cmd)
         self.ser.read(1)
         return True
@@ -473,9 +470,9 @@ class NexStar:
         versions = {}
         for k, v in NexStar.devices.items():
             cmd = "P" + chr(1) + chr(v) + chr(254) + chr(0) + \
-                        chr(0) + chr(0) + chr(2)
+                chr(0) + chr(0) + chr(2)
             self.ser.write(cmd)
-            self.ser.read(3)
+            resp = self.ser.read(3)
             version = "%d.%d" % (ord(resp[0]), ord(resp[1]))
             versions[k] = version
         return versions
