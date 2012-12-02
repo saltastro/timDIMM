@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   fpixel = 1;
   
   gain = 400;
-  exptime = 10.0e-3;
+  exptime = 3.0;
   rate = 3;
   brightness = 100;
   
