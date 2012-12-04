@@ -86,6 +86,7 @@ int main(int argc, char *argv[]) {
   
   gain = 450;
   exptime = 30.0;
+
   rate = 3;
   brightness = 100;
   
