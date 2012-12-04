@@ -118,6 +118,8 @@ int main(int argc, char *argv[]) {
     ysize = 240;
     npixels = xsize * ysize;
     
+    stderr = freopen("video.log", "w", stderr);
+    
     if (!(buffer = malloc(npixels*sizeof(char)))) {
       printf("Couldn't Allocate Image Buffer\n");
       exit(-1);
