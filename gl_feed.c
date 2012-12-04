@@ -282,10 +282,12 @@ int main(int argc, char *argv[]) {
             }
 
             grab_frame(camera, buffer, npixels*sizeof(char));
-            XGetWindowAttributes(dpy, win, &gwa);
-            glViewport(0, 0, gwa.width, gwa.height);
-            DrawImage(buffer);
-            glXSwapBuffers(dpy, win);
+            if (nimages % 30 == 0) {
+                XGetWindowAttributes(dpy, win, &gwa);
+                glViewport(0, 0, gwa.width, gwa.height);
+                DrawImage(buffer);
+                glXSwapBuffers(dpy, win);
+            }
             nimages++;
         }
     }
