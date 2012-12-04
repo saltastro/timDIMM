@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to manual");
     err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_FRAME_RATE, DC1394_TRUE);
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to absolute mode");
-    err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, rate);
+    err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, 1.0*rate);
     DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
     printf("I: framerate is %d fps\n", rate);
 

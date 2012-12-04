@@ -1,6 +1,6 @@
 # Makefile for routines for ieee1394-based DIMM camera
 
-CC = gcc
+CC = /usr/bin/gcc
 CFLAGS = -O2 -I/opt/local/include
 LDFLAGS = -L/opt/local/lib -framework CoreFoundation -framework Carbon -lIOKit -lm -lcfitsio -lxpa -ldc1394
 GLFLAGS = -L/opt/local/lib -framework CoreFoundation -framework Carbon -lIOKit -lm -ldc1394 -L/usr/X11/lib -lX11 -lGL -lGLU
