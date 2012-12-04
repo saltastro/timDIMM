@@ -45,7 +45,7 @@ int grab_frame(dc1394camera_t *c, char *buf, int nbytes) {
 }
 
 void DrawImage(unsigned char *buf) {
-    
+
     GLuint textureid;
     glGenTextures(1, &textureid);
     glBindTexture(GL_TEXTURE_2D, textureid);
@@ -58,7 +58,7 @@ void DrawImage(unsigned char *buf) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(0., 0., 10., 0., 0., 0., 0., 1., 0.);
-    
+
     glBegin(GL_LINE_LOOP);
     glColor3f(0., 1., 0.0);
     glVertex3f(260., 220., 1.);
@@ -109,10 +109,10 @@ int main(int argc, char *argv[]) {
     
     srand48((unsigned)time(NULL));
     
-    gain = 700;
+    gain = 500;
     exptime = 3.0e-3;
     rate = 330;
-    brightness = 100;
+    brightness = 300;
 
     xsize = 320;
     ysize = 240;
@@ -243,46 +243,48 @@ int main(int argc, char *argv[]) {
     glXMakeCurrent(dpy, win, glc);
     glEnable(GL_DEPTH_TEST); 
 
-    nimages = 0;
-    while (1) {
-        XNextEvent(dpy, &xev);
-        if(xev.type == Expose) {
-            while (1) {
-                grab_frame(camera, buffer, npixels*sizeof(char));
-                XGetWindowAttributes(dpy, win, &gwa);
-                glViewport(0, 0, gwa.width, gwa.height);
-                DrawImage(buffer);
-                glXSwapBuffers(dpy, win);
-                nimages++;
+    XNextEvent(dpy, &xev);
+    if(xev.type == Expose) {
+        nimages = 0;
+        printf("\nPress any key to exit.\n\n");
+        gettimeofday(&start_time, NULL);
+        while (1) {
+            while (XPending(dpy) > 0) {
+                XNextEvent(dpy, &xev);
+                if(xev.type == KeyPress) {
+                    gettimeofday(&end_time, NULL);
+                    glXMakeCurrent(dpy, None, NULL);
+                    glXDestroyContext(dpy, glc);
+                    XDestroyWindow(dpy, win);
+                    XCloseDisplay(dpy);
+
+                    printf("End capture.\n");
+
+                    start_sec = start_time.tv_sec;
+                    start_usec = start_time.tv_usec;
+                    end_sec = end_time.tv_sec;
+                    end_usec = end_time.tv_usec;
+
+                    elapsed_time = (float)((end_sec + 1.0e-6*end_usec) - (start_sec + 1.0e-6*start_usec));
+                    fps = nimages/elapsed_time;
+                    printf("Elapsed time = %g seconds.\n", elapsed_time);
+                    printf("Framerate = %g fps.\n", fps);
+ 
+                    /*-----------------------------------------------------------------------
+                     *  stop data transmission
+                     *-----------------------------------------------------------------------*/
+                    err = dc1394_video_set_transmission(camera,DC1394_OFF);
+                    DC1394_ERR_RTN(err,"couldn't stop the camera?");
+                    exit(0);
+                }
             }
-        } else if(xev.type == KeyPress) {
-            glXMakeCurrent(dpy, None, NULL);
-            glXDestroyContext(dpy, glc);
-            XDestroyWindow(dpy, win);
-            XCloseDisplay(dpy);
-            exit(0); 
+
+            grab_frame(camera, buffer, npixels*sizeof(char));
+            XGetWindowAttributes(dpy, win, &gwa);
+            glViewport(0, 0, gwa.width, gwa.height);
+            DrawImage(buffer);
+            glXSwapBuffers(dpy, win);
+            nimages++;
         }
-    } /* this closes while(1) { */
-    
-    gettimeofday(&end_time, NULL);
-    printf("End capture.\n");
-
-    start_sec = start_time.tv_sec;
-    start_usec = start_time.tv_usec;
-    end_sec = end_time.tv_sec;
-    end_usec = end_time.tv_usec;
-
-    elapsed_time = (float)((end_sec + 1.0e-6*end_usec) - (start_sec + 1.0e-6*start_usec));
-    fps = nimages/elapsed_time;
-    printf("Elapsed time = %g seconds.\n", elapsed_time);
-    printf("Framerate = %g fps.\n", fps);
-  
-    /*-----------------------------------------------------------------------
-     *  stop data transmission
-     *-----------------------------------------------------------------------*/
-    err = dc1394_video_set_transmission(camera,DC1394_OFF);
-    DC1394_ERR_RTN(err,"couldn't stop the camera?");
-
-    return (err);
-
+    }
 } /* this is the } which closes int main(int argc, char *argv[]) { */
