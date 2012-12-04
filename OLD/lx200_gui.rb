@@ -197,7 +197,7 @@ class LX200_GUI
   COLUMN_HR, COLUMN_NAME, COLUMN_MAG, COLUMN_CLASS, COLUMN_RA, COLUMN_DEC, COLUMN_SECZ, 
     NUM_COLUMNS = *(0..6).to_a
  
-  def initialize(serport='/dev/ttyUSB0')
+  def initialize(serport='/dev/tty.usbserial')
     @lx200 = LX200.new(serport)
     @prev = Hash.new
 
@@ -642,6 +642,6 @@ Gtk.init
 if ARGV[0]
   LX200_GUI.new(ARGV[0])
 else
-  LX200_GUI.new('/dev/ttyUSB0')
+  LX200_GUI.new('/dev/tty.usbserial')
 end
 Gtk.main

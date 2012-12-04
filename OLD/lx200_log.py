@@ -7,7 +7,7 @@ import LX200
 from LX200.LX200Utils import *
 
 port = LX200.LXSerial(debug=False)
-port.connect('/dev/tty.PL2303-00001004')
+port.connect('/dev/tty.usbserial')
 
 scope = LX200.Telescope(port, "LX200GPS", debug=False)
 
