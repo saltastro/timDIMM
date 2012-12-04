@@ -270,9 +270,9 @@ int main(int argc, char *argv[]) {
                     printf("Elapsed time = %g seconds.\n", elapsed_time);
                     printf("Framerate = %g fps.\n", fps);
  
-                    /*-----------------------------------------------------------------------
+                    /*------------------------------------------------------------
                      *  stop data transmission
-                     *-----------------------------------------------------------------------*/
+                     *------------------------------------------------------------*/
                     err = dc1394_video_set_transmission(camera,DC1394_OFF);
                     DC1394_ERR_RTN(err,"couldn't stop the camera?");
                     exit(0);
