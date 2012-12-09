@@ -4,7 +4,7 @@ require 'GTO900'
 require 'ast_utils'
 require 'turbina'
 require 'timeout'
-require 'OLD/weather'
+require 'LX200/weather'
 
 include Weather
 
