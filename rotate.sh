@@ -13,6 +13,10 @@ mv -f *.fits ../timDIMM_data/$1
 /usr/bin/rsync -av ../timDIMM_data/20* nfs4::seeingdata/massdimm/.
 touch SYNCME
 
+# now handle MASS data
+../masspipe/getmass.sh `date -v -12H +'%Y%m%d'`
+/usr/bin/rsync -av ../masspipe/data/20* nfs4::seeingdata/mass/.
+
 # now rotate skycam data
 mkdir -p /Library/WebServer/Documents/skycam/`date -v -1d +'%Y/%m%d'`/
 cd /Library/WebServer/Documents/skycam/`date -v -1d +'%Y/%m%d'`/
