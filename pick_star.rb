@@ -48,12 +48,19 @@ else
 end
 
 s = GTO900.new()
-t = Turbina.new
 
-temp = t.temperature
-puts "\033[0;32mMASS Temperature: %s\033[0;39m" % temp
-flux = t.flux
-puts "\033[0;32mMASS Flux: %s\033[0;39m" % flux
+begin
+  t = Turbina.new
+rescue
+  t = None
+end
+
+if t
+  temp = t.temperature
+  puts "\033[0;32mMASS Temperature: %s\033[0;39m" % temp
+  flux = t.flux
+  puts "\033[0;32mMASS Flux: %s\033[0;39m" % flux
+end
 
 best_hr = ""
 
@@ -86,25 +93,38 @@ else
 
     # put plenty of sleeps in to make sure nothing trips...  
     puts "Should move. Best HR number is #{best_hr}"
-    puts t.stop
+    if t
+      puts t.stop
+    end
     system("./gto900_hr.rb #{best_hr}")
     system("echo \"#{best_hr}\" > current_object")
-    puts t.object(best_hr)
+
+    if t
+      puts t.object(best_hr)
+    end
+    
     sleep(3)
     system("./gto900_offset.rb s")
     sleep(3)
     system("./gto900_offset.rb w")
     sleep(3)
-    t.background
-    sleep(5)
-    system("./gto900_hr.rb #{best_hr}")
-    sleep(5)
-    puts t.run
+    if t
+      t.background
+      sleep(5)
+      system("./gto900_hr.rb #{best_hr}")
+      sleep(5)
+      puts t.run
+    end
+    
   else
     puts "No better stars available.  Staying put...."
-    check_turbina(t)
+    if t
+      check_turbina(t)
+    end
   end
 
 end
 
-t.close
+if t
+  t.close
+end
