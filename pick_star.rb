@@ -9,14 +9,14 @@ require 'LX200/weather'
 include Weather
 
 def check_turbina(tb)
-  stat = "UNKNOWN"
-  timeout(5) {
-    stat = tb.status
-  }
-  if stat =~ /READY/
-    puts tb.run
-  elsif stat =~ /OFFLINE/
-    puts tb.reboot
+  if tb
+    stat = "UNKNOWN"
+    timeout(5) {
+        stat = tb.status
+    }
+    if stat =~ /READY/
+      puts tb.run
+    end
   end
 end
 
@@ -49,13 +49,11 @@ end
 
 s = GTO900.new()
 
-begin
-  t = Turbina.new
-rescue
-  t = None
-end
+#t = Turbina.new
+t = nil
 
 if t
+  puts "FUCK!"
   temp = t.temperature
   puts "\033[0;32mMASS Temperature: %s\033[0;39m" % temp
   flux = t.flux
@@ -78,7 +76,9 @@ sleep(1)
 # add logic here to avoid the weather mast
 if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 300.0)
   puts "Fine to stay here."
-  check_turbina(t)
+  if t
+    check_turbina(t)
+  end
 else 
 
   best_hrs = best_star(lst)

@@ -18,7 +18,6 @@ while [ 1 ]; do
 	./plot.gnu
 	echo "image;text 25 5 # text={Seeing = `cat seeing.out`\"}" | xpaset timDIMM regions
 	echo "image;text 290 5 # text={R0 = `cat r0.out` cm}" | xpaset timDIMM regions
-	scp seeing.out seeing.dat massdimm@massdimm:~/seeing/suthdimm/.
 	date +'%Y-%m-%dT%H:%M:%S%z' >> seeing.out
 	mv seeing.out ~/Sites/seeing.txt
 	./tpoint_gto.rb `cat current_object` >> pointing.log

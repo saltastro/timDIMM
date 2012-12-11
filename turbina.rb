@@ -264,7 +264,11 @@ class Turbina
 
   def flux
     command("get flux")
-    return @port.gets
+    if @port
+        return @port.gets
+    else
+	return nil
+    end
   end
 
   def data
