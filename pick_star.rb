@@ -103,12 +103,12 @@ else
       puts t.object(best_hr)
     end
     
-    sleep(3)
-    system("./gto900_offset.rb s")
-    sleep(3)
-    system("./gto900_offset.rb w")
-    sleep(3)
     if t
+      sleep(3)
+      system("./gto900_offset.rb s")
+      sleep(3)
+      system("./gto900_offset.rb w")
+      sleep(3)
       t.background
       sleep(5)
       system("./gto900_hr.rb #{best_hr}")

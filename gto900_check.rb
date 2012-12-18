@@ -8,6 +8,7 @@ s = GTO900.new()
 s.clear
 s.clear
 s.clear
+s.long_format
 r = s.ra
 d = s.dec
 az = s.az

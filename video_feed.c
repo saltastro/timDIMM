@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
   char *messages[NXPA];
   int brightness;
   
-  /*  stderr = freopen("video.log", "w", stderr); */
+  stderr = freopen("video.log", "w", stderr);
   
   srand48((unsigned)time(NULL));
   
