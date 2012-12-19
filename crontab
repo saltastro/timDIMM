@@ -1,2 +1,4 @@
-15 7 * * *	$HOME/MASSDIMM/timDIMM/rotate.cron >> $HOME/cron.log
-*/2 * * * *	$HOME/MASSDIMM/timDIMM/mkmovie.sh >> $HOME/cron.log
+01 7 * * *	$HOME/MASSDIMM/timDIMM/mkmovie_all.sh >> $HOME/cron.log 2>&1
+15 7 * * *	$HOME/MASSDIMM/timDIMM/rotate.cron >> $HOME/cron.log 2>&1
+*/2 * * * *	$HOME/MASSDIMM/timDIMM/mkmovie.sh >> $HOME/cron.log 2>&1
+
