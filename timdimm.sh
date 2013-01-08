@@ -1,6 +1,8 @@
 #!/bin/sh
 
 while [ 1 ]; do 
+    pkill ave_frames
+    pkill measure_seeing
     ./ox_wagon.py OPEN
     ./pick_star.rb
     ./ave_frames 10 \!center.fits
