@@ -3,6 +3,7 @@
 import subprocess
 import logger
 import logging
+import sqlite3 as sql
 from threading import Thread
 
 class LightMeter:
@@ -40,20 +41,25 @@ class LightMeter:
             self.status = True
             l.info(h3[2:].strip())
             data = {}
+            con = sql.connect('./lightmeter/lightmeter.db')
+            db = con.cursor()
             while self.status:
                 line = p.stdout.readline()
                 date, time, temp, unit, light, d1, d2, flag, nl = line.split(';')
                 data['Date'] = date
                 data['time'] = time
-                data['T'] = temp
-                data['raw'] = light
-                data['lux'] = self.raw2lux(int(light))
+                data['T'] = float(temp)
+                data['raw'] = int(light)
+                data['lux'] = self.raw2lux(data['raw'])
                 data['flag'] = flag
                 self.data = data
-                l.debug("%s %s: %s %s" % (date, time, temp, light))
+                db.execute("insert into light(temperature, rawdata, lux, flag) \
+                values(%f, %d, %f, '%s')" %
+                           (data['T'], data['raw'], data['lux'], data['flag']))
+                con.commit()
             l.info("Data acquisition stopped.")
             p.terminate()
-            self.status = False
+            con.close()
             return True
 
     def start(self):
