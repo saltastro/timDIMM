@@ -1,7 +1,0 @@
-#!/bin/sh
-
-./ox_wagon.py RESET
-sleep 2
-./ox_wagon.py OPEN
-./turbina.rb init
-./gto900_init.rb
