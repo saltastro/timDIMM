@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import serial
 import struct
 import logger
@@ -39,6 +40,23 @@ class VantagePro:
                               0: "Steady",
                              20: "Rising Slowly",
                              60: "Rising Rapidly"}
+        self.units = { 'Barometer Trend': '',
+                       'Barometer': 'mm Hg',
+                       'Inside Temperature': 'C',
+                       'Inside Humidity': '%',
+                       'Outside Temperature': 'C',
+                       'Wind Speed': 'km/h',
+                       'Ave Wind Speed': 'km/h',
+                       'Wind Direction': '',
+                       'Outside Humidity': '%',
+                       'Rain Rate': 'mm/hour',
+                       'UV Index': '',
+                       'Solar Radiation': 'W/m^2',
+                       'Day Rain': 'mm',
+                       'Month Rain': 'mm',
+                       'Year Rain': 'mm',
+                       'Transmitter Battery Status': '',
+                       'Console Battery Voltage': 'V' }
         # this table is copied from the VantagePro serial protocol document
         self.crc_table = [0x0,  0x1021,  0x2042,  0x3063,  0x4084,  0x50a5,  0x60c6,  0x70e7,
              0x8108,  0x9129,  0xa14a,  0xb16b,  0xc18c,  0xd1ad,  0xe1ce,  0xf1ef,
@@ -89,7 +107,7 @@ class VantagePro:
         for b in data:
             index = (crc.value >> 8) ^ ord(b)
             # need to make the shift in place so that it stays in C.  otherwise python will
-            # recast to int32 for us which is bad.
+            # recast to uint32 which is bad.
             crc.value <<= 8
             crc.value = self.crc_table[index] ^ crc.value
         return crc.value
@@ -110,8 +128,10 @@ class VantagePro:
             resp = self.ser.read(2)
             if resp != "\n\r":
                 self.log.warn("Wake attempt failed again.  Giving up...")
+                return False
             else:
                 self.log.info("Weather station awake.")
+                return True
         else:
             self.log.info("Weather station awake.")
 
@@ -121,8 +141,10 @@ class VantagePro:
         resp = self.ser.read(8)
         if resp == "\n\rTEST\n\r":
             self.log.info("Weather station test successful.")
+            return True
         else:
             self.log.error("Weather station test unsuccessful: %s" % resp)
+            return False
 
     def rxcheck(self):
         self.log.info("Sending RXCHECK command to weather station...")
@@ -133,6 +155,7 @@ class VantagePro:
         data = self.ser.readline().strip()
         self.ser.read(1)
         self.log.info("\t-> Weather station diagnostics: %s" % data)
+        return data
 
     def firmware(self):
         self.log.info("Querying weather station firmware:")
@@ -146,6 +169,7 @@ class VantagePro:
         firmware = self.ser.readline().strip()
         self.ser.read(1)
         self.log.info("\t-> Version %s (%s)" % (firmware, datecode))
+        return (firmware, datecode)
 
     def gettime(self):
         self.log.info("Querying time from weather station.")
@@ -161,7 +185,7 @@ class VantagePro:
         check = self.checksum(crc, start=crc)
         if check == 0:
             self.log.info("\t-> query successful.")
-            time = "%d-%d-%d %d:%d:%d" % (yr, d, mo, h, m, s)
+            time = "%d-%02d-%02d %02d:%02d:%02d" % (yr, d, mo, h, m, s)
             self.log.info("\t-> reported time is %s" % time)
             return time
         else:
@@ -237,25 +261,47 @@ class VantagePro:
         check = self.checksum(crc, start=crc)
         if check == 0:
             newdata = {}
-            newdata['Bar Trend'] = self.bar_trends[struct.unpack("b", packet[3])[0]]
-            newdata['Barometer'] = in2mm(struct.unpack("H", packet[7:9])[0]/1000.0)
-            newdata['Inside Temperature'] = f2c(struct.unpack("H", packet[9:11])[0]/10.0)
+            newdata['Barometer Trend'] = self.bar_trends[struct.unpack("b", packet[3])[0]]
+            newdata['Barometer'] = in2mm(struct.unpack("H", packet[7:9])[0] / 1000.0)
+            newdata['Inside Temperature'] = f2c(struct.unpack("H", packet[9:11])[0] / 10.0)
             newdata['Inside Humidity'] = struct.unpack("B", packet[11])[0]
-            newdata['Outside Temperature'] = f2c(struct.unpack("H", packet[12:14])[0]/10.0)
+            newdata['Outside Temperature'] = f2c(struct.unpack("H", packet[12:14])[0] / 10.0)
             newdata['Wind Speed'] = miles2km(struct.unpack("B", packet[14])[0])
             newdata['Ave Wind Speed'] = miles2km(struct.unpack("B", packet[15])[0])
             newdata['Wind Direction'] = struct.unpack("H", packet[16:18])[0]
             newdata['Outside Humidity'] = struct.unpack("B", packet[33])[0]
-            newdata['Rain Rate'] = struct.unpack("H", packet[41:43])[0]*0.2
+            newdata['Rain Rate'] = struct.unpack("H", packet[41:43])[0] * 0.2
             newdata['UV Index'] = struct.unpack("B", packet[43])[0]
             newdata['Solar Radiation'] = struct.unpack("H", packet[44:46])[0]
-            newdata['Day Rain'] = struct.unpack("H", packet[50:52])[0]
-            newdata['Month Rain'] = struct.unpack("H", packet[52:54])[0]
-            newdata['Year Rain'] = struct.unpack("H", packet[54:56])[0]
+            newdata['Day Rain'] = struct.unpack("H", packet[50:52])[0] * 0.2
+            newdata['Month Rain'] = struct.unpack("H", packet[52:54])[0] * 0.2
+            newdata['Year Rain'] = struct.unpack("H", packet[54:56])[0] * 0.2
             newdata['Transmitter Battery Status'] = struct.unpack("B", packet[86])[0]
             data = struct.unpack("H", packet[87:89])[0]
-            newdata['Console Battery Voltage'] = ((data * 300.0)/512.0)/100.0
+            newdata['Console Battery Voltage'] = ((data * 300.0) / 512.0) / 100.0
             return newdata
         else:
             self.log.error("CRC error when querying data from weather station!")
             return False
+
+if __name__ == '__main__':
+    v = VantagePro()
+    v.flush()
+    if len(sys.argv) < 2:
+        data = v.get_data()
+        for k, val in data.items():
+            if type(val) is str:
+                print "%27s : %16s" % (k, val)
+            elif type(val) is int:
+                print "%27s : %16d %s" % (k, val, v.units[k])
+            elif type(val) is float:
+                print "%27s : %16.2f %s" % (k, val, v.units[k])
+            else:
+                print "Bad Type: %s" % k
+    else:
+        cmd = " ".join(sys.argv[1:])
+        v.log.info("Sending raw command to weather station: %s" % cmd)
+        v.ser.write(cmd + "\n")
+        resp = v.ser.read(8192)
+        v.log.info("Received response: %s" % resp)
+        print resp
