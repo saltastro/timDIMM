@@ -22,6 +22,8 @@ import serial
 import ephem
 import datetime
 import struct
+import logger
+import logging
 
 
 class NexStar:
@@ -45,6 +47,8 @@ class NexStar:
         self.ser.baudrate = 9600
         self.ser.timeout = 3.5
         self.ser.open()
+        self.log = logger.ColorLog(logging.getLogger(__name__))
+        self.log.addHandler(logger.fh)
 
     def hex2ang(self, s, hours=False, precise=True):
         """
@@ -122,10 +126,10 @@ class NexStar:
         self.ser.write(full_cmd)
         resp = self.ser.read(1)
         if resp == '#':
-            print "Slewing to RA=%s, Dec=%s...." % (ra, dec)
+            self.log.info("Slewing to RA=%s, Dec=%s...." % (ra, dec))
             return True
         else:
-            print "Error in slew command..."
+            self.log.error("Error in slew command...")
             resp = self.ser.read(1)
             return False
 
@@ -145,10 +149,10 @@ class NexStar:
         self.ser.write(full_cmd)
         resp = self.ser.read(1)
         if resp == '#':
-            print "Slewing to Az=%s, El=%s...." % (az, el)
+            self.log.info("Slewing to Az=%s, El=%s...." % (az, el))
             return True
         else:
-            print "Error in slew command..."
+            self.log.error("Error in slew command...")
             resp = self.ser.read(1)
             return False
 
@@ -166,10 +170,10 @@ class NexStar:
         self.ser.write(full_cmd)
         resp = self.ser.read(1)
         if resp == '#':
-            print "Syncing mount to RA=%s, Dec=%s...." % (ra, dec)
+            self.log.info("Syncing mount to RA=%s, Dec=%s...." % (ra, dec))
             return True
         else:
-            print "Error in sync command..."
+            self.log.error("Error in sync command...")
             resp = self.ser.read(1)
             return False
 
@@ -181,10 +185,11 @@ class NexStar:
         resp = self.ser.read(2)
         mode, c = struct.unpack("BB", resp)
         if mode in range(4):
-            print "Current tracking mode is: %s" % NexStar.tracking_modes[mode]
+            self.log.info("Current tracking mode is: %s" %
+                          NexStar.tracking_modes[mode])
             return mode
         else:
-            print "Error querying tracking mode."
+            self.log.error("Error querying tracking mode.")
             return None
 
     def set_tracking_mode(self, mode):
@@ -196,11 +201,11 @@ class NexStar:
         self.ser.write(cmd)
         resp = self.ser.read(1)
         if resp == '#':
-            print "Successfully set tracking mode to: %s" % \
-                NexStar.tracking_modes[mode]
+            self.log.info("Successfully set tracking mode to: %s" %
+                          NexStar.tracking_modes[mode])
             return True
         else:
-            print "Error setting tracking mode."
+            self.log.error("Error setting tracking mode.")
             return False
 
     def set_slew_rate(self, rate, dir, fixed=True):
@@ -214,9 +219,9 @@ class NexStar:
             assert dir in NexStar.fixed_slew.keys(), \
                 "Direction must be one of Up, Down, Right, Left."
             if rate > 0:
-                print "Moving %s at fixed rate %d." % (dir, rate)
+                self.log.info("Moving %s at fixed rate %d." % (dir, rate))
             else:
-                print "Stopping %s-ward motion." % dir
+                self.log.info("Stopping %s-ward motion." % dir)
             vals = NexStar.fixed_slew[dir]
             cmd = "P" + chr(2) + chr(vals[0]) + chr(vals[1]) \
                 + chr(rate) + chr(0) + chr(0) + chr(0)
@@ -224,17 +229,17 @@ class NexStar:
             resp = self.ser.read(1)
             if resp != '#':
                 self.ser.read(1)
-                print "Error setting slew rates."
+                self.log.error("Error setting slew rates.")
                 return False
         else:
             assert rate >= 0, 'Slew rate must be >= 0!'
             assert dir in NexStar.variable_slew.keys(), \
                 "Direction must be one of Up, Down, Right, Left."
             if rate > 0:
-                print "Moving %s at variable rate of %d arcsec/sec." % \
-                    (dir, rate)
+                self.log.info("Moving %s at variable rate of %d arcsec/sec." %
+                              (dir, rate))
             else:
-                print "Stopping %s-ward motion." % dir
+                self.log.info("Stopping %s-ward motion." % dir)
             vals = NexStar.variable_slew[dir]
             rateHigh = (int(rate) * 4) / 256
             rateLow = (int(rate) * 4) % 256
@@ -244,7 +249,7 @@ class NexStar:
             resp = self.ser.read(1)
             if resp != '#':
                 self.ser.read(1)
-                print "Error setting slew rates."
+                self.log.error("Error setting slew rates.")
                 return False
         return True
 
@@ -266,6 +271,7 @@ class NexStar:
             lonsign = "-"
         lat = "%s%2d:%02d:%02d" % (latsign, a, b, c)
         lon = "%s%3d:%02d:%02d" % (lonsign, e, f, g)
+        self.log.info("Current mount location: Lat=%s, Lon=%s" % (lat, lon))
         return ephem.degrees(lat), ephem.degrees(lon)
 
     def get_time(self):
@@ -279,6 +285,7 @@ class NexStar:
         if w > 128:
             w -= 256
         time = "20%02d-%02d-%02d %d:%02d:%02d UTC%+2d" % (v, t, u, q, r, s, w)
+        self.log.info("Current mount time: %s" % time)
         return time
 
     def set_location(self, lat, lon):
@@ -301,11 +308,12 @@ class NexStar:
         g = g.split('.')[0]
         cmd = "W" + chr(a) + chr(b) + chr(c) + chr(d) + \
             chr(e) + chr(f) + chr(g) + chr(h)
+        self.log.info("Setting mount location to Lat=%s, Lon=%s." % (lat, lon))
         self.ser.write(cmd)
         resp = self.ser.read(1)
         if resp != '#':
             self.ser.read(1)
-            print "Error setting current location."
+            self.log.error("Error setting current location.")
             return False
         return True
 
@@ -324,11 +332,13 @@ class NexStar:
         v = t.year - 2000
         cmd = "H" + chr(q) + chr(r) + chr(s) + chr(t) + \
             chr(u) + chr(v) + chr(w) + chr(x)
+        self.log.info("Setting mount time to %s UTC" %
+                      t.strftime("%Y-%m-%d %H:%M:%S"))
         self.ser.write(cmd)
         resp = self.ser.read(1)
         if resp != '#':
             self.ser.read(1)
-            print "Error setting current time."
+            self.log.info("Error setting current time.")
             return False
         return True
 
@@ -342,10 +352,10 @@ class NexStar:
         resp = self.ser.read(2)
         x = ord(resp[0])
         if x > 0:
-            print "GPS is linked."
+            self.log.info("Mount GPS is linked.")
             return True
         else:
-            print "GPS is not linked."
+            self.log.info("Mount GPS is not linked.")
             return False
 
     def get_gps_latitude(self):
@@ -360,7 +370,9 @@ class NexStar:
         y = ord(resp[1])
         z = ord(resp[2])
         lat = (x * 65536.0 + y * 256.0 + z) / 2 ** 24
-        return ephem.degrees(2.0 * ephem.pi * lat).znorm
+        lat = ephem.degrees(2.0 * ephem.pi * lat).znorm
+        self.log.info("Current mount latitude from GPS: %s" % lat)
+        return lat
 
     def get_gps_longitude(self):
         """
@@ -374,7 +386,9 @@ class NexStar:
         y = ord(resp[1])
         z = ord(resp[2])
         lon = (x * 65536.0 + y * 256.0 + z) / 2 ** 24
-        return ephem.degrees(2.0 * ephem.pi * lon).znorm
+        lon = ephem.degrees(2.0 * ephem.pi * lon).znorm
+        self.log.info("Current mount longitude from GPS: %s" % lon)
+        return lon
 
     def get_gps_time(self):
         """
@@ -407,6 +421,7 @@ class NexStar:
         second = ord(resp[2])
         d = ephem.Date("%d/%02d/%02d %d:%02d:%02d" %
                       (year, month, day, hour, minute, second))
+        self.log.info("Current mount time from GPS: %s" % d)
         return d
 
     def get_rtc_time(self):
@@ -440,6 +455,7 @@ class NexStar:
         second = ord(resp[2])
         d = ephem.Date("%d/%02d/%02d %d:%02d:%02d" %
                       (year, month, day, hour, minute, second))
+        self.log.info("Current mount time from the RTC: %s" % d)
         return d
 
     def set_rtc_time(self, t):
@@ -447,6 +463,8 @@ class NexStar:
         set the time in the mount's RTC unit. takes datetime object as
         argument
         """
+        self.log.info("Setting mount RTC time to %s UTC" %
+                      t.strftime("%Y-%m-%d %H:%M:%S"))
         # first set the date
         cmd = "P" + chr(3) + chr(178) + chr(131) + chr(t.month) + \
             chr(t.day) + chr(0) + chr(0)
@@ -475,7 +493,7 @@ class NexStar:
         self.ser.write("V")
         resp = self.ser.read(3)
         version = "%d.%d" % (ord(resp[0]), ord(resp[1]))
-        print "Version is %s" % version
+        self.log.info("Mount version is %s" % version)
         return version
 
     def get_device_versions(self):
@@ -483,12 +501,14 @@ class NexStar:
         query versions for the specific components of the telescope
         """
         versions = {}
+        self.log.info("Querying versions for telescope components:")
         for k, v in NexStar.devices.items():
             cmd = "P" + chr(1) + chr(v) + chr(254) + chr(0) + \
                 chr(0) + chr(0) + chr(2)
             self.ser.write(cmd)
             resp = self.ser.read(3)
             version = "%d.%d" % (ord(resp[0]), ord(resp[1]))
+            self.log.info("\t %s => %s" % (k, version))
             versions[k] = version
         return versions
 
@@ -499,6 +519,7 @@ class NexStar:
         self.ser.write("m")
         resp = self.ser.read(2)
         i = ord(resp[0])
+        self.log.info("Telescope model is a %s" % NexStar.models[i])
         return NexStar.models[i]
 
     def echo(self, s):
@@ -507,6 +528,8 @@ class NexStar:
         """
         self.ser.write("K" + s[0])
         resp = self.ser.read(2)
+        self.log.info("Sending echo command to mount:  %s -> %s" %
+                      (s[0], resp[0]))
         return resp[0]
 
     def aligned(self):
@@ -517,8 +540,10 @@ class NexStar:
         resp = self.ser.read(2)
         align = ord(resp[0])
         if align == 1:
+            self.log.info("Mount is aligned.")
             return True
         else:
+            self.log.info("Mount is not aligned.")
             return False
 
     def goto_in_progress(self):
@@ -527,9 +552,12 @@ class NexStar:
         """
         self.ser.write("L")
         resp = self.ser.read(2)
+        self.log.info("Is the Mount in the middle of a GOTO?")
         if resp[0] == "0":
+            self.log.info("\t No.")
             return False
         else:
+            self.log.info("\t Yes.")
             return True
 
     def cancel_goto(self):
@@ -539,8 +567,8 @@ class NexStar:
         self.ser.write("M")
         resp = self.ser.read(1)
         if resp == '#':
-            print "GOTO cancelled"
+            self.log.info("Mount GOTO command cancelled.")
             return True
         else:
-            print "Error cancelling GOTO"
+            self.log.error("Error cancelling GOTO command.")
             return False

@@ -1,4 +1,22 @@
 #!/usr/bin/env python
+"""
+            VantagePro
+
+A collection of classes and functions that implements the Davis Instruments
+VantagePro communication protocol. The information is gleaned from the
+document VantageSerialProtocolDocs_v230.pdf
+
+Author                     Version             Date
+--------------------------------------------------------
+TE Pickering                 0.1             20130205
+
+TODO
+--------------------------------------------------------
+
+Updates
+--------------------------------------------------------
+
+"""
 
 import sys
 import serial
