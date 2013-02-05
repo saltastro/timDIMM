@@ -572,3 +572,21 @@ class NexStar:
         else:
             self.log.error("Error cancelling GOTO command.")
             return False
+
+    def site(self):
+        s = ephem.Observer()
+        gps_lock = self.is_gps_linked()
+        if gps_lock:
+            self.info.log("Setting current site from GPS.")
+            s.lat = self.get_gps_latitude()
+            s.long = self.get_gps_longitude()
+            s.date = self.get_gps_time()
+        else:
+            self.info.log("Setting current site from handset and computer.")
+            s.lat, s.long = self.get_location()
+            s.date = ephem.now()
+        s.elevation = 3200
+        s.temp = 10
+        s.compute_pressure()
+        s.horizon('-6')
+        return s
