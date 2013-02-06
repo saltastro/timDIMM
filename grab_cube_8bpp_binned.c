@@ -50,10 +50,17 @@ int main(int argc, char *argv[])
   dc1394_t * d;
   dc1394camera_list_t * list;
   dc1394error_t err;
+  double exptime;
   char *filename;
-  
+
+  if (argc != 4) {
+      printf("Usage: grab_cube_8bpp_binned <nframes> <FITS filename> <exp time (ms)>");
+      exit(0);
+  }
+
   grab_n_frames = atoi(argv[1]);
   filename = argv[2];
+  exptime = 1.0e-3*atof(argv[3]);
   
   width = 320;
   height = 240;
@@ -126,9 +133,9 @@ int main(int argc, char *argv[])
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to manual");
   err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
-  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, 3.0e-3);
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exptime);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf("I: exptime is %f s\n", 3.0e-3);
+  printf("I: exptime is %f s\n", exptime);
   
   // set gain manually.  use relative value here in range 48 to 730. 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
@@ -140,7 +147,7 @@ int main(int argc, char *argv[])
   // set brightness manually.  use relative value in range 0 to 1023.
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_BRIGHTNESS, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
-  err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 200);
+  err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
   printf ("I: brightness is %d\n", 100);
   
