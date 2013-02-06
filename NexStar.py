@@ -18,6 +18,7 @@ Updates
 
 """
 
+import time
 import serial
 import ephem
 import datetime
@@ -133,6 +134,12 @@ class NexStar:
             resp = self.ser.read(1)
             return False
 
+    def goto_object(self, obj):
+        """
+        take ephem object and slew to it
+        """
+        self.goto_radec(obj.ra, obj.dec, precise=True)
+
     def goto_azel(self, az, el, precise=True):
         """
         slew to Az, El
@@ -229,7 +236,7 @@ class NexStar:
             resp = self.ser.read(1)
             if resp != '#':
                 self.ser.read(1)
-                self.log.error("Error setting slew rates.")
+                self.log.error("Error setting slew rates: %s" % resp)
                 return False
         else:
             assert rate >= 0, 'Slew rate must be >= 0!'
@@ -327,14 +334,15 @@ class NexStar:
         q = t.hour
         r = t.minute
         s = t.second
-        t = t.month
+        tm = t.month
         u = t.day
         v = t.year - 2000
-        cmd = "H" + chr(q) + chr(r) + chr(s) + chr(t) + \
+        cmd = "H" + chr(q) + chr(r) + chr(s) + chr(tm) + \
             chr(u) + chr(v) + chr(w) + chr(x)
         self.log.info("Setting mount time to %s UTC" %
                       t.strftime("%Y-%m-%d %H:%M:%S"))
         self.ser.write(cmd)
+        time.sleep(2)
         resp = self.ser.read(1)
         if resp != '#':
             self.ser.read(1)
@@ -574,6 +582,10 @@ class NexStar:
             return False
 
     def site(self):
+        """
+        use mount information to create an ephem.Observer() object for use with
+        catalogs and such.
+        """
         s = ephem.Observer()
         gps_lock = self.is_gps_linked()
         if gps_lock:
