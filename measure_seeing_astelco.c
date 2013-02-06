@@ -55,13 +55,13 @@ int boxsize = 20;
  double r = 0.130;
  */
 
-/* SAAO mask values */
+/* ASTELCO mask values */
 /*  20101228:  determined DIMM pixel scale to be 1.78"/pixel using HR1866 
  and HR8895 as astrometric double stars
  */
 double pixel_scale = 1.78;
-double d = 0.050;
-double r = 0.200;
+double d = 0.0735;
+double r = 0.190;
 
 double lambda = 0.6e-6;
 
