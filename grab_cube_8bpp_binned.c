@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
   char *filename;
 
   if (argc != 4) {
-      printf("Usage: grab_cube_8bpp_binned <nframes> <FITS filename> <exp time (ms)>");
+      printf("Usage: grab_cube_8bpp_binned <nframes> <FITS filename> <exp time (ms)>\n");
       exit(0);
   }
 
