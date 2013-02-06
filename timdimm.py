@@ -24,6 +24,24 @@ def salt_site():
     salt.date = ephem.now()
     return salt
 
+# read in xephem's sky 2k catalog
+def sky2k_catalog(site=None):
+    fp = open("/opt/local/share/xephem/catalogs/SKY2k65.edb")
+    lines = fp.readlines()
+    fp.close()
+    stars = {}
+
+    p = re.compile('#')
+    for line in lines:
+        if not p.match(line):
+            obj = ephem.readdb(line)
+            names = obj.name.split('|')
+            for name in names:
+                stars[name] = obj
+                if site:
+                    stars[name].compute(site)
+    return stars
+
 # read in HR catalog list used by turbina
 def hr_catalog(site=None):
     fp = open("star.lst", "r")
