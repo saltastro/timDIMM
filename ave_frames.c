@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   time_t start_sec, end_sec;
   suseconds_t start_usec, end_usec;
   float elapsed_time, fps;
-  int i, j, status;
+  int i, j, status = 0;
   unsigned int min_bytes, max_bytes, max_height, max_width;
   unsigned int actual_bytes;
   uint64_t total_bytes = 0;

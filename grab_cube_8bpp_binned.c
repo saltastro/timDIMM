@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   time_t start_sec, end_sec;
   suseconds_t start_usec, end_usec;
   float elapsed_time, fps;
-  int i, status;
+  int i, status = 0;
   unsigned int min_bytes, max_bytes, max_height, max_width;
   unsigned int actual_bytes;
   uint64_t total_bytes = 0;
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
   
   nelements = naxes[0]*naxes[1]*naxes[2];
   
-  stderr = freopen("grab_cube.log", "w", stderr);
+  // stderr = freopen("grab_cube.log", "w", stderr);
   
   d = dc1394_new ();
   if (!d)
@@ -161,16 +161,16 @@ int main(int argc, char *argv[])
   /*-----------------------------------------------------------------------
    *  print allowed and used packet size
    *-----------------------------------------------------------------------*/
-  err=dc1394_format7_get_packet_parameters(camera, DC1394_VIDEO_MODE_FORMAT7_1, &min_bytes, &max_bytes);
+  err = dc1394_format7_get_packet_parameters(camera, DC1394_VIDEO_MODE_FORMAT7_1, &min_bytes, &max_bytes);
   
   DC1394_ERR_RTN(err,"Packet para inq error");
   printf( "camera reports allowed packet size from %d - %d bytes\n", min_bytes, max_bytes);
   
-  err=dc1394_format7_get_packet_size(camera, DC1394_VIDEO_MODE_FORMAT7_1, &actual_bytes);
+  err = dc1394_format7_get_packet_size(camera, DC1394_VIDEO_MODE_FORMAT7_1, &actual_bytes);
   DC1394_ERR_RTN(err,"dc1394_format7_get_packet_size error");
   printf( "camera reports actual packet size = %d bytes\n", actual_bytes);
   
-  err=dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
+  err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_RTN(err,"dc1394_query_format7_total_bytes error");
   printf( "camera reports total bytes per frame = %"PRId64" bytes\n",
          total_bytes);
@@ -178,19 +178,20 @@ int main(int argc, char *argv[])
   /*-----------------------------------------------------------------------
    *  have the camera start sending us data
    *-----------------------------------------------------------------------*/
-  err=dc1394_video_set_transmission(camera,DC1394_ON);
-  if (err!=DC1394_SUCCESS) {
+  err = dc1394_video_set_transmission(camera,DC1394_ON);
+  if (err != DC1394_SUCCESS) {
     dc1394_log_error("unable to start camera iso transmission");
     dc1394_capture_stop(camera);
     dc1394_camera_free(camera);
     exit(1);
   }
-  
+
   // set up FITS image and capture
   fits_create_file(&fptr, filename, &status);
-  dc1394_get_image_size_from_video_mode(camera, DC1394_VIDEO_MODE_FORMAT7_1, &width, &height);
+  dc1394_get_image_size_from_video_mode(camera, DC1394_VIDEO_MODE_FORMAT7_1,
+					&width, &height);
   fits_create_img(fptr, BYTE_IMG, 3, naxes, &status);
-  
+
   /*-----------------------------------------------------------------------
    *  capture frames and measure the time for this operation
    *-----------------------------------------------------------------------*/
@@ -225,7 +226,6 @@ int main(int argc, char *argv[])
                    naxes[0]*naxes[1], 
                    frame->image-1, 
                    &status);
-    
     // release buffer
     dc1394_capture_enqueue(camera,frame);
   }
