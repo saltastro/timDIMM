@@ -62,6 +62,11 @@ int main(int argc, char *argv[])
   filename = argv[2];
   exptime = 1.0e-3*atof(argv[3]);
   
+  fps = 1.0/exptime;
+  if (fps > 330.0) {
+	  fps = 330.0;
+  }
+
   width = 320;
   height = 240;
   naxes[0] = width;
@@ -124,9 +129,9 @@ int main(int argc, char *argv[])
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to manual");
   err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_FRAME_RATE, DC1394_TRUE);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to absolute mode");
-  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, 330.0);
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, fps);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
-  printf("I: framerate is %f fps\n", 330.0);
+  printf("I: framerate is %f fps\n", fps);
   
   // set the shutter speed to absolute value in seconds 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER, DC1394_FEATURE_MODE_MANUAL);
