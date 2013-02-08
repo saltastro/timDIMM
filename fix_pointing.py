@@ -36,19 +36,6 @@ dirs = {'U': 'Up',
         'L': 'Left',
         'R': 'Right'}
 
-
-def nudge(t, dir):
-    t.set_slew_rate(2, dir, fixed=True)
-    time.sleep(1)
-    t.set_slew_rate(0, dir, fixed=True)
-
-
-def tweak(t, dir):
-    t.set_slew_rate(1, dir, fixed=True)
-    time.sleep(1)
-    t.set_slew_rate(0, dir, fixed=True)
-
-
 if __name__ == '__main__':
     tel = NexStar.NexStar()
     pid = run("./video_feed")
@@ -75,10 +62,10 @@ if __name__ == '__main__':
             res = raw_input('---> ')
             if re.match('[UDLW]', res):
                 print "Nudge %s" % dirs[res.upper()]
-                nudge(tel, dirs[res.upper()])
+                tel.nudge(dirs[res.upper()])
             elif re.match('[udlr]', res):
                 print "Tweak %s" % dirs[res.upper()]
-                tweak(tel, dirs[res.upper()])
+                tel.tweak(dirs[res.upper()])
             elif re.match('[kK]', res):
                 print "Skipping"
                 break

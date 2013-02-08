@@ -24,6 +24,18 @@ def salt_site():
     salt.date = ephem.now()
     return salt
 
+# set up ephem Observer for the entoto site
+def entoto_site():
+    site = ephem.Observer()
+    site.lat = "+09:06:28.14"
+    site.long = "38:48:29.42"
+    site.elevation = 3174
+    site.temp = 10
+    site.compute_pressure()
+    site.horizon = '-12'
+    site.date = ephem.now()
+    return site
+
 # read in xephem's sky 2k catalog
 def sky2k_catalog(site=None):
     fp = open("/opt/local/share/xephem/catalogs/SKY2k65.edb")

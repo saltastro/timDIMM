@@ -602,3 +602,19 @@ class NexStar:
         s.compute_pressure()
         s.horizon('-6')
         return s
+
+    def nudge(t, dir):
+        """
+        macro to do a small move in direction, dir, and then stop
+        """
+        self.set_slew_rate(2, dir, fixed=True)
+        time.sleep(2)
+        self.set_slew_rate(0, dir, fixed=True)
+
+    def tweak(t, dir):
+        """
+        macro to do a tiny move in direction, dir, and then stop
+        """
+        self.set_slew_rate(1, dir, fixed=True)
+        time.sleep(2)
+        self.set_slew_rate(0, dir, fixed=True)
