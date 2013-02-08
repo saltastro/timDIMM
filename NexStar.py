@@ -42,7 +42,7 @@ class NexStar:
     fixed_slew = {"Right": (16, 36), "Left": (16, 37),
                   "Up": (17, 36), "Down": (17, 37)}
 
-    def __init__(self, port="/dev/tty.usbserial"):
+    def __init__(self, port="/dev/tty.usbserial-A90160BN"):
         self.ser = serial.Serial()
         self.ser.port = port
         self.ser.baudrate = 9600
@@ -603,18 +603,22 @@ class NexStar:
         s.horizon('-6')
         return s
 
-    def nudge(t, dir):
+    def nudge(self, dir):
         """
         macro to do a small move in direction, dir, and then stop
         """
-        self.set_slew_rate(2, dir, fixed=True)
-        time.sleep(2)
+        self.set_tracking_mode(0)
+        self.set_slew_rate(3, dir, fixed=True)
+        time.sleep(1)
         self.set_slew_rate(0, dir, fixed=True)
+        self.set_tracking_mode(1)
 
-    def tweak(t, dir):
+    def tweak(self, dir):
         """
         macro to do a tiny move in direction, dir, and then stop
         """
-        self.set_slew_rate(1, dir, fixed=True)
+        self.set_tracking_mode(0)
+        self.set_slew_rate(2, dir, fixed=True)
         time.sleep(2)
         self.set_slew_rate(0, dir, fixed=True)
+        self.set_tracking_mode(1)

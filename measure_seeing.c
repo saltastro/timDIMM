@@ -56,10 +56,10 @@ int boxsize = 20;
  */
 
 /* SAAO mask values */
-/*  20101228:  determined DIMM pixel scale to be 1.78"/pixel using HR1866 
- and HR8895 as astrometric double stars
+/*  20130208:  determined DIMM pixel scale to be 1.046"/pixel using HR1866 
+ as an astrometric double star
  */
-double pixel_scale = 1.78;
+double pixel_scale = 1.046;
 double d = 0.050;
 double r = 0.200;
 

@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
   fpixel = 1;
   
   gain = 450;
-  exptime = 100.0e-3;
-  rate = 3;
+  exptime = 3;
+  rate = .33;
   brightness = 100;
   
   nelements = naxes[0]*naxes[1];
