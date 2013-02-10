@@ -606,22 +606,27 @@ class NexStar:
         s.horizon('-6')
         return s
 
-    def nudge(self, dir):
+    def nudge(self, direction, rate):
         """
-        macro to do a small move in direction, dir, and then stop
+        macro to do a move in direction, dir, and then stop. no idea why i need to
+        repeat the command to get it to take.  got information from:
+        NexStar_AUX_Commands_10.pdf
         """
-        self.set_tracking_mode(0)
-        self.set_slew_rate(3, dir, fixed=True)
+        if rate not in range(10):
+            self.log.error("Must specify move rate in valid range of 0-9")
+            return False
+        if direction not in self.fixed_slew.keys():
+            self.log.error("Must specify valid direction: Up, Down, Left, or Right.")
+            return False
+        destid = self.fixed_slew[direction][0]
+        msgid = self.fixed_slew[direction][1]
+        cmd = struct.pack("BBBBBB", 0x50, 2, destid, msgid, rate, 1)
+        self.ser.write(cmd)
+        self.ser.write(cmd)
         time.sleep(1)
-        self.set_slew_rate(0, dir, fixed=True)
-        self.set_tracking_mode(1)
+        cmd = struct.pack("BBBBBB", 0x50, 2, destid, msgid, 0, 1)
+        self.ser.write(cmd)
+        self.ser.write(cmd)
+        resp = self.ser.read(6)
+        return resp
 
-    def tweak(self, dir):
-        """
-        macro to do a tiny move in direction, dir, and then stop
-        """
-        self.set_tracking_mode(0)
-        self.set_slew_rate(2, dir, fixed=True)
-        time.sleep(2)
-        self.set_slew_rate(0, dir, fixed=True)
-        self.set_tracking_mode(1)
