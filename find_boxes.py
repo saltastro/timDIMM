@@ -16,11 +16,10 @@ def rfits(file):
 def daofind(im):
     mean = np.mean(im)
     sig = np.std(im)
-    smooth = nd.gaussian_filter(im, 2.0)
-    clip = smooth >= (mean + 1.0)
+    smooth = nd.gaussian_filter(im, 1.5)
+    clip = smooth >= (mean + 5.0)
     labels, num = nd.label(clip)
     pos = nd.center_of_mass(im, labels, range(num + 1))
-    print num
     return num, pos[1:]
 
 
@@ -43,13 +42,7 @@ if __name__ == '__main__':
         output.close()
         x = xsum / 2
         y = ysum / 2
-        if np.abs(x - 160.0) < 20 and \
-               np.abs(y - 120.0) < 20 and \
-               os.path.exists("SYNCME"):
-            print "\033[0;32mSYNCING TARGET!\033[0;39m"
-            os.system("sync")
-            os.system("rm SYNCME")
-            os.system("sleep 2")
+ 
     else:
         print "No or not enough stars found."
         output = open("init_cen_all", 'w')

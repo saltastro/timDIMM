@@ -5,9 +5,10 @@ import ephem
 import numpy as np
 
 # return airmass for ephem.Object
-def airmass(obj):
-    if obj.alt > 0.0:
-	secz = 1/np.cos(ephem.degrees('90:00:00')-obj.alt)
+def airmass(alt):
+    if alt > 0.0:
+	secz = 1/np.cos(ephem.degrees('90:00:00') -
+                        ephem.degrees(alt))
     else:
 	secz = 999.0
     return secz

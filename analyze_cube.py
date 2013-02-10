@@ -4,11 +4,11 @@ import sys
 import numpy as np
 from find_boxes import rfits, daofind
 
-pixel_scale = 1.22
+pixel_scale = 1.046
 dx = pixel_scale / 206265.0
-rd = 0.13
-d = 0.06
-lamb = 0.65e-6
+rd = 0.19
+d = 0.0735
+lamb = 0.6e-6
 
 
 def moments(data):
@@ -64,7 +64,7 @@ for i in range(image.shape[0]):
     n, test = daofind(image[i])
     im = image[i]
     v1 = np.var(im[0:50, 0:50])
-    v2 = np.var(im[270:319, 190:240])
+    v2 = np.var(im[0:50, 190:240])
     v = (v1 + v2) / 2
 
     if n == 2:

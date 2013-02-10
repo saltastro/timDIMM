@@ -73,9 +73,11 @@ class NexStar:
         """
         rev = a.norm / (2.0 * ephem.pi)
         if precise:
-            return "%8x" % int(rev * 4294967296)
+            resp = "%08x" % int(rev * 4294967296)
+            return resp.upper()
         else:
-            return "%4x" % int(rev * 65536)
+            resp = "%04x" % int(rev * 65536)
+            return resp.upper()
 
     def get_radec(self, precise=True):
         """
@@ -128,6 +130,7 @@ class NexStar:
         resp = self.ser.read(1)
         if resp == '#':
             self.log.info("Slewing to RA=%s, Dec=%s...." % (ra, dec))
+            self.log.info("\t raw command: %s" % full_cmd)
             return True
         else:
             self.log.error("Error in slew command...")
