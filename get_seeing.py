@@ -24,15 +24,15 @@ while True:
     x, y = np.loadtxt("init_cen_all", unpack=True)
     dx = x.mean() - 80.0
     dy = y.mean() - 120.0
-    if dx < -20.0:
+    if dx < -25.0:
         log.info("Star too far to left, moving right...")
-        t.nudge("Right", 2)
-    if dx > 20.0:
+        t.nudge("Right", 3)
+    if dx > 25.0:
         log.info("Star too far to right, moving left...")
-        t.nudge("Left", 2)
+        t.nudge("Left", 3)
     if dy > 30.0:
         log.info("Star too high, moving down...")
-        t.nudge("Up", 2)
+        t.nudge("Down", 3)
     if dy < -30.0:
         log.info("Star too low, moving up...")
-        t.nudge("Down", 2)
+        t.nudge("Up", 3)

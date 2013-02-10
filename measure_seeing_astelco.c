@@ -590,7 +590,11 @@ int main(int argc, char *argv[]) {
       }
       sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
       fprintf(cenfile, "%6.2f %6.2f %.1e\n", dist[f], sig[f], exptime);
-      avemax += box[0].max + box[1].max;
+      if (box[0].max > box[1].max) {
+	avemax += box[0].max;
+      } else {
+	avemax += box[1].max;
+      }
     }
     
     /* now average two exposures */
@@ -677,14 +681,16 @@ int main(int argc, char *argv[]) {
   printf("Elapsed time = %g seconds.\n", elapsed_time);
   printf("Framerate = %g fps.\n", fps);
 
-  avemax /= 2.0*nimages;
-  if (avemax > 200.0) {
+  avemax /= nimages;
+  printf("Avemax is %.3f\n", avemax);
+
+  if (avemax > 100.0) {
       exptime /= 2.0;
-      printf("\033[0;33mStar too bright, reducing exposure time to %.1e seconds.\033[0;39m", exptime);
+      printf("\033[0;33mStar too bright, reducing exposure time to %.1e seconds.\033[0;39m\n", exptime);
   }
-  if (avemax <  40.0) {
+  if (avemax <  30.0) {
       exptime *= 2.0;
-      printf("\033[0;33mStar too faint, increasing exposure time to %.1e seconds.\033[0;39m", exptime);
+      printf("\033[0;33mStar too faint, increasing exposure time to %.1e seconds.\033[0;39m\n", exptime);
   }
 
   init = fopen("exptime", "w");

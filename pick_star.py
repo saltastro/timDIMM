@@ -22,7 +22,7 @@ for star in cat.keys():
 
 log.info("Brightest star is %s at AZ: %s, EL: %s" % (brightest,
                                                      cat[brightest].az,
-                                                     cat[brightest].alt)
+                                                     cat[brightest].alt))
 
 t = NexStar.NexStar()
 t.goto_object(cat[brightest])
@@ -32,3 +32,8 @@ while t.goto_in_progress():
     log.info("\t Slewing AZ: %s EL: %s..." % (l[0], l[1]))
     time.sleep(1)
 log.info("Now on target.")
+
+fp = open("exptime", 'w')
+fp.write("1.0e-3\n")
+fp.close()
+

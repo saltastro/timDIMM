@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
     fits_report_error(stdout, fstatus);
     status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
                     buffer, nelements, names, messages, NXPA);
-    sprintf(xpastr, "image; box 160.0 120.0 60 20 0.0");
+    sprintf(xpastr, "image; box 80.0 120.0 60 20 0.0");
     status = XPASet(xpa, "timDIMM", "regions", "ack=false",
                     xpastr, strlen(xpastr), names, messages, NXPA);
     f++;

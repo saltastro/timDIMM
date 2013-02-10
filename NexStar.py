@@ -628,5 +628,6 @@ class NexStar:
         self.ser.write(cmd)
         self.ser.write(cmd)
         resp = self.ser.read(6)
+        self.set_tracking_mode(1)
         return resp
 
