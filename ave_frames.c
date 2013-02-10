@@ -99,13 +99,10 @@ int main(int argc, char *argv[])
   // configure camera for format7
   err = dc1394_video_set_mode(camera, DC1394_VIDEO_MODE_FORMAT7_1);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot choose format7_0");
-  printf ("I: video mode is format7_0\n");
   
   err = dc1394_format7_get_max_image_size (camera, DC1394_VIDEO_MODE_FORMAT7_1, 
                                            &max_width, &max_height);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size for format7_0");
-  printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
-  printf ("I: current image size is: height = %d, width = %d\n", height, width);
   
   err = dc1394_format7_set_roi (camera, 
                                 DC1394_VIDEO_MODE_FORMAT7_1, 
@@ -114,7 +111,6 @@ int main(int argc, char *argv[])
                                 0, 0, // left, top
                                 width, height); // width, height
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set roi");
-  printf ("I: roi is (0, 0) - (%d, %d)\n", width, height);
   
   // set the frame rate to absolute value in frames/sec
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_MANUAL);
@@ -123,7 +119,6 @@ int main(int argc, char *argv[])
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to absolute mode");
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, 100.0);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
-  printf("I: framerate is %f fps\n", 100.0);
   
   // set the shutter speed to absolute value in seconds 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER, DC1394_FEATURE_MODE_MANUAL);
@@ -132,25 +127,21 @@ int main(int argc, char *argv[])
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, 1.0e-2);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter");
-  printf("I: exptime is %f s\n", 1.0e-2);
   
   // set gain manually.  use relative value here in range 48 to 730. 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain to manual");
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_GAIN, 400);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain");
-  printf ("I: gain is %d\n", 400);
   
   // set brightness manually.  use relative value in range 0 to 1023.
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_BRIGHTNESS, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
-  printf ("I: brightness is %d\n", 100);
   
   err = dc1394_format7_get_total_bytes (camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get total bytes");
-  printf ("I: total bytes per frame are %"PRIu64"\n", total_bytes);
   
   // err = dc1394_feature_set_value (camera, DC1394_FEATURE_GAIN, 24);
   //DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Error setting gain");
@@ -175,11 +166,9 @@ int main(int argc, char *argv[])
   err=dc1394_format7_get_packet_parameters(camera, DC1394_VIDEO_MODE_FORMAT7_1, &min_bytes, &max_bytes);
   
   DC1394_ERR_RTN(err,"Packet para inq error");
-  printf( "camera reports allowed packet size from %d - %d bytes\n", min_bytes, max_bytes);
   
   err=dc1394_format7_get_packet_size(camera, DC1394_VIDEO_MODE_FORMAT7_1, &actual_bytes);
   DC1394_ERR_RTN(err,"dc1394_format7_get_packet_size error");
-  printf( "camera reports actual packet size = %d bytes\n", actual_bytes);
   
   /*-----------------------------------------------------------------------
    *  have the camera start sending us data
@@ -213,8 +202,6 @@ int main(int argc, char *argv[])
    *-----------------------------------------------------------------------*/
   gettimeofday(&start_time, NULL);
   
-  printf("Start capture:\n");
-  
   for( i = 0; i < grab_n_frames; ++i) {
     /*-----------------------------------------------------------------------
      *  capture one frame
@@ -239,7 +226,6 @@ int main(int argc, char *argv[])
   }
   
   gettimeofday(&end_time, NULL);
-  printf("End capture.\n");
   
   /*-----------------------------------------------------------------------
    *  stop data transmission
@@ -251,8 +237,6 @@ int main(int argc, char *argv[])
   
   elapsed_time = (float)((end_sec + 1.0e-6*end_usec) - (start_sec + 1.0e-6*start_usec));
   fps = grab_n_frames/elapsed_time;
-  printf("Elapsed time = %g seconds.\n", elapsed_time);
-  printf("Framerate = %g fps.\n", fps);
   
   err=dc1394_video_set_transmission(camera,DC1394_OFF);
   DC1394_ERR_RTN(err,"couldn't stop the camera?");

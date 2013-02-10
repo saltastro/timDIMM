@@ -56,9 +56,16 @@ def measure_seeing(b):
     quit.config(state=DISABLED)
     b.config(command=lambda but=b,p=pid: killmeasure_seeing(but, p))
 
+def pick_star():
+    main.config(state=DISABLED)
+    quit.config(state=DISABLED)
+    os.system("./pick_star.py")
+    main.config(state=NORMAL)
+    quit.config(state=NORMAL)
+
 root = Tk()
-root.title("timDIMM")
-root.geometry("200x250+100+0")
+root.title("ESSS DIMM")
+root.geometry("200x250")
 
 frame = Frame(root)
 frame.pack()
@@ -70,6 +77,10 @@ ds9.config(command=lambda b=ds9: dimm9(b))
 video = Button(frame, text="Video Feed")
 video.pack(padx=10, pady=5, fill=X)
 video.config(command=lambda b=video: videofeed(b))
+
+star = Button(frame, text="Pick Best Star")
+star.pack(padx=10, pady=5, fill=X)
+star.config(command=pick_star)
 
 main = Button(frame, text="Measure Seeing", width=180)
 main.pack(padx=10, pady=5, expand=True, fill=X)

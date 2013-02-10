@@ -608,9 +608,9 @@ class NexStar:
 
     def nudge(self, direction, rate):
         """
-        macro to do a move in direction, dir, and then stop. no idea why i need to
-        repeat the command to get it to take.  got information from:
-        NexStar_AUX_Commands_10.pdf
+        macro to do a move in a direction for 1 sec and then stop without 
+        interrupting tracking. no idea why i need to repeat the commands to get 
+        it to work.  got information from:  NexStar_AUX_Commands_10.pdf
         """
         if rate not in range(10):
             self.log.error("Must specify move rate in valid range of 0-9")

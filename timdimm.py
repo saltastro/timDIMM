@@ -55,6 +55,24 @@ def sky2k_catalog(site=None):
                     stars[name].compute(site)
     return stars
 
+# cull xephem's catalog to only include bright stars
+def bright_stars(site=None):
+    fp = open("/opt/local/share/xephem/catalogs/SKY2k65.edb")
+    lines = fp.readlines()
+    fp.close()
+    stars = {}
+
+    p = re.compile('#')
+    for line in lines:
+        if not p.match(line):
+            obj = ephem.readdb(line)
+            if site:
+                obj.compute(site)
+                if obj.mag < 2.0 and obj.alt > ephem.degrees("30:00:00"):
+                    names = obj.name.split('|')
+                    stars[names[0]] = obj
+    return stars
+
 # read in HR catalog list used by turbina
 def hr_catalog(site=None):
     fp = open("star.lst", "r")
