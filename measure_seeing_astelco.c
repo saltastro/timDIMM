@@ -575,7 +575,7 @@ int main(int argc, char *argv[]) {
     if (box[0].fwhm > 0.0 && box[1].fwhm > 0.0) {
       for (i=0; i<nboxes; i++) {
         fprintf(cenfile,
-                "%6.2f %6.2f %5.2f %.4f %.4f %.4f %.4f %.4f %.2f\t ",
+                "%6.2f %6.2f %5.2f %9.4f %8.4f %7.4f %7.4f %8.4f %5.3f\t ",
                 box[i].cenx,
                 box[i].ceny,
                 box[i].fwhm,
@@ -588,7 +588,7 @@ int main(int argc, char *argv[]) {
                 );
 	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
       }
-      fprintf(cenfile, "%.2f %.2f %.1e\n", dist[f], sig[f], exptime);    
+      fprintf(cenfile, "%6.2f %6.2f %.1e\n", dist[f], sig[f], exptime);
     }
     
     /* now average two exposures */

@@ -7,9 +7,9 @@ TIME=`date -u '+%Y%m%d-%H%M%S'`
 if [[ -s seeing.out ]]; then
     mv centroids.dat data/centroids_$TIME.dat
     cd data
-#    ../dimm_stats.py centroids_$TIME.dat
+    ../dimm_stats.py centroids_$TIME.dat
     cd ..
-#    ./plot.gnu
+    ./plot.gnu
     echo "image;text 25 5 # text={Seeing = `cat seeing.out`\"}" | xpaset timDIMM regions
     echo "image;text 290 5 # text={R0 = `cat r0.out` cm}" | xpaset timDIMM regions
     date +'%Y-%m-%dT%H:%M:%S%z' >> seeing.out
