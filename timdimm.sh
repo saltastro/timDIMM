@@ -2,7 +2,7 @@
 ./ave_frames 20 \!center.fits
 ./find_boxes.py center.fits
 cat center.fits | xpaset timDIMM fits
-./measure_seeing_astelco 10000 $1 `cat exptime`
+./measure_seeing 10000 $1 `cat exptime`
 TIME=`date -u '+%Y%m%d-%H%M%S'`
 if [[ -s seeing.out ]]; then
     mv centroids.dat data/centroids_$TIME.dat

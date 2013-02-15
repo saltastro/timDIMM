@@ -42,7 +42,7 @@ class NexStar:
     fixed_slew = {"Right": (16, 36), "Left": (16, 37),
                   "Up": (17, 36), "Down": (17, 37)}
 
-    def __init__(self, port="/dev/tty.usbserial-A90160BN"):
+    def __init__(self, port="/dev/tty.usbserial-AH01GROD"):
         self.ser = serial.Serial()
         self.ser.port = port
         self.ser.baudrate = 9600

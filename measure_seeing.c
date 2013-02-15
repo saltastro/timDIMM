@@ -55,12 +55,12 @@ int boxsize = 15;
  double r = 0.130;
  */
 
-/* SAAO mask values */
+/* ASTELCO mask values */
 /*  20130208:  determined DIMM pixel scale to be 1.046"/pixel using HR1866 
  as an astrometric double star
  */
 double pixel_scale = 1.046;
-double d = 0.050;
+double d = 0.05;
 double r = 0.200;
 
 double lambda = 0.6e-6;
@@ -327,7 +327,7 @@ int main(int argc, char *argv[]) {
   struct tm ut;
   time_t start_sec, end_sec;
   suseconds_t start_usec, end_usec;
-  float elapsed_time, fps;
+  float elapsed_time, fps, avemax;
   
   unsigned int actual_bytes;
   char *names[NXPA];
@@ -356,7 +356,12 @@ int main(int argc, char *argv[]) {
   naxes[0] = xsize;
   naxes[1] = ysize;
   fpixel = 1;
-  
+
+  fps = 1.0/exptime;
+  if (fps > 330.0) {
+      fps = 330.0;
+  }
+
   nelements = naxes[0]*naxes[1];
   
   mode = DC1394_VIDEO_MODE_FORMAT7_1;
@@ -387,11 +392,8 @@ int main(int argc, char *argv[]) {
   // configure camera for format7
   err = dc1394_video_set_mode(camera, mode);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't choose video mode.");
-  
   err = dc1394_format7_get_max_image_size(camera, mode, &max_width, &max_height);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot get max image size.");
-  //  printf ("I: max image size is: height = %d, width = %d\n", max_height, max_width);
-  //  printf ("I: current image size is: height = %d, width = %d\n", ysize, xsize);
   
   winleft = 0;
   wintop = 0;
@@ -403,17 +405,18 @@ int main(int argc, char *argv[]) {
                                winleft, wintop, // left, top
                                xsize, ysize);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't set ROI.");
-  //  printf("I: ROI is (%d, %d) - (%d, %d)\n", 
-  //     winleft, wintop, winleft+xsize, wintop+ysize);
   
   // set the frame rate to absolute value in frames/sec
-  err = dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_MANUAL);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to manual");
-  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_FRAME_RATE, DC1394_TRUE);
-  DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to absolute mode");
-  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, 330.0);
+  err = dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE,
+				DC1394_FEATURE_MODE_MANUAL);
+  DC1394_ERR_CLN_RTN(err, dc1394_camera_free (camera), "cannot set framerate to manual");
+  err = dc1394_feature_set_absolute_control(camera,
+					    DC1394_FEATURE_FRAME_RATE, DC1394_TRUE);
+  DC1394_ERR_CLN_RTN(err, dc1394_camera_free (camera),
+		     "cannot set framerate to absolute mode");
+  err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, fps);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
-  printf("I: framerate is %f fps\n", 330.0);
+  printf("I: framerate is %f fps\n", fps);
   
   // set the shutter speed to absolute value in seconds 
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER, DC1394_FEATURE_MODE_MANUAL);
@@ -429,18 +432,15 @@ int main(int argc, char *argv[]) {
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain to manual");
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_GAIN, 400);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set gain");
-  printf ("I: gain is %d\n", 400);
   
   // set brightness manually.  use relative value in range 0 to 1023.
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_BRIGHTNESS, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness to manual");
   err = dc1394_feature_set_value(camera, DC1394_FEATURE_BRIGHTNESS, 100);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set brightness");
-  printf ("I: brightness is %d\n", 100);
   
   err = dc1394_format7_get_total_bytes(camera, DC1394_VIDEO_MODE_FORMAT7_1, &total_bytes);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Can't get total bytes.");
-  // printf("I: total bytes per frame are %"PRIu64"\n", total_bytes);
   
   err = dc1394_capture_setup(camera, 16, DC1394_CAPTURE_FLAGS_DEFAULT);
   DC1394_ERR_CLN_RTN(err, dc1394_camera_free(camera), "Error capturing.");
@@ -514,7 +514,8 @@ int main(int argc, char *argv[]) {
   }
   
   froot = "seeing.fits";
-  
+  avemax = 0.0;
+
   gettimeofday(&start_time, NULL);
   
   /* get initial frame */
@@ -586,9 +587,14 @@ int main(int argc, char *argv[]) {
                 box[i].snr, 
                 box[i].strehl
                 );
-	sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
       }
+      sig[f] = sqrt(box[0].sigmaxy*box[0].sigmaxy + box[1].sigmaxy*box[1].sigmaxy);
       fprintf(cenfile, "%6.2f %6.2f %.1e\n", dist[f], sig[f], exptime);
+      if (box[0].max > box[1].max) {
+	avemax += box[0].max;
+      } else {
+	avemax += box[1].max;
+      }
     }
     
     /* now average two exposures */
@@ -659,6 +665,12 @@ int main(int argc, char *argv[]) {
   gettimeofday(&end_time, NULL);
   printf("End capture.\n");
   
+  /*-----------------------------------------------------------------------
+   *  stop data transmission
+   *-----------------------------------------------------------------------*/
+  err=dc1394_video_set_transmission(camera,DC1394_OFF);
+  DC1394_ERR_RTN(err,"couldn't stop the camera?");
+
   start_sec = start_time.tv_sec;
   start_usec = start_time.tv_usec;
   end_sec = end_time.tv_sec;
@@ -668,13 +680,23 @@ int main(int argc, char *argv[]) {
   fps = nimages/elapsed_time;
   printf("Elapsed time = %g seconds.\n", elapsed_time);
   printf("Framerate = %g fps.\n", fps);
-  
-  /*-----------------------------------------------------------------------
-   *  stop data transmission
-   *-----------------------------------------------------------------------*/
-  err=dc1394_video_set_transmission(camera,DC1394_OFF);
-  DC1394_ERR_RTN(err,"couldn't stop the camera?");
-  
+
+  avemax /= nimages;
+  printf("Avemax is %.3f\n", avemax);
+
+  if (avemax > 100.0) {
+      exptime /= 2.0;
+      printf("\033[0;33mStar too bright, reducing exposure time to %.1e seconds.\033[0;39m\n", exptime);
+  }
+  if (avemax <  30.0) {
+      exptime *= 2.0;
+      printf("\033[0;33mStar too faint, increasing exposure time to %.1e seconds.\033[0;39m\n", exptime);
+  }
+
+  init = fopen("exptime", "w");
+  fprintf(init, "%.2e\n", exptime);
+  fclose(init);
+
   /* analyze short exposure */
   printf("\t SHORT EXPOSURE\n");
   mean = gsl_stats_wmean(weight, 1, dist, 1, nimages);
@@ -712,12 +734,12 @@ int main(int argc, char *argv[]) {
   
   if (nbad < 30) {
     seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
-    printf("\033[0;33mAirmass corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_short);
-    printf("\033[0;33mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
+    printf("\033[0;32mAirmass corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_short);
+    printf("\033[0;32mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
     
     timestr = ctime(&end_sec);
     gmtime_r(&end_sec, &ut);
-    fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f %f\n",
+    fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f %f\n", 
 	    ut.tm_year+1900, 
 	    ut.tm_mon+1, 
 	    ut.tm_mday, 
