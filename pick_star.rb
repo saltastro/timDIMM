@@ -111,6 +111,7 @@ else
       sleep(5)
       system("./gto900_hr.rb #{best_hr}")
       sleep(5)
+      system("echo '1.0e-3' > exptime")
       puts t.run
     end
     

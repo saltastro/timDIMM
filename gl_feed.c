@@ -109,10 +109,10 @@ int main(int argc, char *argv[]) {
     
     srand48((unsigned)time(NULL));
     
-    gain = 500;
-    exptime = 3.0e-3;
-    rate = 330;
-    brightness = 300;
+    gain = 600;
+    exptime = 1.0e-1;
+    rate = 10;
+    brightness = 500;
 
     xsize = 320;
     ysize = 240;
@@ -282,12 +282,10 @@ int main(int argc, char *argv[]) {
             }
 
             grab_frame(camera, buffer, npixels*sizeof(char));
-            if (nimages % 30 == 0) {
-                XGetWindowAttributes(dpy, win, &gwa);
-                glViewport(0, 0, gwa.width, gwa.height);
-                DrawImage(buffer);
-                glXSwapBuffers(dpy, win);
-            }
+	    XGetWindowAttributes(dpy, win, &gwa);
+	    glViewport(0, 0, gwa.width, gwa.height);
+	    DrawImage(buffer);
+	    glXSwapBuffers(dpy, win);
             nimages++;
         }
     }
