@@ -26,7 +26,6 @@ wx = Array.new
 wx.push(salt)
 wx.push(wasp)
 wx.push(grav)
-#wx.push(ness)
 
 ngood = 0
 sum = 0
@@ -49,11 +48,10 @@ end
 
 s = GTO900.new()
 
-#t = Turbina.new
-t = nil
+t = Turbina.new
+#t = nil
 
 if t
-  puts "FUCK!"
   temp = t.temperature
   puts "\033[0;32mMASS Temperature: %s\033[0;39m" % temp
   flux = t.flux
