@@ -44,7 +44,7 @@ typedef struct _Back {
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
-int boxsize = 20;
+int boxsize = 17;
 
 /* MASSDIMM values */
 /*  20101228:  determined DIMM pixel scale to be 1.78"/pixel using HR1866 
@@ -164,7 +164,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
   double  sumy   = 0.0;
   double  sumyy  = 0.0;
   double  val = 0.0;
-  double  gain = 0.95;
+  double  gain = 0.98;
   double  rmom;
   double  dist, dx;
   double nsigma = 3.0;
