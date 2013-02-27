@@ -507,8 +507,6 @@ int main(int argc, char *argv[]) {
   froot = "seeing.fits";
   avemax = 0.0;
 
-  gettimeofday(&start_time, NULL);
-  
   /* get initial frame */
   grab_frame(camera, buffer2, nelements*sizeof(char));
   grab_frame(camera, buffer2, nelements*sizeof(char));
@@ -516,6 +514,8 @@ int main(int argc, char *argv[]) {
   grab_frame(camera, buffer2, nelements*sizeof(char));
   // add_gaussian(buffer2, 195.0, 130.0, 140.0, 1.5);
   // add_gaussian(buffer2, 140.0, 115.0, 140.0, 1.5);
+  
+  gettimeofday(&start_time, NULL);
   
   for (f=0; f<nimages; f++) {
     grab_frame(camera, buffer, nelements*sizeof(char));
