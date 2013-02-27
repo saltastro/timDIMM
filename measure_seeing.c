@@ -675,27 +675,6 @@ int main(int argc, char *argv[]) {
   avemax /= nimages;
   printf("Avemax is %.3f\n", avemax);
 
-  if (avemax > 100.0) {
-      exptime /= 2.0;
-      printf("\033[0;33mStar too bright, reducing exposure time to %.1e seconds.\033[0;39m\n", exptime);
-  }
-
-  if (avemax <  30.0) {
-      exptime *= 2.0;
-      if (exptime > 8.0e-3) {
-	  exptime = 8.0e-3;
-	  printf("\033[0;33mStar too faint, but exposure time max'ed out at %.1e seconds.\033[0;39m\n", 
-		 exptime);
-      } else {
-	  printf("\033[0;33mStar too faint, exposure time increased to %.1e seconds.\033[0;39m\n", 
-		 exptime);
-      }
-  }
-
-  init = fopen("exptime", "w");
-  fprintf(init, "%.2e\n", exptime);
-  fclose(init);
-
   /* analyze short exposure */
   printf("\t SHORT EXPOSURE\n");
   mean = gsl_stats_wmean(weight, 1, dist, 1, nimages);
@@ -732,6 +711,30 @@ int main(int argc, char *argv[]) {
   printf("Bad samples:  %d for short, %d for long.\n", nbad, nbad_l);
   
   if (nbad < 30) {
+
+    /* reduce exposure when too bright */
+    if (avemax > 100.0) {
+      exptime /= 2.0;
+      printf("\033[0;33mStar too bright, reducing exposure time to %.1e seconds.\033[0;39m\n", exptime);
+    }
+
+    /* increase if too faint, but max out at 8 ms */
+    if (avemax <  30.0) {
+      exptime *= 2.0;
+      if (exptime > 8.0e-3) {
+	exptime = 8.0e-3;
+	printf("\033[0;33mStar too faint, but exposure time max'ed out at %.1e seconds.\033[0;39m\n", 
+	       exptime);
+      } else {
+	printf("\033[0;33mStar too faint, exposure time increased to %.1e seconds.\033[0;39m\n", 
+	       exptime);
+      }
+    }
+
+    init = fopen("exptime", "w");
+    fprintf(init, "%.2e\n", exptime);
+    fclose(init);
+
     seeing_ave = pow(seeing_short, 1.75)*pow(seeing_long,-0.75);
     printf("\033[0;32mAirmass corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_short);
     printf("\033[0;32mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
@@ -766,6 +769,7 @@ int main(int argc, char *argv[]) {
   } else {
     printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
   }
+
   fclose(cenfile);
   fclose(out);
   

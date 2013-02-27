@@ -20,7 +20,6 @@ def daofind(im):
     clip = smooth >= (mean + 1.0)
     labels, num = nd.label(clip)
     pos = nd.center_of_mass(im, labels, range(num + 1))
-    print num
     return num, pos[1:]
 
 
