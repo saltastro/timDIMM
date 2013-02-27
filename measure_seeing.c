@@ -44,7 +44,7 @@ typedef struct _Back {
 Box box[3];
 Back back;
 long nelements, naxes[2], fpixel;
-int boxsize = 15;
+int boxsize = 20;
 
 /* MASSDIMM values */
 /*  20101228:  determined DIMM pixel scale to be 1.78"/pixel using HR1866 
