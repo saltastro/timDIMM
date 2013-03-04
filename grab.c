@@ -12,7 +12,7 @@
 
 #define NXPA 10
 
-int grab_frame(dc1394camera_t *c, char *buf, int nbytes) {
+int grab_frame(dc1394camera_t *c, unsigned char *buf, int nbytes) {
   dc1394video_frame_t *frame=NULL;
   dc1394error_t err;
   
@@ -37,28 +37,19 @@ int main(int argc, char *argv[]) {
   dc1394camera_list_t * list;
   dc1394error_t err;
   dc1394video_mode_t mode;
-  unsigned int min_bytes, max_bytes, max_height, max_width, winleft, wintop;
+  unsigned int max_height, max_width, winleft, wintop;
   uint64_t total_bytes = 0;
   
-  unsigned char *buffer, *buffer2;
+  unsigned char *buffer;
   unsigned char *average;
   fitsfile *fptr;
-  int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
-  int nbad = 0, nbad_l = 0;
-  char filename[256], xpastr[256];
-  char *timestr;
-  FILE *init, *out, *cenfile;
-  float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
-  double *dist, *sig, *dist_l, *sig_l, *weight, *weight_l;
-  double mean, var, var_l, avesig, airmass;
-  double r0, seeing_short, seeing_long, seeing_ave;
+  int fstatus, status, nimages, anynul, xsize, ysize;
+  char xpastr[256];
   struct timeval start_time, end_time;
-  struct tm ut;
   time_t start_sec, end_sec;
   suseconds_t start_usec, end_usec;
   float elapsed_time, fps;
   
-  unsigned int actual_bytes;
   char *names[NXPA];
   char *messages[NXPA];
   int packet;
@@ -174,7 +165,7 @@ int main(int argc, char *argv[]) {
   fits_report_error(stdout, fstatus);
   
   status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-                  buffer, nelements, names, messages, NXPA);
+                  (char *)buffer, nelements, names, messages, NXPA);
   sprintf(xpastr, "image; box 160.0 120.0 60 20 0.0");
   status = XPASet(xpa, "timDIMM", "regions", "ack=false",
                   xpastr, strlen(xpastr), names, messages, NXPA);

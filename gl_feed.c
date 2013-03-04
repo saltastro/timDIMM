@@ -28,7 +28,7 @@ GLXContext              glc;
 XWindowAttributes       gwa;
 XEvent                  xev;
 
-int grab_frame(dc1394camera_t *c, char *buf, int nbytes) {
+int grab_frame(dc1394camera_t *c, unsigned char *buf, int nbytes) {
     dc1394video_frame_t *frame=NULL;
     dc1394error_t err;
 
@@ -87,19 +87,17 @@ void DrawImage(unsigned char *buf) {
 
 int main(int argc, char *argv[]) {
     unsigned char *buffer;
-    int i, npixels;
+    int npixels;
 
     dc1394_t * dc;
     dc1394camera_t * camera;
     dc1394camera_list_t * list;
-    dc1394featureset_t features;
     dc1394error_t err;
     dc1394video_mode_t mode;
-    unsigned int min_bytes, max_bytes, max_height, max_width, winleft, wintop;
+    unsigned int max_height, max_width, winleft, wintop;
     uint64_t total_bytes = 0;
     
     struct timeval start_time, end_time;
-    struct tm ut;
     time_t start_sec, end_sec;
     suseconds_t start_usec, end_usec;
     float elapsed_time, fps;
@@ -129,20 +127,20 @@ int main(int argc, char *argv[]) {
     mode = DC1394_VIDEO_MODE_FORMAT7_1;
     dc = dc1394_new();
     if (!dc)
-        return -1;
+        exit(-1);
     err = dc1394_camera_enumerate(dc, &list);
     DC1394_ERR_RTN(err, "Failed to enumerate cameras.");
 
     if (list->num == 0) {
         dc1394_log_error("No cameras found.");
-        return -1;
+        exit(-1);
     }
 
     camera = dc1394_camera_new(dc, list->ids[0].guid);
     if (!camera) {
         dc1394_log_error("Failed to initialize camera with guid %"PRIx64".", 
                          list->ids[0].guid);
-        return -1;
+        exit(-1);
     }
     dc1394_camera_free_list(list);
 
@@ -218,7 +216,7 @@ int main(int argc, char *argv[]) {
         dc1394_log_error("Unable to start camera iso transmission.");
         dc1394_capture_stop(camera);
         dc1394_camera_free(camera);
-        return -1;
+        exit(-1);
     }
     printf("Camera successfully initialized.\n");
     
@@ -226,13 +224,13 @@ int main(int argc, char *argv[]) {
     dpy = XOpenDisplay(NULL);
     if(dpy == NULL) {
         printf("\n\tcannot connect to X server\n\n");
-        exit(0); 
+        exit(-1); 
     }
     root = DefaultRootWindow(dpy);
     vi = glXChooseVisual(dpy, 0, att);
     if (vi == NULL) {
         printf("\n\tno appropriate visual found\n\n");
-        exit(0);
+        exit(-1);
     }
     cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
     swa.colormap = cmap;
@@ -289,4 +287,5 @@ int main(int argc, char *argv[]) {
             nimages++;
         }
     }
+    return 0;
 } /* this is the } which closes int main(int argc, char *argv[]) { */

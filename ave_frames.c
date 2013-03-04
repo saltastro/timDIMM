@@ -41,11 +41,9 @@ int main(int argc, char *argv[]) {
     suseconds_t start_usec, end_usec;
     float elapsed_time, fps;
     int i, j, status;
-    unsigned int min_bytes, max_bytes, max_height, max_width;
-    unsigned int actual_bytes;
+    unsigned int max_height, max_width;
     uint64_t total_bytes = 0;
     unsigned int width, height;
-    dc1394featureset_t features;
     dc1394video_frame_t *frame=NULL;
     dc1394_t * d;
     dc1394camera_list_t * list;
