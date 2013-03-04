@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
   
     grab_n_frames = atoi(argv[1]);
     filename = argv[2];
-  
+    status = 0;
     width = 320;
     height = 240;
     naxes[0] = width;
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
     fits_report_error(stderr, status);
     free(buffer);
     free(average);
-  
+
     printf("wrote: %s\n", filename);
     printf("Readout is %d bits/pixel.\n", frame->data_depth);
   
