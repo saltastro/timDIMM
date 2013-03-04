@@ -5,7 +5,6 @@
 #include <math.h>
 #include <fitsio.h>
 #include <gsl/gsl_statistics.h>
-#include <xpa.h>
 #include <time.h>
 #include <sys/time.h>
 #include <string.h>
@@ -14,8 +13,6 @@
 #define REG_CAMERA_ABS_MIN                  0x000U
 #define REG_CAMERA_ABS_MAX                  0x004U
 #define REG_CAMERA_ABS_VALUE                0x008U
-
-#define NXPA 10
 
 int grab_frame(dc1394camera_t *c, unsigned char *buf, int nbytes) {
   dc1394video_frame_t *frame=NULL;
@@ -36,7 +33,7 @@ int grab_frame(dc1394camera_t *c, unsigned char *buf, int nbytes) {
 
 int main(int argc, char *argv[]) {
   
-  long nelements, naxes[2], fpixel;
+  long nelements, naxes[2];
   dc1394_t * dc;
   dc1394camera_t * camera;
   dc1394camera_list_t * list;
@@ -46,32 +43,23 @@ int main(int argc, char *argv[]) {
   
   unsigned char *buffer, *buffer2;
   double *average, *diff;
-  int j, f, fstatus, status, nimages, anynul, xsize, ysize;
+  int j, f, status, nimages, xsize, ysize;
   double mean, var, exp;
   struct timeval start_time, end_time;
   time_t start_sec, end_sec;
   suseconds_t start_usec, end_usec;
   float elapsed_time, fps;
   
-  int packet;
-  
   stderr = freopen("noise_test.log", "w", stderr);
   
   srand48((unsigned)time(NULL));
   
-  XPA xpa;
-  xpa = XPAOpen(NULL);
-  
-  packet = 10;
-  
-  fstatus = 0;
+  nimages = 0;
   status = 0;
-  anynul = 0;
   xsize = 320;
   ysize = 240;
   naxes[0] = xsize;
   naxes[1] = ysize;
-  fpixel = 1;
   
   nelements = naxes[0]*naxes[1];
   
@@ -207,19 +195,6 @@ int main(int argc, char *argv[]) {
     
     printf("%e %10.2f %10.3f\n", exp, mean, var);
     
-//    filename = sprintf("!noise_test_%d_1.fits", f);
-//    fits_create_file(&fptr, filename, &fstatus);
-//    fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
-//    fits_write_img(fptr, TBYTE, fpixel, nelements, buffer, &fstatus);
-//    fits_close_file(fptr, &fstatus);
-//    fits_report_error(stdout, fstatus);
-//    filename = sprintf("!noise_test_%d_2.fits", f);
-//    fits_create_file(&fptr, filename, &fstatus);
-//    fits_create_img(fptr, BYTE_IMG, 2, naxes, &fstatus);
-//    fits_write_img(fptr, TBYTE, fpixel, nelements, buffer2, &fstatus);
-//    fits_close_file(fptr, &fstatus);
-//    fits_report_error(stdout, fstatus);
-
   }
 
   gettimeofday(&end_time, NULL);

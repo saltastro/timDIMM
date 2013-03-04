@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
   unsigned char *buffer;
   unsigned char *average;
   fitsfile *fptr;
-  int f, fstatus, status, nimages, anynul, xsize, ysize;
+  int f, fstatus, status, nimages, xsize, ysize;
   char xpastr[256];
   double exp, exptime, rate;
   struct timeval start_time, end_time;
@@ -69,7 +69,6 @@ int main(int argc, char *argv[]) {
   
   fstatus = 0;
   status = 0;
-  anynul = 0;
   xsize = 320;
   ysize = 240;
   naxes[0] = xsize;

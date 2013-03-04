@@ -300,9 +300,9 @@ int main(int argc, char *argv[]) {
     char *names[NXPA];
     char *messages[NXPA];
     char filename[256], xpastr[256];
-    char *froot, *timestr;
+    char *froot;
     fitsfile *fptr;
-    int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
+    int i, j, f, fstatus, status, nimages, nboxes, test, xsize, ysize;
     int nbad = 0, nbad_l = 0;
     FILE *init, *out, *cenfile;
     float xx = 0.0, yy = 0.0, xsum = 0.0, ysum = 0.0;
@@ -332,7 +332,6 @@ int main(int argc, char *argv[]) {
     exptime = atof(argv[3]);
     fstatus = 0;
     status = 0;
-    anynul = 0;
     xsize = 320;
     ysize = 240;
     naxes[0] = xsize;
@@ -723,7 +722,6 @@ int main(int argc, char *argv[]) {
 	printf("\033[0;32mAirmass corrected seeing = %4.2f\"\033[0;39m\n\n", seeing_short);
 	printf("\033[0;32mFried Parameter, R0 = %.2f cm\033[0;39m\n\n", 100*r0);
     
-	timestr = ctime(&end_sec);
 	gmtime_r(&end_sec, &ut);
 	fprintf(out, "%d-%02d-%02d %02d:%02d:%02d %f %f %f %f %f %f\n", 
 		ut.tm_year+1900,

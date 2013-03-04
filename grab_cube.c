@@ -34,7 +34,7 @@
 int main(int argc, char *argv[])
 {
     fitsfile *fptr;
-    long fpixel=1, nelements, naxes[3];
+    long fpixel=1, naxes[3];
     dc1394camera_t *camera;
     int grab_n_frames;
     struct timeval start_time, end_time;
@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
     naxes[0] = width;
     naxes[1] = height;
     naxes[2] = grab_n_frames;
-    nelements = naxes[0]*naxes[1]*naxes[2];
 
     stderr = freopen("grab_cube.log", "w", stderr);
 

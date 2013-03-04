@@ -37,9 +37,6 @@ int main(int argc, char *argv[]) {
     dc1394camera_t *camera;
     int grab_n_frames;
     struct timeval start_time, end_time;
-    time_t start_sec, end_sec;
-    suseconds_t start_usec, end_usec;
-    float elapsed_time, fps;
     int i, j, status;
     unsigned int max_height, max_width;
     uint64_t total_bytes = 0;
@@ -209,14 +206,7 @@ int main(int argc, char *argv[]) {
     /*-----------------------------------------------------------------------
      *  stop data transmission
      *-----------------------------------------------------------------------*/
-    start_sec = start_time.tv_sec;
-    start_usec = start_time.tv_usec;
-    end_sec = end_time.tv_sec;
-    end_usec = end_time.tv_usec;
 
-    elapsed_time = (float)((end_sec + 1.0e-6*end_usec) - (start_sec + 1.0e-6*start_usec));
-    fps = grab_n_frames/elapsed_time;
-  
     err = dc1394_video_set_transmission(camera, DC1394_OFF);
     DC1394_ERR_RTN(err,"couldn't stop the camera?");
   

@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   unsigned char *buffer;
   unsigned char *average;
   fitsfile *fptr;
-  int fstatus, status, nimages, anynul, xsize, ysize;
+  int fstatus, status, nimages, xsize, ysize;
   char xpastr[256];
   struct timeval start_time, end_time;
   time_t start_sec, end_sec;
@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
   
   packet = atoi(argv[1]);
   
+  nimages = 0;
   fstatus = 0;
   status = 0;
-  anynul = 0;
   xsize = 320;
   ysize = 240;
   naxes[0] = xsize;
