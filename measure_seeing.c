@@ -105,7 +105,7 @@ double old_seeing(double var) {
 }
 
 /* measure the background in an annulus around the spot pattern */
-int background(char *image, int imwidth, int imheight) {
+int background(unsigned char *image, int imwidth, int imheight) {
   
   int i, j, backpix;
   int low_y, up_y, low_x, up_x;
@@ -163,7 +163,7 @@ int background(char *image, int imwidth, int imheight) {
 }
 
 /* measure centroid using center-of-mass algorithm */
-int centroid(char *image, int imwidth, int imheight, int num) {
+int centroid(unsigned char *image, int imwidth, int imheight, int num) {
   
   int i, j;
   double  max    = 0.0;
@@ -255,7 +255,7 @@ int centroid(char *image, int imwidth, int imheight, int num) {
   
 }
 
-int grab_frame(dc1394camera_t *c, char *buf, int nbytes) {
+int grab_frame(dc1394camera_t *c, unsigned char *buf, int nbytes) {
   dc1394video_frame_t *frame=NULL;
   dc1394error_t err;
   
@@ -272,7 +272,7 @@ int grab_frame(dc1394camera_t *c, char *buf, int nbytes) {
   return 1;
 }
 
-int add_gaussian(char *buffer, float cenx, float ceny, float a, float sigma) {
+int add_gaussian(unsigned char *buffer, float cenx, float ceny, float a, float sigma) {
   float gauss, rsq;
   int i, j, low_x, up_x, low_y, up_y, size;
   double xoff, yoff;
@@ -309,10 +309,10 @@ int main(int argc, char *argv[]) {
   dc1394camera_list_t * list;
   dc1394error_t err;
   dc1394video_mode_t mode;
-  unsigned int min_bytes, max_bytes, max_height, max_width, winleft, wintop;
+  unsigned int max_height, max_width, winleft, wintop;
   uint64_t total_bytes = 0;
   
-  char *buffer, *buffer2, *average;
+  unsigned char *buffer, *buffer2, *average;
   fitsfile *fptr;
   int i, j, f, fstatus, status, nimages, anynul, nboxes, test, xsize, ysize;
   int nbad = 0, nbad_l = 0;
@@ -329,7 +329,6 @@ int main(int argc, char *argv[]) {
   suseconds_t start_usec, end_usec;
   float elapsed_time, fps, avemax;
   
-  unsigned int actual_bytes;
   char *names[NXPA];
   char *messages[NXPA];
   
@@ -564,13 +563,7 @@ int main(int argc, char *argv[]) {
     
     dist[f] = stardist(0, 1);
     if (dist[f] > 55.0 || dist[f] < 15.0) {
-      weight[f] == 0.0;
-      /* 
-      printf("\n\n\033[0;31mABORTING measurement!  Lost at least one box.\033[0;39m\n\n");
-      sleep(3);
-      status = -1;
-      return(status);
-      */ 
+      weight[f] = 0.0;
     }
 
     if (box[0].fwhm > 0.0 && box[1].fwhm > 0.0) {
@@ -649,7 +642,7 @@ int main(int argc, char *argv[]) {
       fits_report_error(stdout, fstatus);
       
       status = XPASet(xpa, "timDIMM", "array [xdim=320,ydim=240,bitpix=8]", "ack=false",
-                      buffer, nelements, names, messages, NXPA);
+                      (char *)buffer, nelements, names, messages, NXPA);
       sprintf(xpastr, "image; box %f %f %d %d 0.0",
               box[0].x, box[0].y, boxsize, boxsize);
       status = XPASet(xpa, "timDIMM", "regions", "ack=false",
