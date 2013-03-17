@@ -69,9 +69,9 @@ root.geometry("200x250+100+0")
 frame = Frame(root)
 frame.pack()
 
-reboot = Button(frame, text="Reboot MASS Computer")
-reboot.pack(padx=10, pady=5, fill=X)
-reboot.config(command=lambda b=reboot: massreboot(b))
+#reboot = Button(frame, text="Reboot MASS Computer")
+#reboot.pack(padx=10, pady=5, fill=X)
+#reboot.config(command=lambda b=reboot: massreboot(b))
 
 ds9 = Button(frame, text="DS9")
 ds9.pack(padx=10, pady=5, fill=X)
