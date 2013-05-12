@@ -95,7 +95,7 @@ def parseElement(e):
     return (k, v)
 
 
-def parseICD(url="http://sgs.salt/xml/salt-tcs-icd.xml"):
+def parseICD(url="http://icd.salt/xml/salt-tcs-icd.xml"):
     """
     parser to take the XML ICD and turn it into a dict of clusters.
     each cluster in turn is a dict of values within the cluster.
