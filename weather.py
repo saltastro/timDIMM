@@ -12,7 +12,7 @@ from html5lib import treebuilders
 def salt():
     wx = {}
     try:
-        tcs = parseICD("http://sgs.salt/xml/salt-tcs-icd.xml")
+        tcs = parseICD("http://icd.salt/xml/salt-tcs-icd.xml")
         time = tcs['tcs xml time info']
         bms = tcs['bms external conditions']
         temps = bms['Temperatures']
