@@ -14,4 +14,3 @@ sleep(1)
 s.clear
 s.halt(dir)
 s.close
-sleep(2)
