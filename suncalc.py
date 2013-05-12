@@ -23,6 +23,10 @@ set = ephem.localtime(salt.next_setting(sun))
 
 now = ephem.localtime(ephem.now())
 
+salt.date = ephem.now()
+
+print "LST: %s" % salt.sidereal_time()
+
 t2rise = rise-now
 t2set = set-now
 
