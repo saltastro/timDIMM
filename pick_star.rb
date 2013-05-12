@@ -24,7 +24,6 @@ rh = 0.0
 
 wx = Array.new
 wx.push(salt)
-wx.push(wasp)
 wx.push(grav)
 
 ngood = 0
@@ -48,8 +47,8 @@ end
 
 s = GTO900.new()
 
-t = Turbina.new
-#t = nil
+#t = Turbina.new
+t = nil
 
 if t
   temp = t.temperature
