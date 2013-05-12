@@ -12,7 +12,7 @@ module Weather
   def salt
     begin
       timeout(5) do
-        doc = REXML::Document.new(open("http://sgs.salt/xml/salt-tcs-icd.xml").read)
+        doc = REXML::Document.new(open("http://icd.salt/xml/salt-tcs-icd.xml").read)
         doubles = doc.elements.to_a("//DBL")
         strings = doc.elements.to_a("//String")
         dbl = Hash.new
