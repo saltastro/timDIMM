@@ -47,8 +47,8 @@ end
 
 s = GTO900.new()
 
-#t = Turbina.new
-t = nil
+t = Turbina.new
+#t = nil
 
 if t
   temp = t.temperature
