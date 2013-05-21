@@ -4,7 +4,7 @@ import sys
 import os
 import numpy as np
 import scipy.ndimage as nd
-import pyfits
+from astropy.io import fits as pyfits
 
 
 def rfits(file):
