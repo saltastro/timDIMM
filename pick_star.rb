@@ -81,7 +81,7 @@ else
   best_hrs = best_star(lst)
   current_hr = `cat current_object`.to_i
   
-  if best_hrs[0] && best_hrs[1]
+  if best_hrs[0] && best_hrs[1] || best_hrs[0].to_i != current_hr
     if best_hrs[0].to_i == current_hr
       best_hr = best_hrs[1]
     else
