@@ -67,7 +67,7 @@ loop {
   d_dec = hms2deg(d) - hms2deg(dec)
 
   puts "\t %f degrees to go in RA, %f degrees to go in Dec...." % [d_ra, d_dec]
-  if d_ra.abs < 1.0/60.0 && d_dec.abs < 1.0/60.0
+  if d_ra.abs < 3.0/60.0 && d_dec.abs < 3.0/60.0
     puts "Done slewing."
     break
   end

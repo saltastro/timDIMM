@@ -42,16 +42,28 @@ class GTO900
   # terminated string, but not always....
   def read_GTO900
     string = ""
-    loop {
-      char = @port.read(1)
-      if char
-	break if char =~ /#/
-	string = string + char
-      else 
-	break
-      end
-    }
-#    return string + "\0"
+    begin
+      timeout(5) {
+        loop {
+          char = @port.read(1)
+          if char
+            break if char =~ /#/
+            string = string + char
+          else 
+            break
+          end
+        }
+      }
+    rescue TimeoutError
+      status = "Timeout"
+      return nil
+    rescue Errno::ECONNREFUSED
+      status = "Refusing connection"
+      return nil
+    rescue => why
+      status = "Error: #{why}"
+      return nil
+    end
     return string
     clear
   end
@@ -193,9 +205,13 @@ class GTO900
     command("#:GZ#")
     string = read_GTO900
     output = ""
-    d, m, s = string.scan(/(\d+)\*(\d+):(\d+)/)[0]
-    output = d + ":" + m + ":" + s
-    return output
+    if string
+      d, m, s = string.scan(/(\d+)\*(\d+):(\d+)/)[0]
+      output = d + ":" + m + ":" + s
+      return output
+    else
+      return nil
+    end
   end
 
   # command the GTO900 to slew to the target RA and Dec
