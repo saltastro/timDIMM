@@ -21,6 +21,7 @@ touch SYNCME
 mkdir -p /Library/WebServer/Documents/skycam/`date -v -1d +'%Y/%m%d'`/
 cd /Library/WebServer/Documents/skycam/`date -v -1d +'%Y/%m%d'`/
 mv /Library/WebServer/Documents/skycam/Data/* .
+ssh massdimm@massdimm "rm /var/www/skycam/Data/*"
 chmod go+r *
 cd /Library/WebServer/Documents/skycam
 /usr/bin/rsync -av --partial-dir=.rsync-partial/ 20* nfs4::seeingdata/skycam/.
