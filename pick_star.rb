@@ -24,7 +24,7 @@ rh = 0.0
 
 wx = Array.new
 wx.push(salt)
-wx.push(grav)
+#wx.push(grav)
 
 ngood = 0
 sum = 0
