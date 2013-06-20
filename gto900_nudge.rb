@@ -13,4 +13,5 @@ s.move(dir)
 sleep(1)
 s.clear
 s.halt(dir)
+sleep(1)
 s.close
