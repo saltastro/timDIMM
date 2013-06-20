@@ -8,7 +8,7 @@ from find_boxes import *
 
 
 def check_image():
-    os.system("./ave_frames 10 \!spiral.fits")
+    os.system("./ave_frames 30 \!spiral.fits")
     os.system("cat spiral.fits | xpaset timDIMM fits")
     hdu = rfits("spiral.fits")
     image = hdu.data
@@ -46,7 +46,7 @@ has_stars = check_image()
 if has_stars:
     print "Got stars right away!"
 else:
-    while n < 50:
+    while n < 500:
         n = n + 1
 
         for i in range(n):
