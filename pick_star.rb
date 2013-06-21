@@ -71,7 +71,7 @@ s.close
 sleep(1)
 
 # add logic here to avoid the weather mast
-if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 300.0)
+if side =~ /East/ && airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 300.0)
   puts "Fine to stay here."
   if t
     check_turbina(t)
