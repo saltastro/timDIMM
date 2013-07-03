@@ -696,13 +696,21 @@ int main(int argc, char *argv[]) {
     
     /* reduce exposure when too bright */
     if (avemax > 100.0) {
-      exptime /= 2.0;
+      if (exptime > 1.0e-3) {
+	exptime -= 1.0e-3;
+      } else {
+	exptime /= 2.0;
+      }
       printf("\033[0;33mStar too bright, reducing exposure time to %.1e seconds.\033[0;39m\n", exptime);
     }
 
     /* increase if too faint, but max out at 8 ms */
-    if (avemax <  30.0) {
-      exptime *= 2.0;
+    if (avemax < 20.0) {
+      if (exptime >= 1.0e-3) {
+	exptime += 1.0e-3;
+      } else {
+	exptime *= 2.0;
+      }
       if (exptime > 8.0e-3) {
 	exptime = 8.0e-3;
 	printf("\033[0;33mStar too faint, but exposure time max'ed out at %.1e seconds.\033[0;39m\n", 
