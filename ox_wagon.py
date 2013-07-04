@@ -14,17 +14,20 @@ from binutils import *
 class OxWagon:
     # set a 2 minute power outage delay
     pwr_delay = "0120"
-    # set a 3 minute watchdog timer delay
-    watch_delay = "0180"
+    # set a 5 minute watchdog timer delay
+    watch_delay = "0300"
 
     # cache the state when status() is queried
     state = {}
 
     # dict of most commonly used commands
-    commands = {'RESET':  "2C008000",
-                'OPEN':   "10428C00",
-                'CLOSE':  "14218000",
-                'MONITOR': "14228C00",
+    commands = {'RESET':    "2C008000",
+                'OPEN':     "10428C02",
+                'CLOSE':    "14218000",
+                'MONITOR':  "14228C02",
+                'SCOPE':    "00000002",
+                'LIGHT':    "00000001",
+                'OFF':      "00000000",
                 }
 
     # bit map for the first 16-bit register used to monitor status
@@ -51,7 +54,7 @@ class OxWagon:
                     False,
                     False,
                     False,
-                    False,
+                    'Telescope Powered On',
                     'Closed due to Power Failure',
                     False,
                     False,
