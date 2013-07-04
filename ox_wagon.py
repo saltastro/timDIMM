@@ -90,7 +90,11 @@ class OxWagon:
         on the delay parameters, and calculating the checksum.
         '''
         cmd_header = ":01101064000408"
-        cmd = cmd_header + cmd + self.watch_delay + self.pwr_delay
+        if cmd in self.commands:
+            cmd = cmd_header + self.commands[cmd] + \
+                  self.watch_delay + self.pwr_delay
+        else:
+            return False
 
         # use checksum from binutils.py
         sum = checksum(cmd + "0000")
@@ -107,26 +111,26 @@ class OxWagon:
         '''
         use pre-defined command to open the ox wagon completely
         '''
-        self.command(self.commands['OPEN'])
+        self.command('OPEN')
 
     def monitor(self):
         '''
         use pre-defined command to open the ox wagon slide roof only
         '''
-        self.command(self.commands['MONITOR'])
+        self.command('MONITOR')
 
     def close(self):
         '''
         use pre-defined command to close the ox wagon
         '''
-        self.command(self.commands['CLOSE'])
+        self.command('CLOSE')
 
     def reset(self):
         '''
         use pre-defined command to reset the ox wagon controller and
         clear forced closure bits
         '''
-        self.command(self.commands['RESET'])
+        self.command('RESET')
 
     def status(self):
         '''
@@ -170,4 +174,6 @@ if __name__ == '__main__':
                 print "%30s : \t %s" % (k, v)
         else:
             # eval is your friend!
-            eval("o.%s()" % sys.argv[1].lower())
+            method = sys.argv[1].lower()
+            args = ", ".join(sys.argv[2:])
+            eval("o.%s(%s)" % (method, args))
