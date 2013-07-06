@@ -6,6 +6,8 @@ require 'ast_utils'
 s = GTO900.new()
 
 s.clear
+s.clear
+s.clear
 
 puts "Initializing mount...."
 
