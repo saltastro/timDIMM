@@ -34,12 +34,12 @@ if h < 0.0
 else
   puts "Pointing West."
 
-  ih = 4518.79/3600.0
-  id = 568.47/3600.0
-  np = -216.44/3600.00
-  ch = -518.36/3600.0
-  me = 309.27/3600.0
-  ma = -465.78/3600.0
+  ih = -724.03/3600.0
+  id = -314.65/3600.0
+  np = -132.56/3600.00
+  ch = -461.46/3600.0
+  me = 204.74/3600.0
+  ma = -277.38/3600.0
 
   ra_deg = ra_deg + ih + ch/Math::cos(dec_deg*Math::PI/180.0) - ma*Math::cos(h*Math::PI/180.0)*Math::tan(dec_deg*Math::PI/180.0) + me*Math::sin(h*Math::PI/180.0)*Math::tan(dec_deg*Math::PI/180.0) + np*Math::tan(dec_deg*Math::PI/180.0)
   dec_deg = dec_deg - id - ma*Math::sin(h*Math::PI/180.0) - me*Math::cos(h*Math::PI/180.0)

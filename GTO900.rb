@@ -449,6 +449,7 @@ class GTO900
   def startup
     clear
     clear
+    clear
     long_format
 #    set_RA_backlash(0)
 #    set_Dec_backlash(0)
@@ -464,10 +465,12 @@ class GTO900
   # shutdown procedure
   def shutdown
     clear
-    command_az(180,0,0)
-    command_alt(32,22,32)
-    slew
-    park_mode
+    set_local_time
+    set_current_date
+    set_latitude(-32, 22, 32)
+    set_longitude(-20, 48, 30)
+    set_gmt_offset(-2)
+#    park_mode
   end
 
 end

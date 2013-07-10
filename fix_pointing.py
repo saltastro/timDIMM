@@ -66,7 +66,6 @@ if __name__ == '__main__':
             elif re.match('[qQxX]', res):
                 print "Exiting..."
                 os.system("kill -9 %d" % pid)
-                os.system("./gto900_park.rb")
                 exit()
             else:
                 print "\tNESW for big move"
@@ -75,4 +74,3 @@ if __name__ == '__main__':
                 print "\ta to accept to move on"
                 print "\tx or q to exit"
     os.system("kill -9 %d" % pid)
-    os.system("./gto900_park.rb")

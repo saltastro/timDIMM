@@ -1,9 +1,13 @@
 #!/bin/sh
 
+rm current_object
 ./ox_wagon.py RESET
 sleep 2
 ./ox_wagon.py OPEN
-sleep 2
+sleep 5
 ./turbina.rb init
+./gto900_check.rb > /dev/null
+./gto900_check.rb > /dev/null
+./gto900_check.rb
 ./gto900_init.rb
 echo "1.0e-3" > exptime

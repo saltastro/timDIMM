@@ -131,11 +131,11 @@ def best_star(lst)
 
   good = Array.new
   sort.each { |s|
-    if s[1][:airmass] < 1.7 && s[1][:vmag] < 1.9 && hms2deg(s[1][:ha]) > 0.5
+    if s[1][:airmass] < 1.6 && s[1][:vmag] < 2.3 && hms2deg(s[1][:ha]) > 0.5
       good.push(s[0])
     end
   }
-  return good[0], good[1], good[2]
+  return good[0], good[1]
 end
 
 def vis_strip(lst)
