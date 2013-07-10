@@ -71,7 +71,7 @@ s.close
 sleep(1)
 
 # add logic here to avoid the weather mast
-if side =~ /East/ && airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 300.0)
+if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 300.0) && File.exist?("current_object")
   puts "Fine to stay here."
   if t
     check_turbina(t)
@@ -79,7 +79,12 @@ if side =~ /East/ && airmass < 1.5 && !(alt < 75.0 && az > 285.0 && az < 300.0)
 else 
 
   best_hrs = best_star(lst)
-  current_hr = `cat current_object`.to_i
+
+  if File.exist?("current_object")
+    current_hr = `cat current_object`.to_i
+  else
+    current_hr = 0
+  end
   
   if best_hrs[0] && best_hrs[1] || best_hrs[0].to_i != current_hr
     if best_hrs[0].to_i == current_hr
