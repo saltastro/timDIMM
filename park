@@ -4,5 +4,6 @@ cd /Users/timdimm/MASSDIMM/timDIMM
 ./gto900_park.rb
 ./turbina.rb park
 sleep 2
+./gto900_check.rb
 ./ox_wagon.py CLOSE
 
