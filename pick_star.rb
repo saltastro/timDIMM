@@ -46,6 +46,8 @@ else
 end
 
 s = GTO900.new()
+s.clear
+s.clear
 
 t = Turbina.new
 #t = nil
