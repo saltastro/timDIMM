@@ -161,6 +161,14 @@ class GTO900
     return string
   end
 
+  # get local date
+  def get_local_date
+    command("#:GC#")
+    string = read_GTO900
+    string.gsub(':', '/')
+    return string
+  end
+
   # get LST
   def lst
     command("#:GS#")
