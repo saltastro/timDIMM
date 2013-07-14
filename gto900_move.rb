@@ -10,7 +10,7 @@ s = GTO900.new()
 s.clear
 s.set_center_rate(64)
 s.move(dir)
-sleep(15)
+sleep(5)
 s.clear
 s.halt(dir)
 sleep(1)

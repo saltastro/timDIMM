@@ -10,4 +10,5 @@ sleep 5
 ./gto900_check.rb > /dev/null
 ./gto900_check.rb
 ./gto900_init.rb
+./gto900_check.rb
 echo "1.0e-3" > exptime
