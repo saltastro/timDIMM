@@ -35,5 +35,6 @@ dd, dm, ds = d.split(':')
 s.command_ra(rh.to_i, rm.to_i, rs.to_i)
 s.command_dec(dd.to_i, dm.to_i, ds.to_i)
 s.sync
+puts "...synced to RA = %s, Dec = %s" % [r_new, d]
 
 s.close
