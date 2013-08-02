@@ -3,7 +3,8 @@ cd /Users/timdimm/MASSDIMM/timDIMM
 ./turbina.rb stop_now 
 ./gto900_park.rb
 ./turbina.rb park
-sleep 2
 ./gto900_check.rb
+echo "TELESCOPE PARKED.  CLOSING...."
+sleep 5
 ./ox_wagon.py CLOSE
 

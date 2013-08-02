@@ -705,7 +705,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* increase if too faint, but max out at 8 ms */
-    if (avemax < 20.0) {
+    if (avemax < 25.0) {
       if (exptime >= 1.0e-3) {
 	exptime += 1.0e-3;
       } else {

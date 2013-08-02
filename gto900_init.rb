@@ -25,16 +25,17 @@ date = s.get_local_date
 puts "At RA = %s, Dec = %s, Alt = %s, Az = %s, on the %s side of the pier" % [r, d, alt, az, side]
 
 ra_deg = hms2deg(r)
-offset = hms2deg("00:02:20")
+offset = hms2deg("00:01:10")
 new = ra_deg + offset
 r_new = sexagesimal(new).gsub("+", "")
-puts "Actually pointing at RA = %s..."
+#puts "Actually pointing at RA = %s..." % r_new
 
 rh, rm, rs = r_new.split(':')
 dd, dm, ds = d.split(':')
-s.command_ra(rh.to_i, rm.to_i, rs.to_i)
-s.command_dec(dd.to_i, dm.to_i, ds.to_i)
-s.sync
-puts "...synced to RA = %s, Dec = %s" % [r_new, d]
+#s.command_ra(rh.to_i, rm.to_i, rs.to_i)
+#s.command_dec(dd.to_i, dm.to_i, ds.to_i)
+#sleep(1)
+#s.sync
+#puts "...synced to RA = %s, Dec = %s" % [r_new, d]
 
 s.close

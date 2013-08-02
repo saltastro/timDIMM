@@ -45,10 +45,6 @@ else
   puts "\033[0;31mHigh Humidity ALERT: %.1f\033[0;39m" % rh
 end
 
-s = GTO900.new()
-s.clear
-s.clear
-
 t = Turbina.new
 #t = nil
 
@@ -59,18 +55,46 @@ if t
   puts "\033[0;32mMASS Flux: %s\033[0;39m" % flux
 end
 
-best_hr = ""
+lst = nil
+side = nil
+airmass = nil
+az = nil
+alt = nil
 
-s.clear
-s.clear
-s.clear
-lst = s.lst
-side = s.pier?
-airmass = s.airmass.to_f
-az = s.az.to_f
-alt = s.alt.to_f
-s.close
-sleep(1)
+begin
+  timeout(10) {
+    s = GTO900.new()
+    s.clear
+    s.clear
+    s.clear
+    s.clear
+
+    best_hr = ""
+
+    lst = s.lst
+    puts "LST: %s" % lst
+
+    side = s.pier?
+    puts "%s side of the pier" % side if side
+
+    airmass = s.airmass.to_f
+    puts "Airmass: %.2f" % airmass if airmass
+
+    az = s.az.to_f
+    puts "AZ: %.2f" % az if az
+
+    alt = s.alt.to_f
+    puts "ALT: %.2f" % alt if alt
+
+    sleep(1)
+    s.close
+  }
+rescue TimeoutError
+  puts "Telescope read timed out"
+  retry
+rescue => why
+  puts "Telescope read error: %s" % why
+end
 
 # add logic here to avoid the weather mast
 if side =~ /East/ && airmass < 1.6 && !(alt < 75.0 && az > 285.0 && az < 300.0) && File.exist?("current_object")

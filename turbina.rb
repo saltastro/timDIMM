@@ -257,7 +257,7 @@ class Turbina
     command("init")
     resp = read
     if resp
-      @status = resp
+      @status = "Initialized (%s)" % resp
     end
     return @status
   end

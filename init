@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rm current_object
+rm -f current_object
 ./ox_wagon.py RESET
 sleep 2
 ./ox_wagon.py OPEN
@@ -10,5 +10,14 @@ sleep 5
 ./gto900_check.rb > /dev/null
 ./gto900_check.rb
 ./gto900_init.rb
+./gto900_check.rb > /dev/null
+sleep 1
+./gto900_check.rb > /dev/null
 ./gto900_check.rb
+./turbina.rb etest
+./turbina.rb dtest
+./turbina.rb park
+./turbina.rb init
+./ox_wagon.py OPEN
+echo "READY TO OBSERVE!!!"
 echo "1.0e-3" > exptime

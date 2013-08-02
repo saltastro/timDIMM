@@ -15,9 +15,9 @@ class GTO900
   def sockopen(host, port)
     socket = nil
     status = nil
-    timeout = 5.0
+    time = 3.0
     begin
-      timeout(5) {
+      timeout(time) {
         socket = TCPSocket.open(host, port)
       }
     rescue TimeoutError
