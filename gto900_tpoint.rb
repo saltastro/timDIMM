@@ -22,7 +22,7 @@ h = calc_ha(lst, ra_deg)
 if h < 0.0
   puts "Pointing East."
 
-  ih = 2557.88/3600.0
+  ih = 0.0
   id = -272.95/3600.0
   np = 193.18/3600.0
   ch = 576.99/3600.0
