@@ -2,10 +2,19 @@
 
 require 'GTO900'
 require 'ast_utils'
+require 'timeout'
 
-s = GTO900.new()
+begin
+  timeout(10) {
+    s = GTO900.new()
 
-s.clear
-s.shutdown
+    s.clear
+    s.shutdown
 
-s.close
+    s.close
+  }
+rescue TimeoutError
+  puts "Timeout attempting to park telescope. Power off?"
+rescue => why
+  puts "Error parking telescope: %s" % why
+end

@@ -30,5 +30,5 @@ while [ 1 ]; do
 	rm seeing.out
     fi
 #    xpaset -p timDIMM saveimage png ds9.png
-    mv ds9.png /Users/timdimm/Sites/images/.
+#    mv ds9.png /Users/timdimm/Sites/images/.
 done

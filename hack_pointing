@@ -1,0 +1,4 @@
+#!/bin/sh
+cd /Users/timdimm/MASSDIMM/timDIMM
+./gto900_hackpointing.rb
+./gto900_hr.rb `cat current_object`
