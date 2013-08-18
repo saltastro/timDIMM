@@ -461,11 +461,11 @@ class GTO900
     long_format
 #    set_RA_backlash(0)
 #    set_Dec_backlash(0)
-    set_local_time
-    set_current_date
-    set_latitude(-32, 22, 32)
-    set_longitude(-20, 48, 30)
-    set_gmt_offset(-2)
+#    set_local_time
+#    set_current_date
+#    set_latitude(-32, 22, 32)
+#    set_longitude(-20, 48, 30)
+#    set_gmt_offset(-2)
 #    park_off
 #    haltall
   end
@@ -473,11 +473,11 @@ class GTO900
   # shutdown procedure
   def shutdown
     clear
-    set_local_time
-    set_current_date
-    set_latitude(-32, 22, 32)
-    set_longitude(-20, 48, 30)
-    set_gmt_offset(-2)
+#    set_local_time
+#    set_current_date
+#    set_latitude(-32, 22, 32)
+#    set_longitude(-20, 48, 30)
+#    set_gmt_offset(-2)
 #    park_mode
   end
 
