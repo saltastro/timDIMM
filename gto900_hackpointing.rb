@@ -21,7 +21,7 @@ date = s.get_local_date
 puts "At RA = %s, Dec = %s, Alt = %s, Az = %s, on the %s side of the pier" % [r, d, alt, az, side]
 
 ra_deg = hms2deg(r)
-offset = hms2deg("00:02:25")
+offset = hms2deg("00:01:13")
 new = ra_deg + offset
 r_new = sexagesimal(new).gsub("+", "")
 puts "Actually pointing at RA = %s..." % r_new
