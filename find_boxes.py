@@ -42,13 +42,13 @@ if __name__ == '__main__':
         output.close()
         x = xsum / 2
         y = ysum / 2
-#        if np.abs(x - 160.0) < 20 and \
-#               np.abs(y - 120.0) < 20 and \
-#               os.path.exists("SYNCME"):
-#            print "\033[0;32mSYNCING TARGET!\033[0;39m"
-#            os.system("sync")
-#            os.system("rm SYNCME")
-#            os.system("sleep 2")
+        if np.abs(x - 160.0) < 20 and \
+               np.abs(y - 120.0) < 20 and \
+               os.path.exists("SYNCME"):
+            print "\033[0;32mSYNCING TARGET!\033[0;39m"
+            os.system("sync")
+            os.system("rm SYNCME")
+            os.system("sleep 2")
     else:
         print "No or not enough stars found."
         output = open("init_cen_all", 'w')
