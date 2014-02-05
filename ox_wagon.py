@@ -9,6 +9,9 @@ import serial
 import io
 import sys
 from binutils import *
+import string
+
+from datetime import datetime
 
 
 class OxWagon:
@@ -45,13 +48,13 @@ class OxWagon:
                     'Remote Enabled',
                     'Slide Roof Slowdown',
                     'Slide Roof Moving',
-                    'Slide Roof Opened',
+                    'Slide Roof Fully Opened',
                     'Slide Roof Closed']
 
     # bit map for the second register
     reg_106f_map = ['Watchdog Tripped',
-                    False,
-                    False,
+                    'Drop Roof Inverter Fault',
+                    'Slide roof Inverter Fault',
                     False,
                     False,
                     'Telescope Powered On',
@@ -76,11 +79,10 @@ class OxWagon:
                                  bytesize=7,
                                  parity=serial.PARITY_EVEN,
                                  timeout=1)
+        
         # use this trick to make sure the CR-LF conversions are
         # handled correctly
-        self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser,
-                                                      self.ser),
-                                    newline='\r\n')
+        self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser), newline='\r\n')
         self.sio.flush()
         self.status()
 
@@ -95,6 +97,7 @@ class OxWagon:
                   self.watch_delay + self.pwr_delay
         else:
             return False
+        print cmd
 
         # use checksum from binutils.py
         sum = checksum(cmd + "0000")
@@ -103,14 +106,33 @@ class OxWagon:
 
         self.sio.write(unicode(to_send))
         self.sio.flush()
-
+     
         resp = self.sio.readline()
+        print resp
         return resp
 
-    def open(self):
+    def open(self, delay=600):
         '''
         use pre-defined command to open the ox wagon completely
         '''
+        #this is all here because i'm trying to figure out 
+        #who or what is running this at 3:15 every day
+        import traceback as tb
+        now=datetime.now()
+        fout=open('/Users/timdimm/ox.log', 'a')
+        if now.hour==15:
+           msg='I refuse to open during 3 pm, and I am not sure who is asking but they should stop'
+           print msg
+           fout.write(now)
+           fout.write(msg)
+           fout.write(tb.format_exc())
+           fout.write(str(tb.format_stack()))
+           fout.write('\n')
+           return 
+        else:
+           fout.write('Opening %s\n' % str(now))
+        fout.close()
+        self.watch_delay=string.zfill(int(delay),4)
         self.command('OPEN')
 
     def monitor(self):

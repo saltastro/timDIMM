@@ -20,7 +20,8 @@ touch SYNCME
 # now rotate skycam data
 mkdir -p /Library/WebServer/Documents/skycam/`date -v -1d +'%Y/%m%d'`/
 cd /Library/WebServer/Documents/skycam/`date -v -1d +'%Y/%m%d'`/
-mv /Library/WebServer/Documents/skycam/Data/* .
+/usr/bin/rsync -av --partial-dir=.rsync-partial/ massdimm@massdimm.suth:/var/www/skycam/Data/
+# mv /Library/WebServer/Documents/skycam/Data/* .
 ssh massdimm@massdimm "rm /var/www/skycam/Data/*"
 chmod go+r *
 cd /Library/WebServer/Documents/skycam
