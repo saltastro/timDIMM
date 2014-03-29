@@ -2,8 +2,8 @@
 
 CC = gcc
 CFLAGS = -Wall -O2 -I/opt/local/include
-LDFLAGS = -L/opt/local/lib -framework CoreFoundation -framework Carbon -lIOKit \
-	-lm -lcfitsio -lxpa -ldc1394
+LDFLAGS = -L/opt/local/lib -framework CoreFoundation -framework Carbon \
+	-framework IOKit -lm -lcfitsio -lxpa -ldc1394
 EXECS = grab_cube measure_seeing_saao measure_seeing_astelco ave_frames \
 	video_feed grab noise_test
 

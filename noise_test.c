@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
   
   f = 0;
   
-  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
+  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_ON);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
   exp = 8.0*1.0e-5;
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exp);

@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
   // set the frame rate to absolute value in frames/sec and get value from commandline
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to manual");
-  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_FRAME_RATE, DC1394_TRUE);
+  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_FRAME_RATE, DC1394_ON);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate to absolute mode");
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_FRAME_RATE, rate);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set framerate");
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
   // set the shutter speed to absolute value in seconds (input ms on commandline)
   err = dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER, DC1394_FEATURE_MODE_MANUAL);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to manual");
-  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_TRUE);
+  err = dc1394_feature_set_absolute_control(camera, DC1394_FEATURE_SHUTTER, DC1394_ON);
   DC1394_ERR_CLN_RTN(err,dc1394_camera_free (camera),"cannot set shutter to absolute mode");
   exp = exptime*1.0e-3;
   err = dc1394_feature_set_absolute_value(camera, DC1394_FEATURE_SHUTTER, exp);
