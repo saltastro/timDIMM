@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd /Users/timdimm/MASSDIMM/timDIMM
+cd /home/massdimm/timDIMM
 ./db_insert.py seeing.dat

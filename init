@@ -6,14 +6,9 @@ sleep 2
 ./ox_wagon.py OPEN
 sleep 5
 ./turbina.rb init
-./gto900_check.rb > /dev/null
-./gto900_check.rb > /dev/null
-./gto900_check.rb
-./gto900_init.rb
-./gto900_check.rb > /dev/null
+python pygto900.py init
 sleep 1
-./gto900_check.rb > /dev/null
-./gto900_check.rb
+python pygto900.py status
 ./turbina.rb etest
 ./turbina.rb dtest
 ./turbina.rb park

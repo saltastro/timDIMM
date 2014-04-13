@@ -8,6 +8,8 @@ from find_boxes import *
 
 
 def check_image():
+    if os.path.isfile("STOP_SPIRAL"): exit()
+
     os.system("./ave_frames 30 \!spiral.fits")
     os.system("cat spiral.fits | xpaset timDIMM fits")
     hdu = rfits("spiral.fits")
@@ -23,19 +25,19 @@ def check_image():
 
 
 def plus_x():
-    os.system("./gto900_nudge.rb s")
+    os.system("./pygto900.py nudge s")
 
 
 def minus_x():
-    os.system("./gto900_nudge.rb n")
+    os.system("./pygto900.py nudge n")
 
 
 def plus_y():
-    os.system("./gto900_nudge.rb e")
+    os.system("./pygto900.py nudge e")
 
 
 def minus_y():
-    os.system("./gto900_nudge.rb w")
+    os.system("./pygto900.py nudge w")
 
 n = 0
 x = 0
@@ -43,10 +45,16 @@ y = 0
 
 has_stars = check_image()
 
+if len(sys.argv)==2:
+    niter=int(sys.argv[1])
+else:
+    niter=100
+
 if has_stars:
     print "Got stars right away!"
 else:
-    while n < 500:
+    if os.path.isfile("STOP_SPIRAL"): os.remove("STOP_SPIRAL")
+    while n < niter:
         n = n + 1
 
         for i in range(n):

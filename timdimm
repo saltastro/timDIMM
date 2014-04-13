@@ -49,6 +49,7 @@ def killmeasure_seeing(b, pid):
     print "\nKilling main timDIMM process #%d\n" % pid
     b.config(text="Stopping...")
     b.config(state=DISABLED)
+    os.system("touch STOP_SPIRAL")
     os.system("kill -9 %d" % pid)
     os.system("./turbina.rb stop_now")
     b.config(text="Measure Seeing")
@@ -57,7 +58,8 @@ def killmeasure_seeing(b, pid):
     b.config(command=lambda c=b: measure_seeing(c))
     
 def measure_seeing(b):
-    pid = run("./timdimm.sh")
+    if os.path.isfile("STOP_SPIRAL"): os.remove("STOP_SPIRAL")
+    pid = run("./run_measure_seeing.py")
     b.config(text="Stop Measuring Seeing")
     initpark.config(state=DISABLED)
     b.config(command=lambda but=b,p=pid: killmeasure_seeing(but, p))

@@ -23,8 +23,9 @@ def daofind(im):
     return num, pos[1:]
 
 
-if __name__ == '__main__':
-    hdu = rfits(sys.argv[1])
+
+def find_boxes(infile):
+    hdu = rfits(infile)
     image = hdu.data
     hdr = hdu.header
     n, stars = daofind(image)
@@ -46,7 +47,7 @@ if __name__ == '__main__':
                np.abs(y - 120.0) < 20 and \
                os.path.exists("SYNCME"):
             print "\033[0;32mSYNCING TARGET!\033[0;39m"
-            os.system("sync")
+            os.system("./pygto900.py sync")
             os.system("rm SYNCME")
             os.system("sleep 2")
     else:
@@ -55,3 +56,9 @@ if __name__ == '__main__':
         output.write("160.0   120.0\n")
         output.write("198.0   120.0\n")
         output.close()
+
+    return n
+
+if __name__ == '__main__':
+    infile = sys.argv[1]
+    find_boxes(infile)

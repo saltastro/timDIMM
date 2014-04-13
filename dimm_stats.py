@@ -22,7 +22,7 @@ for i in range(len(data)):
     out.write("%10s  %10.3f \t %7.3f\n" % (labels[i],
                                             np.mean(data[i]),
                                             np.std(data[i])))
-    file = "/Users/timdimm/MASSDIMM/timDIMM/data/" + labels[i] + ".dat"
+    file = "/home/massdimm/timDIMM/data/" + labels[i] + ".dat"
     fp = open(file, 'a')
     fp.write("%s %s \t  %10.3f \t %7.3f\n" % (date,
                                               time,
