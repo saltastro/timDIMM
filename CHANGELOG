@@ -1,0 +1,7 @@
+
+20140620:
+-Removed any telescope sync from spiral search (smc)
+-Added import shutil to run_measure_seeing.py (smc)
+
+20140611
+-(Laure--Please enter your changes here)

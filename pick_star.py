@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import hrstar_with_precess
 import hrstar
 from pygto900 import GTO900, status, slew
 
@@ -15,58 +16,51 @@ def pick_star():
     salt_lat=Angle("-32:22:32 degree")
     catalog = 'star.lst'
 
-    g = GTO900()
-    g.startup()
-    g.clear()
-    ra, dec, ha, lst,alt,az,airmass,pier = status(g)
-    pier = pier.strip().lower()
-    alt = Angle('%s degree' % alt) 
-    az = Angle('%s degree' % az) 
+    with GTO900() as g:
+        ra, dec, ha, lst,alt,az,airmass,pier = status(g)
+        pier = pier.strip().lower()
+        alt = Angle('%s degree' % alt) 
+        az = Angle('%s degree' % az) 
   
-    if pier == 'e' and airmass < 1.6 and not (alt.degree < 75.0 and 285.0 < az.degree < 300.0) and os.path.isfile(current_file):
-       print 'Fine to stay here'
-       g.close()
-       return
+        if pier == 'e' and airmass < 1.6 and not (alt.degree < 75.0 and 285.0 < az.degree < 300.0) and os.path.isfile(current_file):
+           print 'Fine to stay here'
+           return
 
-    try:
-       sid_current = open(current_file).read().strip()
-    except:
-       sid_current=None
-    print sid_current
+        try:
+           sid_current = open(current_file).read().strip()
+        except:
+           sid_current=None
+        print sid_current
 
-    #get the best object
-    try:
-        sid, ra, dec = hrstar.best_star(lst,catalog=catalog, lat=salt_lat)
-    except ValueError:
-        print 'No other acceptable candidates, so best to stay here'
-        g.close()
-        return
+        #get the best object
+        try:
+            sid, ra, dec = hrstar.best_star(lst,catalog=catalog, lat=salt_lat)
+            #sid, ra, dec = hrstar_with_precess.best_star(lst, int(2014), catalog=catalog, lat=salt_lat)
+            print sid, ra, type(ra), dec, type(dec)
+        except ValueError:
+            print 'No other acceptable candidates, so best to stay here'
+            return
 
-    #get current object
-    if sid==sid_current:
-       print 'Current object is still best candidate'
-       g.close()
-       return
+        #get current object
+        if sid==sid_current:
+           print 'Current object is still best candidate'
+           return
 
-
-    #Move to the new best object
-    print 'Slewing to HR %s at RA=%s and Dec=%s' % (sid, ra, dec)
-    slew(g, ra, dec)
+        #Move to the new best object
+        print 'Slewing to HR %s at RA=%s and Dec=%s' % (sid, ra, dec)
+        slew(g, ra, dec)
  
-    #update current value
-    if os.path.isfile(current_file): os.remove(current_file)
-    fout = open(current_file, 'w')
-    fout.write('%s' % sid)
-    fout.close()
+        #update current value
+        if os.path.isfile(current_file): os.remove(current_file)
+        fout = open(current_file, 'w')
+        fout.write('%s' % sid)
+        fout.close()
 
-    #update the exposure time
-    if os.path.isfile(exposure_file): os.remove(exposure_file)
-    fout = open(exposure_file, 'w')
-    fout.write('1.0e-3')
-    fout.close()
- 
-    #close connection
-    g.close()
-
+        #update the exposure time
+        if os.path.isfile(exposure_file): os.remove(exposure_file)
+        fout = open(exposure_file, 'w')
+        fout.write('1.0e-3')
+        fout.close()
+    
 if __name__=='__main__':
    pick_star()

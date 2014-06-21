@@ -28,6 +28,9 @@ class GTO900:
         self.catalog={}
 
    def __enter__(self):
+       self.clear()
+       self.long_format()
+       self.set_local_time()
        return self
   
    def __exit__(self, errtype, value, traceback):
@@ -381,8 +384,12 @@ def slew(g, ra, dec, niter=100):
     g.slew()
 
     for i in range(niter):
-        r = Angle(g.ra(), unit='hour')
-        d = Angle(g.dec(), unit='degree')
+        try:
+          r = Angle(g.ra(), unit='hour')
+          d = Angle(g.dec(), unit='degree')
+        except Exception,e:
+            print e
+            continue
         dist = ((r.degree - ra.degree)**2 + (d.degree-dec.degree)**2)**0.5
         if dist < 1.0/60.0:
            print 'Done Slewing'
@@ -430,7 +437,6 @@ if __name__=='__main__':
       exit()
  
    with GTO900() as g:
-       g.long_format()
        if task == 'status':
            results = status(g)
            output ="At RA = %s, Dec = %s, HA = %s, LST = %s, Alt = %s, Az = %s, secz = %.2f, on the %s side of the pier" % results

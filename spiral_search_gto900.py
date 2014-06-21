@@ -39,28 +39,27 @@ def plus_y():
 def minus_y():
     os.system("./pygto900.py nudge w")
 
-n = 0
-x = 0
-y = 0
 
-has_stars = check_image()
 
-if len(sys.argv)==2:
-    niter=int(sys.argv[1])
-else:
-    niter=100
+def spiralsearch(niter=100):
+   n = 0
+   x = 0
+   y = 0
+   if os.path.isfile("STOP_SPIRAL"): os.remove("STOP_SPIRAL")
 
-if has_stars:
-    print "Got stars right away!"
-else:
-    if os.path.isfile("STOP_SPIRAL"): os.remove("STOP_SPIRAL")
-    while n < niter:
+   has_stars = check_image()
+
+   if has_stars:
+       print "Got stars right away!"
+   else:
+     while n < niter:
         n = n + 1
 
         for i in range(n):
             y = y + 1
             plus_y()
             print "At (x, y) = (%d, %d)" % (x, y)
+            print "Iteration: %s" %(n)
             if check_image():
                 has_stars = True
                 break
@@ -72,6 +71,7 @@ else:
             x = x - 1
             minus_x()
             print "At (x, y) = (%d, %d)" % (x, y)
+            print "Iteration: %s" %(n)
             if check_image():
                 has_stars = True
                 break
@@ -85,6 +85,7 @@ else:
             y = y - 1
             minus_y()
             print "At (x, y) = (%d, %d)" % (x, y)
+            print "Iteration: %s" %(n)
             if check_image():
                 has_stars = True
                 break
@@ -96,6 +97,7 @@ else:
             x = x + 1
             plus_x()
             print "At (x, y) = (%d, %d)" % (x, y)
+            print "Iteration: %s" %(n)
             if check_image():
                 has_stars = True
                 break
@@ -103,5 +105,13 @@ else:
         if has_stars:
             break
 
+   return n, x, y
 
-print "Found stars after %d iterations." % n
+
+if __name__=='__main__':
+   if len(sys.argv)==2:
+       niter=int(sys.argv[1])
+   else:
+       niter=150
+   n, x, y = spiralsearch(niter=niter)
+   print "Found stars after %d iterations." % n

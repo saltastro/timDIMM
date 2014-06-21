@@ -22,9 +22,8 @@ def goto_hr(current_file='current_object', hr_file='star.lst'):
     dec = Angle(dec, unit='degree')
 
     #slew telescope to position
-    g = GTO900() 
-    slew(g, ra, dec)
-    g.close()
+    with GTO900()  as g:
+       slew(g, ra, dec)
 
     
 if __name__=='__main__':

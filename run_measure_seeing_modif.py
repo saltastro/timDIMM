@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 import os, shutil
-import datetime
+import datetime 
+
 import ox_wagon
 import pick_star
 from find_boxes import find_boxes
 from guide_gto900 import guide_gto900
 from spiral_search_gto900 import spiralsearch
+from pygto900 import GTO900, status
 
 old_star = None
 repeat = 10
@@ -42,14 +44,19 @@ while True:
 
 
    #check to see if the star is available
-   nstars = find_boxes('center.fits')
-   if nstars < 2:
-      nfound, sx, sy = spiralsearch()
-      sout = open(spiral_log, 'a')
-      sout.write('%s %i %i %i\n' % (datetime.datetime.now(), sx, sy, nfound))
-      sout.close()
+   with GTO900() as g:
       os.system('./ave_frames 10 \!center.fits')
       nstars = find_boxes('center.fits')
+
+      if nstars < 2:
+          ra_i, dec_i, ha_i, lst_i ,alt_i ,az_i, airmass_i ,pier_i = status(g) 
+          nfound, sx, sy = spiralsearch()
+          ra_f, dec_f, ha_f, lst_f, alt_f ,az_f ,airmass_f ,pier_f = status(g)
+          sout = open(spiral_log, 'a')
+          sout.write('%s %i %i %i %s %s %s %s %s %s\n' % (datetime.datetime.now(), sx, sy, nfound,lst_i,ra_i,dec_i,lst_f,ra_f,dec_f)
+          sout.close()
+          os.system('./ave_frames 10 \!center.fits')
+          nstars = find_boxes('center.fits')
 
    #start turbina running
    try:
