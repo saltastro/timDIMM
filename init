@@ -1,18 +1,14 @@
 #!/bin/sh
 
 rm -f current_object
-./ox_wagon.py RESET
-sleep 2
+#./ox_wagon.py RESET
+sleep 5
 ./ox_wagon.py OPEN
 sleep 5
 #./turbina.rb init
-python pygto900.py init
-sleep 1
-python pygto900.py status
 #./turbina.rb etest
 #./turbina.rb dtest
 #./turbina.rb park
 #./turbina.rb init
 #./ox_wagon.py OPEN
-echo "READY TO OBSERVE!!!"
-echo "1.0e-3" > exptime
+echo "3.0e-3" > exptime

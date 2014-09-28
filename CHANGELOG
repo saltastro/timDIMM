@@ -1,7 +1,60 @@
-
 20140620:
 -Removed any telescope sync from spiral search (smc)
 -Added import shutil to run_measure_seeing.py (smc)
 
-20140611
--(Laure--Please enter your changes here)
+20140611:
+- Create hrstar_with_precess.py (same as hrstar.py with the addition of precession to the star coordinate changing them from EPOQ-2000 to EPOQ-NOW, ie 2014). (lc)
+- Replace hrstar.best_star by hrstar_with_precess.best_star in pick_star.py at line 37. (lc)
+- Modify all star coordinates in star.lst with 60s/60min value to be +1min/+1h. Otherwise it will bring an error within the astropy functions resulting in rejecting the star at line 40 in pick_star.py (lc)
+
+20140627:
+- Ran into the pier at the end of the night. Couldn't find new star so stayed on the current one (Fomalhaut - HR8728) and ended up tracking too low on the horizon >>> modified code to pick stars in the West, so that there is no risk of running into the pier, as the star already past the meridian:
+	* changed pick_star.py (l.26) to start looking for a new star once the current star has airmass>1.15 (when zenith angle is over 30deg). (lc)
+	* created hrstar_with_precess_WEST.py, to pick stars in the West. (lc)
+	* Use hrstar_with_precess_WEST.Best_star in pick_star.py (l.39). (lc)
+	* Modified goto_hr.py to implement precession (l.8,25,31,37). When
+calling it one need to make sure that current_object got the right HR number
+and need to specify the year of the current time as an argument (ie: python goto_hr.py 2014). (lc)
+
+20140702:
+- Telescope was powered on when openning ox-wagon for SkyCam, but not used for
+seeing measurements (cloudy) hence it kept tracking till running into the pier
+>>> modified code to prevent it from happening
+>>> Added instruction in the wiki for opening Ox-wagon while not running seeing
+measurements. (lc)
+	* Added "./pygto900.py park" at the end of init/killmeasure_seeing/open
+and close_oxwagon procedures in timdimm (l.33,61,73,78)
+	* Added "./ox_wagon.py SCOPE", "./ox_wagon.py STATUS",
+"./pygto900.py park_off", "./pygto900.py status" in run_measure_seeing.py (l17)
+to make sure telescope is powered on and inparked before starting measurements.
+	* Added "./pygto900.py status" in run_measure_seeing.py (l38) to keep
+track of telescope position while measurements are done.
+	* Added ./ox_wagon STATUS at the end of park to chack that telescope has
+been powered off.
+
+20140708:
+- Add waiting time in Open/Close/Initialize/Park function of the timdimm GUI, to
+allow for the ox-wagon to fully open and close. Also add instructions for not
+sending 2 commands at the same time to ox-wagon and/or telescope and a status
+check after each procedure to make sure telescope is always powered off.
+
+The measure seeing procedure will start it up before doing measurements.
+This way No special procedure is needed when using Ox-wagon but not TimDIMM.
+
+The telescope will only get powered up when seeing measurement is run.
+Stopping seeing measurement will also park and turn the telescope power off,
+in the case seeing measurements are stopped for a long period of time due to
+clouds/wind coming in.
+
+20140902
+-If alt is less than 30, then sends the park command before exiting
+-Added check_image.py which takes a single image and displays it
+
+20140904
+-Removed all 'ox_wagon RESET' from the code so telescope stays off
+-Added park telescope and unpark telescope when entering or exiting measure_seeing program in timdimm
+-Changed pick stars to pass the telescope object instead of creating a new one
+-Removed status so pick_stars is only asking for parameters of interest
+
+
+

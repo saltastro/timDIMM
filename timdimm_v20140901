@@ -17,41 +17,35 @@ def massreboot(b):
 def park(b, pid):
     b.config(state=DISABLED)
     print "\nParking MASS and telescope....\n"
+    os.system("./ox_wagon.py RESET")
+    time.sleep(2)
+    os.system("./ox_wagon.py SCOPE")
+    time.sleep(5)
     os.system("./park")
+    time.sleep(10)
+    for i in range(8):
+       print 'WAIT until both sliding and dropping roofs are FULLY CLOSED before sending ANY new commands to the ox-wagon and/or telecope\n'
+       time.sleep(60)
+    print 'Ox-wagon Fully Closed'
+    os.system("./ox_wagon.py RESET")
+    time.sleep(5)
+    os.system("./ox_wagon.py STATUS")
+    print "MAKE SURE that 'Telescope Powered On' in the above status is 'False'\n"
+    print "... if not open an other terminal and run the following commands:\n"
+    print "cd ~/timDIMM\n"
+    print "./ox_wagon.py reset\n"
+    print "./ox_wagon.py status\n"
     b.config(text="Initialize")
     quit.config(state=NORMAL)
     main.config(state=DISABLED)
     b.config(state=NORMAL)
     b.config(command=lambda c=b: init(c))
-
-    #os.system("./ox_wagon.py RESET")
-    #time.sleep(2)
-    #os.system("./ox_wagon.py SCOPE")
-    #time.sleep(5)
-    #time.sleep(10)
-    #for i in range(8):
-    #   print 'WAIT until both sliding and dropping roofs are FULLY CLOSED before sending ANY new commands to the ox-wagon and/or telecope\n'
-    #   time.sleep(60)
-    #print 'Ox-wagon Fully Closed'
-    #os.system("./ox_wagon.py RESET")
-    #time.sleep(5)
-    #os.system("./ox_wagon.py STATUS")
-    #print "MAKE SURE that 'Telescope Powered On' in the above status is 'False'\n"
-    #print "... if not open an other terminal and run the following commands:\n"
-    #print "cd ~/timDIMM\n"
-    #print "./ox_wagon.py reset\n"
-    #print "./ox_wagon.py status\n"
     
 def init(b):
     print "\nInitializing mount and MASS....\n"
     pid = run("./init")
     quit.config(state=DISABLED)
     time.sleep(60)
-    main.config(state=NORMAL)
-    b.config(text="Park")
-    b.config(command=lambda but=b,p=pid: park(but, p))
-    print "READY  TO  START  SEEING  MEASUREMENTS\n"
-
     #for i in range(6):
     #   print 'WAIT until both sliding and dropping roofs are FULLY OPENED before sending ANY new commands to the ox-wagon and/or telecope\n'
     #   time.sleep(60)
@@ -65,6 +59,10 @@ def init(b):
     #print "./ox_wagon.py reset\n"
     #print "./ox_wagon.py status\n"
     time.sleep(5)
+    main.config(state=NORMAL)
+    b.config(text="Park")
+    b.config(command=lambda but=b,p=pid: park(but, p))
+    print "READY  TO  START  SEEING  MEASUREMENTS\n"
 
 def killdimm9(b, pid):
     print "\nKilling DS9 process #%d\n" % pid
@@ -91,10 +89,10 @@ def killmeasure_seeing(b, pid):
     if os.path.isfile("current_object"): os.remove("current_object")
     time.sleep(5)
     os.system("./pygto900.py park")
-    #time.sleep(5)
-    #os.system("./ox_wagon.py RESET")
-    #time.sleep(5)
-    #os.system("./ox_wagon.py STATUS")
+    time.sleep(5)
+    os.system("./ox_wagon.py RESET")
+    time.sleep(5)
+    os.system("./ox_wagon.py STATUS")
     b.config(text="Measure Seeing")
     initpark.config(state=NORMAL)
     b.config(state=NORMAL)
@@ -103,8 +101,6 @@ def killmeasure_seeing(b, pid):
  
 def measure_seeing(b):
     if os.path.isfile("STOP_SPIRAL"): os.remove("STOP_SPIRAL")
-    #take it out of park
-    os.system("./pygto900.py park_off")
     pid = run("./run_measure_seeing.py")
     b.config(text="Stop Measuring Seeing")
     initpark.config(state=DISABLED)
@@ -112,8 +108,13 @@ def measure_seeing(b):
 
 def open_oxwagon(b):
     print 'Opening Ox Wagon'
-    #os.system("./ox_wagon.py RESET")
+    os.system("./ox_wagon.py RESET")
     os.system("./ox_wagon.py open 3600")
+    time.sleep(10)
+    os.system("./pygto900.py init")
+    time.sleep(10)
+    os.system("./pygto900.py park")
+    time.sleep(10)
     #for i in range(6):
     #   print 'WAIT until both sliding and dropping roofs are FULLY OPENED before sending ANY new commands to the ox-wagon and/or telecope\n'
     #   time.sleep(60)
@@ -129,24 +130,24 @@ def open_oxwagon(b):
 
 def close_oxwagon(b):
     print 'Closing Ox Wagon'
-    #os.system("./ox_wagon.py RESET")
-    #time.sleep(2)
-    #os.system("./ox_wagon.py SCOPE")
+    os.system("./ox_wagon.py RESET")
+    time.sleep(2)
+    os.system("./ox_wagon.py SCOPE")
     #time.sleep(2)
     os.system("./ox_wagon.py CLOSE")
-    #time.sleep(10)
-    #for i in range(8):
-    #   print 'WAIT until both sliding and dropping roofs are FULLY CLOSED before sending ANY new commands to the ox-wagon and/or telecope\n'
-    #   time.sleep(60)
-    #print 'Ox-wagon Fully Closed'
-    #os.system("./ox_wagon.py RESET")
-    #time.sleep(2)
-    #os.system("./ox_wagon.py STATUS")
-    #print "MAKE SURE that 'Telescope Powered On' in the above status is 'False'\n"
-    #print "... if not open an other terminal and run the following commands:\n"
-    #print "cd ~/timDIMM\n"
-    #print "./ox_wagon.py reset\n"
-    #print "./ox_wagon.py status\n"
+    time.sleep(10)
+    for i in range(8):
+       print 'WAIT until both sliding and dropping roofs are FULLY CLOSED before sending ANY new commands to the ox-wagon and/or telecope\n'
+       time.sleep(60)
+    print 'Ox-wagon Fully Closed'
+    os.system("./ox_wagon.py RESET")
+    time.sleep(2)
+    os.system("./ox_wagon.py STATUS")
+    print "MAKE SURE that 'Telescope Powered On' in the above status is 'False'\n"
+    print "... if not open an other terminal and run the following commands:\n"
+    print "cd ~/timDIMM\n"
+    print "./ox_wagon.py reset\n"
+    print "./ox_wagon.py status\n"
 
 root = Tk()
 root.title("timDIMM")

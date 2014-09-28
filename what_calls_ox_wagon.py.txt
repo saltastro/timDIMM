@@ -1,0 +1,39 @@
+/home/massdimm/timDIMM/scripts/fix_pointing.py:        os.system("./ox_wagon.py open")
+/home/massdimm/timDIMM/scripts/fix_pointing.py:            os.system("./ox_wagon.py open")
+/home/massdimm/timDIMM/scripts/timdimm.sh:    ./ox_wagon.py OPEN
+/home/massdimm/timDIMM/ox_wagon.py:        print "Usage: ox_wagon.py <OPEN|CLOSE|RESET|STATUS>"
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py reset")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py scope")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py RESET")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py STATUS")
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py reset\n"
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py status\n"
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py RESET")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py STATUS")
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py reset\n"
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py status\n"
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py RESET")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py STATUS")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py open 3600")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py RESET")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py STATUS")
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py reset\n"
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py status\n"
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py RESET")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py SCOPE")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py CLOSE")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py RESET")
+/home/massdimm/timDIMM/timdimm:    os.system("./ox_wagon.py STATUS")
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py reset\n"
+/home/massdimm/timDIMM/timdimm:    print "./ox_wagon.py status\n"
+/home/massdimm/timDIMM/park:./ox_wagon.py CLOSE
+/home/massdimm/timDIMM/park:./ox_wagon.py STATUS
+/home/massdimm/timDIMM/CHANGELOG:	* Added "./ox_wagon.py SCOPE", "./ox_wagon.py STATUS",
+/home/massdimm/timDIMM/run_measure_seeing.py:os.system('./ox_wagon.py SCOPE')
+/home/massdimm/timDIMM/run_measure_seeing.py:os.system('./ox_wagon.py STATUS')
+/home/massdimm/timDIMM/init:./ox_wagon.py RESET
+/home/massdimm/timDIMM/init:./ox_wagon.py OPEN
+/home/massdimm/timDIMM/init:#./ox_wagon.py OPEN
+/home/massdimm/timDIMM/README:ox_wagon.py -- control ox wagon
+/home/massdimm/timDIMM/tmp:        print "Usage: ox_wagon.py <OPEN|CLOSE|RESET|STATUS>"
+/usr/local/saao/bin/ox_wagon_door_status.py:command="/home/massdimm/timDIMM/ox_wagon.py status"

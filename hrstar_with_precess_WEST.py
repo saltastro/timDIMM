@@ -1,8 +1,19 @@
 #!/usr/bin/env python
 
-"""Functions for loading a catalog of stars, determining the RA/DEC for a given
+"""
+Modified version of hrstar_with_precess.py:
+Functions for loading a catalog of stars, determining the RA/DEC for a given
     star, and choosing the best star to observe.
 """
+### Modification Log
+"""
+Created: 2014/06/29 (Laure)
+Change the best_star parameters from hrstar_with_precess.py to select stars in West.
+This way we avoid the risk of the telescope running into the pier when tracking too long on the same star.
+Also changed limiting magnitude from 2.3 to 3.0 and airmass from 1.6 to 1.2 (ie 35 deg from zenith)
+
+"""
+
 import math
 from astropy.coordinates import Angle
 from astropy.coordinates import FK5
@@ -44,10 +55,6 @@ def load_catalog(catalog='star.lst'):
        Dictionary with id as key, and containing name, ra, dec, vmag.  ra/dec are 
        astropy.coordinate.angle objects
 
-    Note
-    ----
-
-    Convert J2000 coordinates to NOW
 
     """
     #set up the deictionary
@@ -116,8 +123,10 @@ def calculate_airmass(ha, dec, lat=salt_lat):
 
 def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
     """Given an lst and a catalog of stars, determine the best star in the list.
-       The best star is determined to have an airmass less than 1.6, a
-       magnitude below 2.3, and an hour angle greater than 0.5.
+       The best star is determined to have an airmass less than 1.2, a
+       magnitude below 3.0, and an hour angle greater than 0.5. And we will pic
+       it to be in the West to avoid running into the pier while tracking
+       (55<Alt<90  and  181<Az<359).
 
        This is specific to the current position of the timdimm in the ox-wagon
        and should be updated if the telescope is moved
@@ -167,23 +176,37 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
         vmag = star_dict[k][3]
         ha = Angle('%s hour' % lst) - RA_now
         az, alt, airmass = calculate_airmass(ha, Dec_now, lat=lat)
-        if ha.degree < 0.5 and 0 < airmass < 1.2 and vmag < 2.3 and vmag < best_vmag:
-          if not (alt.degree < 75.0 and 285.0 < az.degree < 300.0):
-             best_sid = k
-             best_vmag = vmag
-             best_RA = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[0]
-             best_Dec = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[1]
+
+        if ha.degree > 0.5 and  vmag < 3.0 and vmag < best_vmag and alt.degree > 55.0 and 181.0 < az.degree < 359.0:
+          best_sid = k
+          best_vmag = vmag
+          best_RA = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[0]
+          best_Dec = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[1]
 
     if best_sid is None:
        raise ValueError('No acceptable stars found')
+
+    # Suppress decimal values and min/sec = 60
     h_RA = int(best_RA.hms[0])
     m_RA = int(best_RA.hms[1])
+    if m_RA == 60:
+       h_RA = int(h_RA+1)
+       m_RA = '00'
     s_RA = int(round(best_RA.hms[2]))
+    if s_RA == 60:
+       m_RA = int(m_RA+1)
+       s_RA = '00'
     d_Dec = int(best_Dec.dms[0])
     m_Dec = abs(int(best_Dec.dms[1]))
+    if m_Dec == 60:
+       d_Dec = int(d_Dec+1)
+       m_Dec = '00'
     s_Dec = abs(int(round(best_Dec.dms[2])))
+    if s_Dec == 60:
+       m_Dec = int(m_Dec+1)
+       s_Dec = '00'
 
-    return best_sid, Angle('%s:%s:%s hour'%(h_RA,m_RA,s_RA)), Angle('%s:%s:%s degrees'%(d_Dec,m_Dec,s_Dec))
+    return best_sid, Angle('%s:%s:%s hour'%(h_RA,m_RA,s_RA)), Angle('%s:%s:%s degree'%(d_Dec,m_Dec,s_Dec))
 
 #lst = '12:30:30'
 #print best_star(lst, catalog='star.lst')
