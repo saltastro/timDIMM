@@ -5,8 +5,26 @@
 """
 import math
 from astropy.coordinates import Angle
+from astropy.coordinates import FK5
+from astropy.time import Time
+import astropy.units as u
 
 salt_lat = Angle("-32:22:32 degree")
+
+def Apply_precess(RA,Dec,Year_Now):
+    """
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+    Coord_J2000 = FK5('%s %s'%(RA,Dec))
+    Coord_NOW = Coord_J2000.precess_to(Time(Year_Now, format='jyear', scale='utc'))
+    RA_NOW = Angle(Coord_NOW.ra,unit=u.hour)
+    Dec_NOW = Angle(Coord_NOW.dec,unit=u.deg)
+    return RA_NOW, Dec_NOW
 
 def load_catalog(catalog='star.lst'):
     """Load a catalog of stars
@@ -25,6 +43,11 @@ def load_catalog(catalog='star.lst'):
     star_dict: dict
        Dictionary with id as key, and containing name, ra, dec, vmag.  ra/dec are 
        astropy.coordinate.angle objects
+
+    Note
+    ----
+
+    Convert J2000 coordinates to NOW
 
     """
     #set up the deictionary
@@ -91,7 +114,7 @@ def calculate_airmass(ha, dec, lat=salt_lat):
    return az, alt, airmass
  
 
-def best_star(lst, star_dict=None, catalog=None, lat=salt_lat):
+def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
     """Given an lst and a catalog of stars, determine the best star in the list.
        The best star is determined to have an airmass less than 1.6, a
        magnitude below 2.3, and an hour angle greater than 0.5.
@@ -140,23 +163,32 @@ def best_star(lst, star_dict=None, catalog=None, lat=salt_lat):
     for k in star_dict.keys():
         ra = star_dict[k][1]
         dec = star_dict[k][2]
+        RA_now, Dec_now = Apply_precess(ra,dec,Year_NOW)
         vmag = star_dict[k][3]
-        ha = Angle('%s hour' % lst) - ra
-        az, alt, airmass = calculate_airmass(ha, dec, lat=lat)
-        if ha.degree < 0.5 and 0 < airmass < 1.6 and vmag < 2.3 and vmag < best_vmag:
+        ha = Angle('%s hour' % lst) - RA_now
+        az, alt, airmass = calculate_airmass(ha, Dec_now, lat=lat)
+        if ha.degree < 0.5 and 0 < airmass < 1.2 and vmag < 2.3 and vmag < best_vmag:
           if not (alt.degree < 75.0 and 285.0 < az.degree < 300.0):
              best_sid = k
              best_vmag = vmag
+             best_RA = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[0]
+             best_Dec = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[1]
 
     if best_sid is None:
-       raise ValueError('No acceptable stars found') 
+       raise ValueError('No acceptable stars found')
+    h_RA = int(best_RA.hms[0])
+    m_RA = int(best_RA.hms[1])
+    s_RA = int(round(best_RA.hms[2]))
+    d_Dec = int(best_Dec.dms[0])
+    m_Dec = abs(int(best_Dec.dms[1]))
+    s_Dec = abs(int(round(best_Dec.dms[2])))
 
-    return best_sid, star_dict[best_sid][1], star_dict[best_sid][2]
+    return best_sid, Angle('%s:%s:%s hour'%(h_RA,m_RA,s_RA)), Angle('%s:%s:%s degrees'%(d_Dec,m_Dec,s_Dec))
 
 #lst = '12:30:30'
 #print best_star(lst, catalog='star.lst')
 
 if __name__=='__main__':
    import sys
-   sid,ra,dec=best_star(sys.argv[1], catalog='star.lst')
+   sid,ra,dec=best_star(sys.argv[1],int(sys.argv[2]), catalog='star.lst')
    print sid, ra, dec

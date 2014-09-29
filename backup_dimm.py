@@ -4,6 +4,7 @@ import os
 import glob
 import shutil
 
+
 def move_files(names, arch_dir):
     """Move a group of files"""
     infiles=glob.glob(names)
@@ -24,7 +25,7 @@ def backup_dimm(obsdate, data_dir='/home/massdimm/data/massdimm/', home_dir='/ho
     if not os.path.isdir(arch_dir): os.mkdir(arch_dir)
 
     #load data to the database
-    os.system('./db_inster.py seeing.dat')
+    os.system('./db_insert.py seeing.dat')
 
     #compress existing data
     os.system('gzip -v data/centroids_*.dat')
@@ -39,4 +40,13 @@ def backup_dimm(obsdate, data_dir='/home/massdimm/data/massdimm/', home_dir='/ho
     if os.path.isfile('centroid.dat'): os.remove('centroid.dat')
 
 if __name__=='__main__':
-   backup_dimm(sys.argv[1])
+   import datetime as dt
+ 
+   if len(sys.argv)==2:
+      obsdate = sys.argv[1]
+   else:
+      obsdate = dt.datetime.now() - dt.timedelta(seconds=12*3600.)  
+      obsdate = obsdate.strftime('%Y%m%d')
+      print obsdate
+ 
+   backup_dimm(obsdate)

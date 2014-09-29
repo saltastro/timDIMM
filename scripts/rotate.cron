@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /Users/timdimm/MASSDIMM/timDIMM
+./rotate.sh `date -u -v-1d +'%Y/%m%d'`

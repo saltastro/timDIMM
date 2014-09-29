@@ -14,6 +14,10 @@ from datetime import datetime
 from astropy.coordinates import Angle
 
 
+def airmass(a):
+    ang = Angle(90, unit='degree') - a
+    return 1.0/math.cos(ang.radian)
+
 class GTO900:
    def __init__(self, port="/dev/ttyUSB1"):
         '''
@@ -28,6 +32,10 @@ class GTO900:
         self.catalog={}
 
    def __enter__(self):
+       self.clear()
+       self.long_format()
+       self.set_current_date()
+       self.set_local_time()
        return self
   
    def __exit__(self, errtype, value, traceback):
@@ -153,8 +161,7 @@ class GTO900:
    # calculate current GTO900 airmass
    def airmass(self):
     a = Angle(self.alt(), unit='degree')
-    ang = Angle(90, unit='degree') - a
-    return 1.0/math.cos(ang.radian)
+    return airmass(a)
 
    # read the current azimuth from the GTO900
    def az(self):
@@ -263,7 +270,7 @@ class GTO900:
    # query pier
    def pier(self):
        self.command("#:pS#")
-       return self.check()
+       return self.read()
 
    # sync mount
    def sync(self):
@@ -357,7 +364,8 @@ def status(g):
     ha = Angle('%s hour' % lst) - Angle('%s hour' % ra)
     alt = g.alt()
     az = g.az()
-    z = g.airmass()
+    a = Angle(alt, unit='degree')
+    z = airmass(a)
     p = g.pier()
     return ra,dec,ha,lst,alt,az,z,p
 
@@ -381,8 +389,12 @@ def slew(g, ra, dec, niter=100):
     g.slew()
 
     for i in range(niter):
-        r = Angle(g.ra(), unit='hour')
-        d = Angle(g.dec(), unit='degree')
+        try:
+          r = Angle(g.ra(), unit='hour')
+          d = Angle(g.dec(), unit='degree')
+        except Exception,e:
+            print e
+            continue
         dist = ((r.degree - ra.degree)**2 + (d.degree-dec.degree)**2)**0.5
         if dist < 1.0/60.0:
            print 'Done Slewing'
@@ -430,7 +442,6 @@ if __name__=='__main__':
       exit()
  
    with GTO900() as g:
-       g.long_format()
        if task == 'status':
            results = status(g)
            output ="At RA = %s, Dec = %s, HA = %s, LST = %s, Alt = %s, Az = %s, secz = %.2f, on the %s side of the pier" % results
@@ -442,6 +453,8 @@ if __name__=='__main__':
            init(g)
        elif task == 'park':
            g.park_mode()
+       elif task == 'park_off':
+           g.park_off()
        elif task == 'sync':
            g.sync()
        elif task == 'move':
