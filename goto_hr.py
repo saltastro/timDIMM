@@ -5,18 +5,12 @@ from astropy.coordinates import Angle
 from hrstar_with_precess import Apply_precess
 
 #def goto_hr(current_file='current_object', hr_file='star.lst'):
-def goto_hr(Year_NOW,current_file='current_object', hr_file='star.lst'):
+def goto_hr(sid, Year_NOW, hr_file='star.lst'):
     """Go to the current object"""
-
-    try:
-       sid = open(current_file).read().strip()
-    except Exception, e:
-       print e
-       return 
 
     #load catalog
     star_dict=load_catalog(hr_file)
-
+    print star_dict
     #get ra/dec for best object
     ra = star_dict[sid][1]
     dec = star_dict[sid][2]
@@ -34,4 +28,4 @@ def goto_hr(Year_NOW,current_file='current_object', hr_file='star.lst'):
 if __name__=='__main__':
    #goto_hr()
    import sys
-   goto_hr(int(sys.argv[1]),current_file='current_object', hr_file='star.lst')
+   goto_hr(sys.argv[1],int(sys.argv[2]), hr_file='star.lst')

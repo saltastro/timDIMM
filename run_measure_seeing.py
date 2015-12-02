@@ -63,6 +63,13 @@ while True:
 
         #check to see if the star is available
         os.system('./ave_frames 10 \!center.fits')
+        if not os.path.isfile('center.fits'):
+           print Exception
+           print 'Center.fits was not created'
+           print 'WARNING:  YOU MAY WANT TO STOP MEASUREMENT AND START AGAIN'
+           g.park_mode()
+           exit()
+
         nstars = find_boxes('center.fits')
         if nstars < 2:
            nfound, sx, sy = spiralsearch(g,niter=niter)
@@ -76,11 +83,13 @@ while True:
            os.system('./ave_frames 10 \!center.fits')
            nstars = find_boxes('center.fits')
 
+
    #start turbina running
    try:
        current_star=open('current_object').read().strip()
    except:
        old_star = None
+       current_star = None
 
    if (old_star is None) or (old_star != current_star):
       #os.system('./run_turbina.py')
@@ -95,6 +104,9 @@ while True:
 
    # adjust the guiding
    guide_gto900()
+
+   #remove file so error caught if it isn't made
+   if os.path.isfile('center.fits'): os.remove('center.fits')
  
    #update the documents
    if os.path.isfile('seeing.out'):

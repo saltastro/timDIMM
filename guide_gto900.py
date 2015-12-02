@@ -9,6 +9,9 @@ from pygto900 import GTO900
 
 def guide_gto900(tol=100): 
    """Script for guiding the GTO900 based on the output from measure_seeing"""
+
+   """Laure (11-04-2015): Inverted 'Move East' and 'Move West' commands as
+   it was pushing the spots off the FOV instead of re-centering them."""
  
    #set up the telescope
    g = GTO900()
@@ -34,18 +37,18 @@ def guide_gto900(tol=100):
       g.move('n')
    if miny < tol:
        if side == 'w':
-           print "Move West."
-           g.move('w')
-       else:
            print "Move East."
            g.move('e')
+       else:
+           print "Move West."
+           g.move('w')
    if maxy > 240-tol:
        if side == 'w':
-           print "Move East."
-           g.move('e')
-       else:
            print "Move West."
            g.move('w')
+       else:
+           print "Move East."
+           g.move('e')
 
    time.sleep(1)
    g.haltall()

@@ -70,7 +70,7 @@ class OxWagon:
                     'Lights On']
 
 # old port location "/dev/tty.usbserial-A700dz6N"):
-    def __init__(self, port="/dev/ttyUSB0"):
+    def __init__(self, port="/dev/ttyUSBtoPLC"):
         '''
         we use the py27-serial package to implement RS232 communication.
         beware, the port may change if the USB-RS232 cable is ever moved
@@ -116,6 +116,7 @@ class OxWagon:
         '''
         use pre-defined command to open the ox wagon completely
         '''
+        print 'Opening for %i seconds' %delay
         #this is all here because i'm trying to figure out 
         #who or what is running this at 3:15 every day
         import traceback as tb

@@ -22,6 +22,8 @@ def pick_star(g):
     alt = Angle('%s degree' % g.alt()) 
     az = Angle('%s degree' % g.az()) 
     pier = g.pier().strip().lower()
+    #ha = Angle('%s hour' % g.lst()) - Angle('%s hour' % g.ra())
+    ### TO AVOID RUNNING INTO THE PIER WHILE TRACKING OVER MERIDIAN ADD HA<0 ###
   
     if pier == 'east' and airmass(alt) < 1.15 and not (alt.degree < 75.0 and 285.0 < az.degree < 300.0) and os.path.isfile(current_file):
            print 'Fine to stay here'
@@ -35,8 +37,8 @@ def pick_star(g):
 
     #get the best object
     try:
-            #sid, ra, dec = hrstar.best_star(lst,catalog=catalog, lat=salt_lat)
-        sid, ra, dec = hrstar_with_precess_WEST.best_star(g.lst(), int(2014), catalog=catalog, lat=salt_lat)
+       sid, ra, dec = hrstar_with_precess.best_star(g.lst(), 2015, catalog=catalog, lat=salt_lat)
+          #sid, ra, dec = hrstar.best_star(lst,catalog=catalog, lat=salt_lat)
     except ValueError:
         print 'No other acceptable candidates, so best to stay here'
         return

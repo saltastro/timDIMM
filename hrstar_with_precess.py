@@ -160,15 +160,22 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
 
     best_sid = None
     best_vmag = 99
+    best_ha = 0.5
+    print lst
     for k in star_dict.keys():
+        #print k
         ra = star_dict[k][1]
         dec = star_dict[k][2]
         RA_now, Dec_now = Apply_precess(ra,dec,Year_NOW)
         vmag = star_dict[k][3]
         ha = Angle('%s hour' % lst) - RA_now
         az, alt, airmass = calculate_airmass(ha, Dec_now, lat=lat)
-        if ha.degree < 0.5 and 0 < airmass < 1.2 and vmag < 2.3 and vmag < best_vmag:
+        #if vmag < 2.0 and abs(ha.hour) < 5.0 :
+            #print k, RA_now, Dec_now, ha.hour, airmass, az.degree, alt.degree, vmag
+        if ha.hour < 1.0 and ha.hour > -3 and vmag < 2.3 and 45.0 < alt.degree < 75.0 and airmass < 1.2 and  vmag < best_vmag:
+          print ' ', k, RA_now, Dec_now, ha.hour, ha.degree, az.degree, alt.degree, vmag, airmass
           if not (alt.degree < 75.0 and 285.0 < az.degree < 300.0):
+             best_ha = ha.degree
              best_sid = k
              best_vmag = vmag
              best_RA = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[0]

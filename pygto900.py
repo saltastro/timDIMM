@@ -19,7 +19,7 @@ def airmass(a):
     return 1.0/math.cos(ang.radian)
 
 class GTO900:
-   def __init__(self, port="/dev/ttyUSB1"):
+   def __init__(self, port="/dev/ttyUSBtoGTO900"):
         '''
         we use the py27-serial package to implement 
         communication.to the telescope.  The port may change

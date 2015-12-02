@@ -50,6 +50,7 @@ def init(b):
     main.config(state=NORMAL)
     b.config(text="Park")
     b.config(command=lambda but=b,p=pid: park(but, p))
+    #os.system("./pygto900.py park") ### ADDITION OF PARK COMMAND ###
     print "READY  TO  START  SEEING  MEASUREMENTS\n"
 
     #for i in range(6):
@@ -114,6 +115,8 @@ def open_oxwagon(b):
     print 'Opening Ox Wagon'
     #os.system("./ox_wagon.py RESET")
     os.system("./ox_wagon.py open 3600")
+    #os.system("./pygto900.py park") ### ADDITION OF PARK COMMAND ###
+
     #for i in range(6):
     #   print 'WAIT until both sliding and dropping roofs are FULLY OPENED before sending ANY new commands to the ox-wagon and/or telecope\n'
     #   time.sleep(60)
@@ -129,10 +132,7 @@ def open_oxwagon(b):
 
 def close_oxwagon(b):
     print 'Closing Ox Wagon'
-    #os.system("./ox_wagon.py RESET")
-    #time.sleep(2)
-    #os.system("./ox_wagon.py SCOPE")
-    #time.sleep(2)
+    #os.system("./pygto900.py park") ### ADDITION OF PARK COMMAND ###
     os.system("./ox_wagon.py CLOSE")
     #time.sleep(10)
     #for i in range(8):

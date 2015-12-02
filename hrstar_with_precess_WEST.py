@@ -12,6 +12,10 @@ Change the best_star parameters from hrstar_with_precess.py to select stars in W
 This way we avoid the risk of the telescope running into the pier when tracking too long on the same star.
 Also changed limiting magnitude from 2.3 to 3.0 and airmass from 1.6 to 1.2 (ie 35 deg from zenith)
 
+change: 2014/11/15
+
+--added HourAngle  less than 0.5
+
 """
 
 import math
@@ -117,6 +121,8 @@ def calculate_airmass(ha, dec, lat=salt_lat):
    az = Angle(az, unit='radian')   
 
    ang = Angle(90, unit='degree') - alt
+   #print ang
+   #print ang.radian
    airmass = 1.0 / math.cos(ang.radian)
    return az, alt, airmass
  
@@ -169,6 +175,7 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
 
     best_sid = None
     best_vmag = 99
+    max_ha=-0.5
     for k in star_dict.keys():
         ra = star_dict[k][1]
         dec = star_dict[k][2]
@@ -176,12 +183,14 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
         vmag = star_dict[k][3]
         ha = Angle('%s hour' % lst) - RA_now
         az, alt, airmass = calculate_airmass(ha, Dec_now, lat=lat)
-
-        if ha.degree > 0.5 and  vmag < 3.0 and vmag < best_vmag and alt.degree > 55.0 and 181.0 < az.degree < 359.0:
-          best_sid = k
-          best_vmag = vmag
-          best_RA = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[0]
-          best_Dec = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[1]
+        #print star_dict[k][0], ha.degree, vmag, alt.degree, az.degree
+        if ha.degree > max_ha and vmag < 3.0 and vmag < best_vmag and 45.0 < alt.degree < 75.0 and 181.0 < az.degree < 359.0:
+           if not (285.0 < az.degree < 300.0): #weather mast
+              best_sid = k
+              best_vmag = vmag
+              best_RA = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[0]
+              best_Dec = Apply_precess(star_dict[best_sid][1], star_dict[best_sid][2],Year_NOW)[1]
+              max_ha = ha.degree
 
     if best_sid is None:
        raise ValueError('No acceptable stars found')
