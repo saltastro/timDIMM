@@ -263,6 +263,11 @@ class GTO900:
    def park_mode(self):
        self.command("#:KA#")
 
+   # invoke parked mode
+   def park_mode_test(self):
+       self.command("#:RG2#")
+       self.command("#:Me#")
+
    # park off
    def park_off(self):
        self.command("#PO:#")
