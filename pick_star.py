@@ -19,12 +19,12 @@ def pick_star(g):
     catalog = 'star.lst'
 
     #ra,dec,ha,lst,alt,az,airmass,pier = status(g)
-    alt = Angle('%s degree' % g.alt()) 
-    az = Angle('%s degree' % g.az()) 
+    alt = Angle('%s degree' % g.alt())
+    az = Angle('%s degree' % g.az())
     pier = g.pier().strip().lower()
     #ha = Angle('%s hour' % g.lst()) - Angle('%s hour' % g.ra())
     ### TO AVOID RUNNING INTO THE PIER WHILE TRACKING OVER MERIDIAN ADD HA<0 ###
-  
+
     if pier == 'east' and airmass(alt) < 1.15 and not (alt.degree < 75.0 and 285.0 < az.degree < 300.0) and os.path.isfile(current_file):
            print 'Fine to stay here'
            return
@@ -51,11 +51,11 @@ def pick_star(g):
     #Move to the new best object
     print 'Slewing to HR %s at RA=%s and Dec=%s' % (sid, ra, dec)
     slew(g, ra, dec)
- 
+
     #update current value
     if os.path.isfile(current_file): os.remove(current_file)
     fout = open(current_file, 'w')
-    fout.write('%s' % sid)
+    fout.write('%s' %sid)
     fout.close()
 
     #update the exposure time
@@ -63,7 +63,7 @@ def pick_star(g):
     fout = open(exposure_file, 'w')
     fout.write('3.0e-3')
     fout.close()
-    
+
 if __name__=='__main__':
     with GTO900() as g:
        g.park_off()
