@@ -69,18 +69,18 @@ class GTO900:
         self.command("#:U#")
 
    # set the offset from greenwich mean time
-   def set_gmt_offset(hrs):
+   def set_gmt_offset(self, hrs):
         self.command("#:SG %s#" % hrs)
         return self.check()
 
    # set the current longitude
-   def set_longitude(d, m, s):
+   def set_longitude(self, d, m, s):
        long_str = "%d*%02d:%02d" % (d, m, s)
        self.command("#:Sg %s#" % long_str )
        return self.check()
 
    # set the current latitude
-   def set_latitude(d, m, s):
+   def set_latitude(self, d, m, s):
        lat_str = "%d*%02d:%02d" % (d, m, s)
        self.command("#:St %s#" % lat_str)
        return self.check()
