@@ -26,7 +26,7 @@ class OxWagon:
     # dict of most commonly used commands
     commands = {'RESET':    "2C008000",
                 'OPEN':     "10428C02",
-                'CLOSE':    "14218000",
+                'CLOSE':    "14218002",
                 'MONITOR':  "14228C02",
                 'SCOPE':    "00000002",
                 'LIGHT':    "00000001",
