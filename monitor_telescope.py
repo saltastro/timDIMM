@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # -*- coding: utf-8 -*-
 """
@@ -29,7 +29,7 @@ def scope_status(g):
     scope['ra'] = g.ra()
     scope['dec'] = g.dec()
     scope['lst'] = g.lst()
-    scope['ha'] = Angle('%s hour' % lst) - Angle('%s hour' % ra)
+    scope['ha'] = Angle('%s hour' % scope['lst']) - Angle('%s hour' % scope['ra'])
     scope['alt'] = g.alt()
     scope['az'] = g.az()
     scope['p'] = g.pier()
@@ -53,12 +53,15 @@ def check_position(g, scope):
 if __name__ == '__main__':
     g = GTO900()
     o = OxWagon()
-    
+    print
+    print datetime.datetime.now() 
     # make sure the telescope remains switched on
+    print 'keeping the scope on'
     o.scope()    
-    
-    scope = scope_status(g)
-    
+    print 'parking the mount'
+    g.park_mode()
+    #scope = scope_status(g)
+    print
     
 
     
