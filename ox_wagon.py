@@ -66,7 +66,7 @@ class OxWagon:
                     'Proximity Close Drop Roof',
                     'Proximity Open Drop Roof',
                     'Proximity Close Slide Roof',
-                    'Proximity Open Slide" Roof',
+                    'Proximity Open Slide Roof',
                     'Lights On']
 
 # old port location "/dev/tty.usbserial-A700dz6N"):
@@ -80,7 +80,7 @@ class OxWagon:
                                  bytesize=7,
                                  parity=serial.PARITY_EVEN,
                                  timeout=1)
-        
+
         # use this trick to make sure the CR-LF conversions are
         # handled correctly
         self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser), newline='\r\n')
@@ -107,7 +107,7 @@ class OxWagon:
 
         self.sio.write(unicode(to_send))
         self.sio.flush()
-     
+
         resp = self.sio.readline()
         print resp
         return resp
@@ -117,7 +117,7 @@ class OxWagon:
         use pre-defined command to open the ox wagon completely
         '''
         print 'Opening for %i seconds' %delay
-        #this is all here because i'm trying to figure out 
+        #this is all here because i'm trying to figure out
         #who or what is running this at 3:15 every day
         import traceback as tb
         now=datetime.now()
@@ -130,7 +130,7 @@ class OxWagon:
            fout.write(tb.format_exc())
            fout.write(str(tb.format_stack()))
            fout.write('\n')
-           return 
+           return
         else:
            fout.write('Opening %s\n' % str(now))
         fout.close()
