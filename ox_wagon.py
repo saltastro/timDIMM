@@ -26,15 +26,17 @@ class OxWagon:
     # dict of most commonly used commands:
     # the last bit in CLOSE was changed from 0 to 2
     # to keep the scope on when the ox wagon is closed
-    commands = {'RESET':          "2C008000",
-                'OPEN':           "10428C02",
-                'CLOSE':          "14218002",
-                'MONITOR':        "14228C02",
-                'SCOPE':          "00000002",
-                'LIGHT':          "00000001",
-                'OFF':            "00000000",
-                'CLOSE_SCOPE_ON': "14218002",
-                'CLOSE_SCOPE_OFF':"14218000"
+    commands = {'RESET':           "2C008000",
+                'OPEN':            "10428C02",
+                'CLOSE':           "14218002",
+                'MONITOR':         "14228C02",
+                'SCOPE':           "00000002",
+                'LIGHT':           "00000001",
+                'OFF':             "00000000",
+                'CLOSE_SCOPE_ON':  "14218002",
+                'CLOSE_SCOPE_OFF': "14218000"
+                'RESET_SCOPE_ON':  "2C008002",
+                'RESET_SCOPE_OFF': "2C008000",
                 }
 
     # bit map for the first 16-bit register used to monitor status
@@ -177,6 +179,20 @@ class OxWagon:
         use pre-defined command to close the ox wagon
         '''
         self.command('CLOSE_SCOPE_OFF')
+
+    def reset_scope_on(self):
+        '''
+        use pre-defined command to reset the ox wagon controller and
+        clear forced closure bits
+        '''
+        self.command('RESET_SCOPE_ON')
+
+    def reset_scope_off(self):
+        '''
+        use pre-defined command to reset the ox wagon controller and
+        clear forced closure bits
+        '''
+        self.command('RESET_SCOPE_OFF')
 
     def status(self):
         '''
