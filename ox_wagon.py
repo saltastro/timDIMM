@@ -34,9 +34,9 @@ class OxWagon:
                 'LIGHT':           "00000001",
                 'OFF':             "00000000",
                 'CLOSE_SCOPE_ON':  "14218002",
-                'CLOSE_SCOPE_OFF': "14218000"
+                'CLOSE_SCOPE_OFF': "14218000",
                 'RESET_SCOPE_ON':  "2C008002",
-                'RESET_SCOPE_OFF': "2C008000",
+                'RESET_SCOPE_OFF': "2C008000"
                 }
 
     # bit map for the first 16-bit register used to monitor status
