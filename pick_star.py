@@ -22,22 +22,23 @@ def pick_star(g):
     alt = Angle('%s degree' % g.alt())
     az = Angle('%s degree' % g.az())
     pier = g.pier().strip().lower()
+    lst = g.lst()
     #ha = Angle('%s hour' % g.lst()) - Angle('%s hour' % g.ra())
     ### TO AVOID RUNNING INTO THE PIER WHILE TRACKING OVER MERIDIAN ADD HA<0 ###
 
     if pier == 'east' and airmass(alt) < 1.15 and not (alt.degree < 75.0 and 285.0 < az.degree < 300.0) and os.path.isfile(current_file):
-           print 'Fine to stay here'
-           return
+        print 'Fine to stay here'
+        return
 
     try:
-       sid_current = open(current_file).read().strip()
+        sid_current = open(current_file).read().strip()
     except:
-       sid_current=None
-    print sid_current
+        sid_current=None
+    print '* STAR HR: ',sid_current
 
     #get the best object
     try:
-       sid, ra, dec = hrstar_with_precess.best_star(g.lst(), 2015, catalog=catalog, lat=salt_lat)
+        sid, ra, dec = hrstar_with_precess.best_star(lst, 2015, catalog=catalog, lat=salt_lat)
           #sid, ra, dec = hrstar.best_star(lst,catalog=catalog, lat=salt_lat)
     except ValueError:
         print 'No other acceptable candidates, so best to stay here'
@@ -45,8 +46,8 @@ def pick_star(g):
 
     #get current object
     if sid==sid_current:
-       print 'Current object is still best candidate'
-       return
+        print 'Current object is still best candidate'
+        return
 
     #Move to the new best object
     print 'Slewing to HR %s at RA=%s and Dec=%s' % (sid, ra, dec)
@@ -66,5 +67,5 @@ def pick_star(g):
 
 if __name__=='__main__':
     with GTO900() as g:
-       g.park_off()
-       pick_star(g)
+        g.park_off()
+        pick_star(g)
