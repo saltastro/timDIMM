@@ -61,7 +61,10 @@ if __name__ == '__main__':
             print datetime.datetime.now() 
             # make sure the telescope remains switched on
             print 'keeping the scope on by sending the close command'
-            o.close()    
+            o.close()
+            print 
+            print 'Telescope on? ', o_status['Telescope Powered On']
+            print 'Telescope is currently at:', g.alt(), g.az()
             print 'parking the mount'
             g.park_mode()
             #scope = scope_status(g)
