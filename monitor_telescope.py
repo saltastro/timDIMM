@@ -19,7 +19,7 @@ from pygto900 import GTO900
 from ox_wagon import OxWagon
 import datetime as datetime
 from astropy.coordinates import Angle
-
+import os
 
 
 def scope_status(g):
@@ -51,18 +51,29 @@ def check_position(g, scope):
     
     
 if __name__ == '__main__':
-    g = GTO900()
-    o = OxWagon()
-    print
-    print datetime.datetime.now() 
-    # make sure the telescope remains switched on
-    print 'keeping the scope on'
-    o.scope()    
-    print 'parking the mount'
-    g.park_mode()
-    #scope = scope_status(g)
-    print
-    
+
+    if not os.path.isfile('timDIMM_rinning'):
+        g = GTO900()
+        o = OxWagon()
+        o_status = o.status()
+        if o_status['Drop Roof Closed'] and o_status['Slide Roof Closed']:
+            print
+            print datetime.datetime.now() 
+            # make sure the telescope remains switched on
+            print 'keeping the scope on by sending the close command'
+            o.close()    
+            print 'parking the mount'
+            g.park_mode()
+            #scope = scope_status(g)
+            print
+        else:
+            print datetime.datetime.now()
+            print 'The ox wagon is opening, or not closed, Don\'t do anything'
+            pass
+    else:
+        print datetime.datetime.now()
+        print 'timdimm software is running, doing nothing'
+        pass
 
     
     
