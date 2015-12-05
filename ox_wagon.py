@@ -23,14 +23,18 @@ class OxWagon:
     # cache the state when status() is queried
     state = {}
 
-    # dict of most commonly used commands
-    commands = {'RESET':    "2C008000",
-                'OPEN':     "10428C02",
-                'CLOSE':    "14218002",
-                'MONITOR':  "14228C02",
-                'SCOPE':    "00000002",
-                'LIGHT':    "00000001",
-                'OFF':      "00000000",
+    # dict of most commonly used commands:
+    # the last bit in CLOSE was changed from 0 to 2
+    # to keep the scope on when the ox wagon is closed
+    commands = {'RESET':          "2C008000",
+                'OPEN':           "10428C02",
+                'CLOSE':          "14218002",
+                'MONITOR':        "14228C02",
+                'SCOPE':          "00000002",
+                'LIGHT':          "00000001",
+                'OFF':            "00000000",
+                'CLOSE_SCOPE_ON': "14218002",
+                'CLOSE_SCOPE_OFF':"14218000"
                 }
 
     # bit map for the first 16-bit register used to monitor status
@@ -161,6 +165,18 @@ class OxWagon:
         use pre-defined command to turn on power to telescope
         '''
         self.command('SCOPE')
+
+    def close_scope_on(self):
+        '''
+        use pre-defined command to close the ox wagon
+        '''
+        self.command('CLOSE_SCOPE_ON')
+
+    def close_scope_off(self):
+        '''
+        use pre-defined command to close the ox wagon
+        '''
+        self.command('CLOSE_SCOPE_OFF')
 
     def status(self):
         '''
