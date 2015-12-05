@@ -1,5 +1,6 @@
 #!/bin/sh
 
+touch timDIMM_running
 rm -f current_object
 #./ox_wagon.py RESET
 sleep 5

@@ -11,3 +11,4 @@ sleep 25
 echo "TELESCOPE PARKED.  CLOSING...."
 sleep 5
 ./ox_wagon.py CLOSE
+rm timDIMM_running
