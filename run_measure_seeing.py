@@ -18,6 +18,37 @@ niter = 15
 
 spiral_log = '/home/massdimm/spiral.log'
 
+def telescope_info(g):
+    '''A method to monitor the telescope position while measuring the seeing
+    ---
+    If the telescope is in an compromising position, set a flag to stop measure
+    seeing and try and point to a different star. This way 
+    '''
+    warn = False
+
+    alt = g.alt()
+    az = g.alt()
+    pier = g.pier().strip().lower()
+    lst = Angle('%s hour' %g.lst())
+    ra = Angle('%s hour' %g.ra())
+    dec = Angle('%s degrees' %g.dec()
+    ha = lst - ra
+
+    scope = {}
+    scope['alt'] = alt
+    scope['az'] = az
+    scope['pier'] = pier
+    scope['lst'] = lst
+    scope['ha'] = ha
+    scope['ra'] = ra
+    scope['dec'] = dec 
+
+    if (pier == 'west') and (ha > Angle('00:45:00.0 degree')):
+        warn = True
+        print 'WARNING: Telescope could run into the pier'
+        print '         Stop measure seeing'
+
+    return warn,scope
 
 
 while True:
@@ -35,14 +66,10 @@ while True:
       print 'Could not give open command to Ox Wagon'
       pass
 
-   #Display telescope status
-   #os.system('./pygto900.py status')
-   #time.sleep(30)
-
    #Warning if telescope is pointing too low
    with GTO900() as g:
-        alt = g.alt()
-        if alt<=30.0:
+        warn, scope = telescope_info(g)  
+        if scope['alt'] <= 30.0:
            print '!!!WARNING: Telescope is at an altitude lower than 30 degrees !!!'
            print 'Seeing measurements will not start'
            print 'YOU MAY WANT TO CHECK THE TELESCOPE ALIGNMENT AND POINTING BEFORE STARTING MEASUREMENTS'
@@ -84,7 +111,6 @@ while True:
            nstars = find_boxes('center.fits')
 
 
-   #start turbina running
    try:
        current_star=open('current_object').read().strip()
    except:
@@ -92,7 +118,6 @@ while True:
        current_star = None
 
    if (old_star is None) or (old_star != current_star):
-      #os.system('./run_turbina.py')
       old_star = current_star
   
    #display star and log information
