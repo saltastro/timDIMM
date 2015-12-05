@@ -11,6 +11,7 @@ from pygto900 import GTO900, status
 from spiral_search_gto900 import spiralsearch
 import time
 import sys
+from astropy.coordinates import Angle
 
 old_star = None
 repeat = 1
@@ -29,9 +30,14 @@ def telescope_info(g):
     alt = g.alt()
     az = g.alt()
     pier = g.pier().strip().lower()
-    lst = Angle('%s hour' %g.lst())
+    try:
+        lst = Angle('%s hour' %g.lst())
+    except: ValueError:
+        time.sleep(1)
+        lst = Angle('%s hour' %g.lst()
+
     ra = Angle('%s hour' %g.ra())
-    dec = Angle('%s degrees' %g.dec()
+    dec = Angle('%s degrees' %g.dec())
     ha = lst - ra
 
     scope = {}
@@ -68,7 +74,14 @@ while True:
 
    #Warning if telescope is pointing too low
    with GTO900() as g:
-        warn, scope = telescope_info(g)  
+        warn, scope = telescope_info(g) 
+        print '----------------------------------------'
+        print 'WARNING:', warn
+        print 'Telescope info:'
+        print scope
+        print 
+        print '----------------------------------------'
+        print
         if scope['alt'] <= 30.0:
            print '!!!WARNING: Telescope is at an altitude lower than 30 degrees !!!'
            print 'Seeing measurements will not start'
