@@ -52,7 +52,7 @@ def check_position(g, scope):
     
 if __name__ == '__main__':
 
-    if not os.path.isfile('timDIMM_rinning'):
+    if not os.path.isfile('timDIMM_running'):
         g = GTO900()
         o = OxWagon()
         o_status = o.status()
