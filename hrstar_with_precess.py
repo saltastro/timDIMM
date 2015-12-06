@@ -196,6 +196,8 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
 #print best_star(lst, catalog='star.lst')
 
 if __name__=='__main__':
-   import sys
-   sid,ra,dec=best_star(sys.argv[1],int(sys.argv[2]), catalog='star.lst')
-   print sid, ra, dec
+    import sys
+    lst = sys.argv[1]
+    yr = sys.argv[2]
+    sid,ra,dec=best_star(lst, int(yr), catalog='star.lst')
+    print sid, ra, dec
