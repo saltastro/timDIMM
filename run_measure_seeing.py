@@ -27,14 +27,14 @@ def telescope_info(g):
     '''
     warn = False
 
-    alt = g.alt()
-    az = g.alt()
+    alt = Angle('%s degree' % g.alt())
+    az = Angle('%s degree' % g.az())
     pier = g.pier().strip().lower()
     try:
         lst = Angle('%s hour' %g.lst())
-    except: ValueError:
+    except ValueError:
         time.sleep(1)
-        lst = Angle('%s hour' %g.lst()
+        lst = Angle('%s hour' %g.lst())
 
     ra = Angle('%s hour' %g.ra())
     dec = Angle('%s degrees' %g.dec())
@@ -49,7 +49,7 @@ def telescope_info(g):
     scope['ra'] = ra
     scope['dec'] = dec 
 
-    if (pier == 'west') and (ha > Angle('00:45:00.0 degree')):
+    if (pier == 'west') and (ha > Angle('00:45:00.0 hour')):
         warn = True
         print 'WARNING: Telescope could run into the pier'
         print '         Stop measure seeing'
@@ -82,7 +82,7 @@ while True:
         print 
         print '----------------------------------------'
         print
-        if scope['alt'] <= 30.0:
+        if scope['alt'] <= Angle('30 degree'):
            print '!!!WARNING: Telescope is at an altitude lower than 30 degrees !!!'
            print 'Seeing measurements will not start'
            print 'YOU MAY WANT TO CHECK THE TELESCOPE ALIGNMENT AND POINTING BEFORE STARTING MEASUREMENTS'
@@ -93,7 +93,7 @@ while True:
 
         #pick the star
         try:
-           pick_star.pick_star(g)
+           pick_star.pick_star(g, scope)
         except Exception, e:
            print Exception
            print 'Could not pick new star because %s' % e
