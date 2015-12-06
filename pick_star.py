@@ -8,7 +8,7 @@ import time
 
 from astropy.coordinates import Angle
 
-def pick_star(g):
+def pick_star(g, scope=None)
     """A task to check to see if the current star is okay, and if not,
        to find a new star and move to it.
     """
@@ -17,12 +17,19 @@ def pick_star(g):
     exposure_file = 'exptime'
     salt_lat=Angle("-32:22:32 degree")
     catalog = 'star.lst'
-
-    #ra,dec,ha,lst,alt,az,airmass,pier = status(g)
-    alt = Angle('%s degree' % g.alt())
-    az = Angle('%s degree' % g.az())
-    pier = g.pier().strip().lower()
-    lst = g.lst()
+    
+    if scope == None:
+        #ra,dec,ha,lst,alt,az,airmass,pier = status(g)
+        alt = Angle('%s degree' % g.alt())
+        az = Angle('%s degree' % g.az())
+        pier = g.pier().strip().lower()
+        lst = g.lst()
+    else:
+        alt = scope['alt']
+        az = scope['az']
+        pier = scope['pier']
+        lst = scope['lst'].to_string().replace('h',':').replace('m',':').strip('s')
+        
     #ha = Angle('%s hour' % g.lst()) - Angle('%s hour' % g.ra())
     ### TO AVOID RUNNING INTO THE PIER WHILE TRACKING OVER MERIDIAN ADD HA<0 ###
 
@@ -36,9 +43,11 @@ def pick_star(g):
         sid_current=None
     print '* STAR HR: ',sid_current
 
-    #get the best object
+    #get the best objecit
+    now = time.localtime()
+    yr = now.tm_year
     try:
-        sid, ra, dec = hrstar_with_precess.best_star(lst, 2015, catalog=catalog, lat=salt_lat)
+        sid, ra, dec = hrstar_with_precess.best_star(lst, yr, catalog=catalog, lat=salt_lat)
           #sid, ra, dec = hrstar.best_star(lst,catalog=catalog, lat=salt_lat)
     except ValueError:
         print 'No other acceptable candidates, so best to stay here'
