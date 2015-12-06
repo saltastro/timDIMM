@@ -49,7 +49,7 @@ def telescope_info(g):
     scope['ra'] = ra
     scope['dec'] = dec 
 
-    if (pier == 'west') and (ha > Angle('00:45:00.0 hour')):
+    if (pier == 'west') and (ha > Angle('00:40:00.0 hour')):
         warn = True
         print 'WARNING: Telescope could run into the pier'
         print '         Stop measure seeing'
