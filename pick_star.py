@@ -8,7 +8,7 @@ import time
 
 from astropy.coordinates import Angle
 
-def pick_star(g, scope=None)
+def pick_star(g, scope=None):
     """A task to check to see if the current star is okay, and if not,
        to find a new star and move to it.
     """
