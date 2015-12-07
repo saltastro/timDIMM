@@ -2,14 +2,5 @@
 
 touch timDIMM_running
 rm -f current_object
-#./ox_wagon.py RESET
-sleep 5
 ./ox_wagon.py OPEN
-sleep 5
-#./turbina.rb init
-#./turbina.rb etest
-#./turbina.rb dtest
-#./turbina.rb park
-#./turbina.rb init
-#./ox_wagon.py OPEN
 echo "3.0e-3" > exptime
