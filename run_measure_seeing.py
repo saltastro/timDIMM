@@ -7,7 +7,7 @@ import ox_wagon
 import pick_star
 from find_boxes import find_boxes
 from guide_gto900 import guide_gto900
-from pygto900 import GTO900, status
+from pygto900 import GTO900, status, park_position
 from spiral_search_gto900 import spiralsearch
 import time
 import sys
@@ -53,9 +53,24 @@ def telescope_info(g):
         warn = True
         if warn:
             os,system('rm current_object')
+        print '***************************************************************'    
         print 'WARNING: Telescope could run into the pier'
-        print '         Stop measure seeing'
-
+        print '         Removed current object, expecting a repoint to target'
+        print 'Check that it slews to the east side of the pier'
+        print '**************************************************************'
+    
+    if (pier == 'west') and (ha > Angle('00:45:00.0 hour')):
+        print '!!!************************************!!!'
+        print 'The telescope is too close to the pier'
+        print 'Stopping the telescope and parking it'
+        print 'There probably is no other candidate star'
+        print 'at the moment, so please wait a while'
+        print 'before measureing the seeing again'
+        print '******************************************'    
+        g.haltall()
+        park_position(g)
+        g.park_mode()
+        sys.exit()
     return warn,scope
 
 
