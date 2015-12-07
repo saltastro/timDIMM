@@ -52,7 +52,7 @@ def telescope_info(g):
     if (pier == 'west') and (ha > Angle('00:40:00.0 hour')):
         warn = True
         if warn:
-            os,system('rm current_object')
+            os.system('rm current_object')
         print '***************************************************************'    
         print 'WARNING: Telescope could run into the pier'
         print '         Removed current object, expecting a repoint to target'
