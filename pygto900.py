@@ -378,8 +378,9 @@ def park_position(g):
     '''
     Move the telescope to point directly South.
     '''
-    g.command_alt('+32:22:33')
-    g.command_az('+180:00:00')  
+    print 'sending the telescope to the park position...'
+    g.command_alt(32, 22, 33)
+    g.command_az(180,00,00)  
     g.slew()
     g.park_mode()
 
@@ -468,6 +469,8 @@ if __name__=='__main__':
            init(g)
        elif task == 'park':
            g.park_mode()
+       elif task == 'park_position':
+           park_position(g)
        elif task == 'park_off':
            g.park_off()
        elif task == 'sync':
