@@ -374,6 +374,16 @@ def status(g):
     p = g.pier()
     return ra,dec,ha,lst,alt,az,z,p
 
+def park_position(g):
+    '''
+    Move the telescope to point directly South.
+    '''
+    g.command_alt('+32:22:33')
+    g.command_az('+180:00:00')  
+    g.slew()
+    g.park_mode()
+
+
 def slew(g, ra, dec, niter=100):
     """Slew to a location
 
