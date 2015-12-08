@@ -172,8 +172,8 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
         az, alt, airmass = calculate_airmass(ha, Dec_now, lat=lat)
         #if vmag < 2.0 and abs(ha.hour) < 5.0 :
             #print k, RA_now, Dec_now, ha.hour, airmass, az.degree, alt.degree, vmag
-        if ha.hour < 1.0 and ha.hour > -3 and vmag < 2.3 and 45.0 < alt.degree < 75.0 and airmass < 1.2 and  vmag < best_vmag:
-          print ' ', k, RA_now, Dec_now, ha.hour, ha.degree, az.degree, alt.degree, vmag, airmass
+        if ha.hour < 3.0 and ha.hour > -3 and vmag < 2.3 and 45.0 < alt.degree < 75.0 and airmass < 1.2 and  vmag < best_vmag:
+          print 'Candidate stars: ', k, RA_now, Dec_now, ha.hour, ha.degree, az.degree, alt.degree, vmag, airmass
           if not (alt.degree < 75.0 and 285.0 < az.degree < 300.0):
              best_ha = ha.degree
              best_sid = k
