@@ -7,7 +7,7 @@ import ox_wagon
 import pick_star
 from find_boxes import find_boxes
 from guide_gto900 import guide_gto900
-from pygto900 import GTO900, status, park_position
+from pygto900 import GTO900, status, park_position, airmass
 from spiral_search_gto900 import spiralsearch
 import time
 import sys
@@ -18,6 +18,21 @@ repeat = 1
 niter = 15
 
 spiral_log = '/home/massdimm/spiral.log'
+
+
+def print_telescope_info(s):
+    '''
+    Print the telescope information
+    '''
+    print 'RA    :  %s' %s['ra'].to_string()
+    print 'DEC   :  %s' %s['dec'].to_string()
+    print 'LST   :  %s' %s['lst'].to_string()
+    print 'HA    :  %s' %s['ha'].to_string()
+    print 'ALT   :  %0.2f' %s['alt'].deg
+    print 'AZ    :  %0.2f' %s['az'].deg
+    print 'PIER  :  %s' %s['pier']
+
+    return
 
 def telescope_info(g):
     '''A method to monitor the telescope position while measuring the seeing
@@ -34,7 +49,11 @@ def telescope_info(g):
         lst = Angle('%s hour' %g.lst())
     except ValueError:
         time.sleep(1)
-        lst = Angle('%s hour' %g.lst())
+        try:
+            lst = Angle('%s hour' %g.lst())
+        except ValueError:
+            time.sleep(2)
+            lst = Angle('%s hour' %g.lst())
 
     ra = Angle('%s hour' %g.ra())
     dec = Angle('%s degrees' %g.dec())
@@ -95,7 +114,7 @@ while True:
         print '----------------------------------------'
         print 'WARNING:', warn
         print 'Telescope info:'
-        print scope
+        print_telescope_info(scope)
         print 
         print '----------------------------------------'
         print
