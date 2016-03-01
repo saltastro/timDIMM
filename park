@@ -3,5 +3,6 @@
 cd /home/massdimm/timDIMM/
 ./pygto900.py park_position
 echo "TELESCOPE PARKED.  CLOSING OX WAGON...."
+sleep 30
 ./ox_wagon.py close_scope_on
 rm timDIMM_running
