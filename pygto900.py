@@ -479,6 +479,8 @@ if __name__=='__main__':
            g.move(sys.argv[2])
        elif task == 'nudge':
            nudge(g, sys.argv[2])
+       elif task == 'set_time':
+           g.set_local_time()
        elif task == 'slew':
            ra = Angle(sys.argv[2], unit='hour')
            dec = Angle(sys.argv[3], unit='degree')
