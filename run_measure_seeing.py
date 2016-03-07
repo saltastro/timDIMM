@@ -111,6 +111,8 @@ while True:
 
    #Warning if telescope is pointing too low
    with GTO900() as g:
+        # set the telescope tracking rate to sideal rate
+        g.select_tracking_rate('2')
         warn, scope = telescope_info(g)
         print '----------------------------------------'
         print 'WARNING:', warn
@@ -124,7 +126,7 @@ while True:
            print 'Seeing measurements will not start'
            print 'YOU MAY WANT TO CHECK THE TELESCOPE ALIGNMENT AND POINTING BEFORE STARTING MEASUREMENTS'
            g.park_mode()
-           sys.exit()
+           exit()
         else:
            print 'Telescope position checked'
 
