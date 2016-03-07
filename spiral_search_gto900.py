@@ -42,7 +42,7 @@ def minus_y(g):
     nudge(g, 'w')
 
 
-def spiralsearch(g, niter=150):
+def spiralsearch(g, niter=14):
    n = 0
    x = 0
    y = 0
