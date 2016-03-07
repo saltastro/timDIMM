@@ -39,7 +39,7 @@ except KeyboardInterrupt:
             break
         if option == 'c':
             print 'Closing the ox wagon\n'
-            o.close_scope_on()
+            o.close_scope_off()
             os.system('rm timDIMM_running')
             break
         if option =='e':

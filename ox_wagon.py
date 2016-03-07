@@ -28,7 +28,7 @@ class OxWagon:
     # to keep the scope on when the ox wagon is closed
     commands = {'RESET':           "2C008000",
                 'OPEN':            "10428C02",
-                'CLOSE':           "14218002",
+                'CLOSE':           "14218000",
                 'MONITOR':         "14228C00",
                 'SCOPE':           "00000002",
                 'LIGHT':           "00000001",
