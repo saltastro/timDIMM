@@ -88,6 +88,7 @@ def telescope_info(g):
         print '******************************************'    
         g.haltall()
         park_position(g)
+        time.sleep(45)
         g.park_mode()
         sys.exit()
     return warn,scope
@@ -110,12 +111,12 @@ while True:
 
    #Warning if telescope is pointing too low
    with GTO900() as g:
-        warn, scope = telescope_info(g) 
+        warn, scope = telescope_info(g)
         print '----------------------------------------'
         print 'WARNING:', warn
         print 'Telescope info:'
-        print_telescope_info(scope)
-        print 
+        print scope
+        print
         print '----------------------------------------'
         print
         if scope['alt'] <= Angle('30 degree'):
