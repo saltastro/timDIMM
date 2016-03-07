@@ -194,6 +194,13 @@ class OxWagon:
         '''
         self.command('RESET_SCOPE_OFF')
 
+    def light_on(self):
+        '''
+        use pre-defined command to reset the ox wagon controller and
+        clear forced closure bits
+        '''
+        self.command('LIGHT')
+
     def status(self):
         '''
         send pre-defined command to query status and parse response into
