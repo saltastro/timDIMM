@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /home/massdimm/timDIMM/
+./monitor_telescope.py

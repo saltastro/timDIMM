@@ -1,0 +1,6 @@
+#!/bin/sh
+
+touch timDIMM_running
+rm -f current_object
+./ox_wagon.py OPEN
+echo "3.0e-3" > exptime

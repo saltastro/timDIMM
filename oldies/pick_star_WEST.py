@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import os
-#import hrstar_with_precess_WEST
+import hrstar_with_precess_WEST
 import hrstar_with_precess
-#import hrstar
+import hrstar
 from pygto900 import GTO900, status, slew, airmass
 import time
 

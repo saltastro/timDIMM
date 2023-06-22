@@ -123,22 +123,26 @@ class OxWagon:
         use pre-defined command to open the ox wagon completely
         '''
         print 'Opening for %i seconds' %delay
-        #this is all here because i'm trying to figure out
-        #who or what is running this at 3:15 every day
-        import traceback as tb
+# ejk: 2023-02-01 - start
+# Removing this ancient check: It stops TechOps from doing maintenance between 15:00-16:00        
+##this is all here because i'm trying to figure out
+#        #who or what is running this at 3:15 every day
+#        import traceback as tb
         now=datetime.now()
         fout=open('/home/massdimm/ox.log', 'a')
-        if now.hour==15:
-           msg='I refuse to open during 3 pm, and I am not sure who is asking but they should stop'
-           print msg
-           fout.write(now)
-           fout.write(msg)
-           fout.write(tb.format_exc())
-           fout.write(str(tb.format_stack()))
-           fout.write('\n')
-           return
-        else:
-           fout.write('Opening %s\n' % str(now))
+#        if now.hour==15:
+#           msg='I refuse to open during 3 pm, and I am not sure who is asking but they should stop'
+#           print msg
+#           fout.write(now)
+#           fout.write(msg)
+#           fout.write(tb.format_exc())
+#           fout.write(str(tb.format_stack()))
+#           fout.write('\n')
+#           return
+#        else:
+#           fout.write('Opening %s\n' % str(now))
+        fout.write('Opening %s\n' % str(now))
+# ejk: 2023-02-01 - end
         fout.close()
         self.watch_delay=string.zfill(int(delay),4)
         self.command('OPEN')

@@ -1,13 +1,31 @@
-GTO900.rb -- ruby class for communicating with Astrophysics GTO900 mount
-analyze_cube.py --
-ast_utils.rb -- 
+Programs in "timDIMM" directory:
+--------------------------------
+ave_frames-- take an image of N frames
 binutils.py -- binary data procedures
-db_insert.py -- Inster dimm results into Sdb
-dimm_plots.py -- Old tasks for plotting results
-dimm_stats.py -- Task for calculating statistics
-east_search_gto900.py --search in east directory for stars
+check_image.py -- called by spiral_search_gto900.py to check the image
+db_insert.py & db_insert.sh -- Inster dimm results into Sdb
+dimm9  --  launch DS9 to display the captured images
+dimm_stats.py -- calculate statistics on the results of the image processing
 find_boxes.py -- tasks for finding boxes in field 
-fix_pointing.py --  Use to manual find stars in field
+finder  --  TEST GUI for moving with software, not hand paddle
+guide_gto900.py  --  guide and therefore keep the star on the frame
+hrstar_with_precess.py  -- precess the coordinates
+init  --  initialise the telescope and DIMM and open the dome 
+logger.py -- sets color information for logger
+measure_seeing  --  do the seeing calculation by image processing
+ox_wagon.py -- control ox wagon (open and close the ox wagon manually)
+park  --  park the telescope and close the dome
+pick_star.py  --  select a suitable star for measuring zenith corrected seeing
+precess.py  -- calculate precession for star
+pygto900.py  --  control the telescope mount
+reboot  --  script to reboot the computer if software freezes
+run_measure_seeing.py  -- orchestrates the seeing measurement. It sits in an endless loop
+spiral_search_gto900.py -- use a spiral search to find star
+timdimm -- script to run timdimm
+
+Programs in "timDIMM/ruby" directory:
+-------------------------------------
+ast_utils.rb  --  
 gto900_check.rb -- print the status of the telescope
 gto900_guide.rb -- 
 gto900_hackpointing.rb --
@@ -23,21 +41,8 @@ gto900_slew_altaz.rb -- slew gto900 to Alt/Az
 gto900_sync.rb -- sync position of gto900
 gto900_tpoint.rb --
 gto900_tweak.rb --
-logger.py -- sets color information for logger
-ox_wagon.py -- control ox wagon
-pick_star.rb -- 
-precess.py  -- calculate precession for star
+GTO900.rb -- ruby class for communicating with Astrophysics GTO900 mount
 ra_fix.rb --  move ra by a certain amount
-spiral_search_gto900.py -- use a spiral search to find star
-suncalc.py -- compute parameters for the sun
-tcp_serial_redirect.py --
-timdimm -- script to run timdimm
-timdimm.py --   ?
-timdimm_auto.py -- ?
-tpoint_gto.rb -- point to an hr source
-turbina.py -- incomplete python wrapper 
-turbina.rb -- turbina wrapper used in timdimm
-weather.py -- produce the weather data
-xml_icd.py -- read in the SALT ICD data
-video_feed -- continous run the camera
-ave_frame-- take an image of N frames
+run_turbina.rb  --  
+tpoint_gto.rb -- point to an hr source  
+turbina.rb -- turbina wrapper that used to be used in timdimm script

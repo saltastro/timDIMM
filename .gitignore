@@ -35,3 +35,8 @@ exptime
 SYNCME
 gl_feed
 log
+STOP_SPIRAL
+current_object_details
+seeing.txt
+src/live_video
+status_at_park

@@ -39,9 +39,9 @@ def load_catalog(catalog='star.lst'):
 
     Returns
     -------
-
+    
     star_dict: dict
-       Dictionary with id as key, and containing name, ra, dec, vmag.  ra/dec are
+       Dictionary with id as key, and containing name, ra, dec, vmag.  ra/dec are 
        astropy.coordinate.angle objects
 
     Note
@@ -52,7 +52,7 @@ def load_catalog(catalog='star.lst'):
     """
     #set up the deictionary
     star_dict={}
-
+ 
     #read in the catalog
     lines = open(catalog).readlines()
 
@@ -107,12 +107,12 @@ def calculate_airmass(ha, dec, lat=salt_lat):
            math.sin(dec.radian) * math.cos(lat.radian) / math.cos(dec.radian)
        az = math.atan2(n,d)
        if az < 0: az += 2*math.pi
-   az = Angle(az, unit='radian')
+   az = Angle(az, unit='radian')   
 
    ang = Angle(90, unit='degree') - alt
    airmass = 1.0 / math.cos(ang.radian)
    return az, alt, airmass
-
+ 
 
 def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
     """Given an lst and a catalog of stars, determine the best star in the list.
@@ -129,25 +129,25 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
        The local sideral time
 
     star_dict: dict
-       Dictionary with id as key, and containing name, ra, dec, vmag.  ra/dec are
+       Dictionary with id as key, and containing name, ra, dec, vmag.  ra/dec are 
        astropy.coordinate.angle objects
 
-    catalog: string
+    catalog: string 
        Name of catalog with stars in it.  The catalog should have the format of
        id, name (2 columns), rah, ram, ras, ded, dem, des, Vmag, B-V color, and
        Spectral type.  Only uses catalog if star_dict is None
 
     Returns
     -------
-
+    
     sid: string
        key for object in star_dict
 
     ra: astropy.coordinates.Angle
-       RA for best star
+       RA for best star 
 
     dec: astropy.coordinates.Angle
-       Declination for best star
+       Declination for best star 
 
     Exceptions
     ----------
@@ -164,7 +164,6 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
     print lst
     for k in star_dict.keys():
         #print k
-        name = star_dict[k][0]
         ra = star_dict[k][1]
         dec = star_dict[k][2]
         RA_now, Dec_now = Apply_precess(ra,dec,Year_NOW)
@@ -173,9 +172,9 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
         az, alt, airmass = calculate_airmass(ha, Dec_now, lat=lat)
         #if vmag < 2.0 and abs(ha.hour) < 5.0 :
             #print k, RA_now, Dec_now, ha.hour, airmass, az.degree, alt.degree, vmag
-        if ha.hour < 3.0 and ha.hour > -3 and vmag < 2.3 and 45.0 < alt.degree < 75.0 and airmass < 1.2 and  vmag < best_vmag:
-          print 'Candidate stars: ', k, name, RA_now, Dec_now, ha.hour, ha.degree, az.degree, alt.degree, vmag, airmass
-          if not (alt.degree < 75.0 and 285.0 < az.degree < 300.0):
+        if ha.degree < 0.5 and vmag < 3.0 and alt.degree < 80.0 and airmass < 1.4 and  vmag < best_vmag:
+          print ' ', k, RA_now, Dec_now, ha.hour, ha.degree, az.degree, alt.degree, vmag, airmass
+          if not (285.0 < az.degree < 300.0):
              best_ha = ha.degree
              best_sid = k
              best_vmag = vmag
@@ -197,8 +196,6 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
 #print best_star(lst, catalog='star.lst')
 
 if __name__=='__main__':
-    import sys
-    lst = sys.argv[1]
-    yr = sys.argv[2]
-    sid,ra,dec=best_star(lst, int(yr), catalog='star.lst')
-    print sid, ra, dec
+   import sys
+   sid,ra,dec=best_star(sys.argv[1],int(sys.argv[2]), catalog='star.lst')
+   print sid, ra, dec

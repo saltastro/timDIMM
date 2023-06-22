@@ -1,0 +1,43 @@
+GTO900.rb -- ruby class for communicating with Astrophysics GTO900 mount
+analyze_cube.py --
+ast_utils.rb -- 
+binutils.py -- binary data procedures
+db_insert.py -- Inster dimm results into Sdb
+dimm_plots.py -- Old tasks for plotting results
+dimm_stats.py -- Task for calculating statistics
+east_search_gto900.py --search in east directory for stars
+find_boxes.py -- tasks for finding boxes in field 
+fix_pointing.py --  Use to manual find stars in field
+gto900_check.rb -- print the status of the telescope
+gto900_guide.rb -- 
+gto900_hackpointing.rb --
+gto900_hr.rb -- point to a star with a given hr number
+gto900_init.rb -- initialize mount
+gto900_log.rb -- 
+gto900_nudge.rb -- move mount slight in direction [news]
+gto900_offset.rb --
+gto900_park.rb -- park gto900
+gto900_parkhere.rb  --  
+gto900_slew.rb -- slew gto900 to RA/DEC
+gto900_slew_altaz.rb -- slew gto900 to Alt/Az
+gto900_sync.rb -- sync position of gto900
+gto900_tpoint.rb --
+gto900_tweak.rb --
+logger.py -- sets color information for logger
+ox_wagon.py -- control ox wagon
+pick_star.rb -- 
+precess.py  -- calculate precession for star
+ra_fix.rb --  move ra by a certain amount
+spiral_search_gto900.py -- use a spiral search to find star
+suncalc.py -- compute parameters for the sun
+tcp_serial_redirect.py --
+timdimm -- script to run timdimm
+timdimm.py --   ?
+timdimm_auto.py -- ?
+tpoint_gto.rb -- point to an hr source
+turbina.py -- incomplete python wrapper 
+turbina.rb -- turbina wrapper used in timdimm
+weather.py -- produce the weather data
+xml_icd.py -- read in the SALT ICD data
+video_feed -- continous run the camera
+ave_frame-- take an image of N frames

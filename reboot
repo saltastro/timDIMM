@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cd /home/massdimm/timDIMM/
+./pygto900.py park_position
+./pygto900.py status > status_at_park
+./ox_wagon.py open 9999
+echo When prompted enter: Saaomassdimm
+sudo reboot now

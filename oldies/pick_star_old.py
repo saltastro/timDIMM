@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import os
-#import hrstar_with_precess_WEST
+import hrstar_with_precess_WEST
 import hrstar_with_precess
-#import hrstar
+import hrstar
 from pygto900 import GTO900, status, slew, airmass
 import time
 
@@ -67,14 +67,6 @@ def pick_star(g, scope=None):
     fout = open(current_file, 'w')
     fout.write('%s' %sid)
     fout.close()
-
-    try:
-        current_star=open('current_object').read().strip()
-        print 'HRnr Name    RA2000   Dec2000     Vmag B-V   SED SpType'
-        os.system('grep '+str(current_star)+' star.lst')
-        os.system('grep '+str(current_star)+' star.lst > current_object_details')
-    except:
-        print 'Cannot retrieve information from current_object'
 
     #update the exposure time
     if os.path.isfile(exposure_file): os.remove(exposure_file)

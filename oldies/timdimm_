@@ -149,10 +149,10 @@ def close_oxwagon(b):
     #print "./ox_wagon.py status\n"
 
 def synchronize(b):
-    print 'Synchronizing the software. PLEASE WAIT!'
+    print 'Synchronizing the software'
     os.system("./pygto900.py sync")
-    os.system("./pygto900.py status > sync.log")
-    print 'Now you can click Measure Seeing'
+    os.system("./pygto900.py status")
+    print 'Now you can press Measure Seeing'
 
 root = Tk()
 root.title("timDIMM")
