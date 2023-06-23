@@ -1,48 +1,35 @@
-Programs in "timDIMM" directory:
---------------------------------
-ave_frames-- take an image of N frames
-binutils.py -- binary data procedures
-check_image.py -- called by spiral_search_gto900.py to check the image
-db_insert.py & db_insert.sh -- Inster dimm results into Sdb
-dimm9  --  launch DS9 to display the captured images
-dimm_stats.py -- calculate statistics on the results of the image processing
-find_boxes.py -- tasks for finding boxes in field 
-finder  --  TEST GUI for moving with software, not hand paddle
-guide_gto900.py  --  guide and therefore keep the star on the frame
-hrstar_with_precess.py  -- precess the coordinates
-init  --  initialise the telescope and DIMM and open the dome 
-logger.py -- sets color information for logger
-measure_seeing  --  do the seeing calculation by image processing
-ox_wagon.py -- control ox wagon (open and close the ox wagon manually)
-park  --  park the telescope and close the dome
-pick_star.py  --  select a suitable star for measuring zenith corrected seeing
-precess.py  -- calculate precession for star
-pygto900.py  --  control the telescope mount
-reboot  --  script to reboot the computer if software freezes
-run_measure_seeing.py  -- orchestrates the seeing measurement. It sits in an endless loop
-spiral_search_gto900.py -- use a spiral search to find star
-timdimm -- script to run timdimm
+# timDIMM notes
 
-Programs in "timDIMM/ruby" directory:
--------------------------------------
-ast_utils.rb  --  
-gto900_check.rb -- print the status of the telescope
-gto900_guide.rb -- 
-gto900_hackpointing.rb --
-gto900_hr.rb -- point to a star with a given hr number
-gto900_init.rb -- initialize mount
-gto900_log.rb -- 
-gto900_nudge.rb -- move mount slight in direction [news]
-gto900_offset.rb --
-gto900_park.rb -- park gto900
-gto900_parkhere.rb  --  
-gto900_slew.rb -- slew gto900 to RA/DEC
-gto900_slew_altaz.rb -- slew gto900 to Alt/Az
-gto900_sync.rb -- sync position of gto900
-gto900_tpoint.rb --
-gto900_tweak.rb --
-GTO900.rb -- ruby class for communicating with Astrophysics GTO900 mount
-ra_fix.rb --  move ra by a certain amount
-run_turbina.rb  --  
-tpoint_gto.rb -- point to an hr source  
-turbina.rb -- turbina wrapper that used to be used in timdimm script
+The main DIMM measurement entry-point is 'timdimm'.  This allows the user to initiate and abort seeing measurements, and to control the ox-wagon. It is a 'Tkinter' graphical menu that 'exec()'s a number of scripts to do the heavy lifting. It can:
+
+- park the telescope and close the dome by calling 'park'
+- initialise the telescope and DIMM and open the dome by calling 'init'
+- launch DS9 to display the captured images by calling 'dimm9'
+- measure the seeing by calling 'run_measure_seeing.py'
+- open and close the ox wagon manually by calling 'ox_wagon.py' with various arguments
+- synchronize the software and mount by calling 'pygto900.py'
+
+## 'run_measure_seeing.py'
+
+'run_measure_seeing.py' orchestrates the seeing measurement. It sits in an endless loop and calls:
+
+- 'pygto900.py' to control the telescope mount
+- 'pick_star.py' to select a suitable star for measuring zenith corrected seeing
+-- it in turn calls 'hrstar_with_precess.py' to precess the coordinates
+- 'spiral_search_gto900.py' to find the star
+- 'ave_frames' to capture images
+- 'find_boxes.py' to identify the star images for finding boxes in field 
+- 'measure_seeing' to do the seeing calculation by image processing
+- 'guide_gto900.py' to guide and therefore keep the star on the frame
+- 'dimm_stats.py' to calculate statistics on the results of the image processing
+
+It pipes the captured image, as a FITS file, to 'ds9' using 'xpaset' for display to the user. 
+If an error is encountered at any point, it aborts execution with an error message.
+
+## 'ave_frames', from 'ave_frames.c'
+
+This appears the be an example programme that was written by the author of 'libdc1394'. It captures a number of images from a FireWire connected camera, and creates an output FITS file containing the averaged data of N images. It takes 2 arguments: the first argument is the number of frames to capture and average, the second argument is the destination FITS file name.
+
+## 'measure_seeing', from 'measure_seeing.c'
+
+'measure_seeing' captures N images from a FireWire camera and calculates the seeing.  It takes three arguments: the first argument is the number of images to capture, the second argument is floating-point airmass value, and the third argument is a floating-point exposure time in seconds.
