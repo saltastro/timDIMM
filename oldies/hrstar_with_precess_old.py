@@ -164,7 +164,6 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
     print lst
     for k in star_dict.keys():
         #print k
-        name = star_dict[k][0]
         ra = star_dict[k][1]
         dec = star_dict[k][2]
         RA_now, Dec_now = Apply_precess(ra,dec,Year_NOW)
@@ -174,7 +173,7 @@ def best_star(lst, Year_NOW, star_dict=None, catalog=None, lat=salt_lat):
         #if vmag < 2.0 and abs(ha.hour) < 5.0 :
             #print k, RA_now, Dec_now, ha.hour, airmass, az.degree, alt.degree, vmag
         if ha.hour < 3.0 and ha.hour > -3 and vmag < 2.3 and 45.0 < alt.degree < 75.0 and airmass < 1.2 and  vmag < best_vmag:
-          print 'Candidate stars: ', k, name, RA_now, Dec_now, ha.hour, ha.degree, az.degree, alt.degree, vmag, airmass
+          print 'Candidate stars: ', k, RA_now, Dec_now, ha.hour, ha.degree, az.degree, alt.degree, vmag, airmass
           if not (alt.degree < 75.0 and 285.0 < az.degree < 300.0):
              best_ha = ha.degree
              best_sid = k

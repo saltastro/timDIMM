@@ -19,7 +19,7 @@ def airmass(a):
     return 1.0/math.cos(ang.radian)
 
 class GTO900:
-   def __init__(self, port="/dev/ttyUSB1"):
+   def __init__(self, port="/dev/ttyUSBtoGTO900"):
         '''
         we use the py27-serial package to implement 
         communication.to the telescope.  The port may change
@@ -69,18 +69,18 @@ class GTO900:
         self.command("#:U#")
 
    # set the offset from greenwich mean time
-   def set_gmt_offset(hrs):
+   def set_gmt_offset(self, hrs):
         self.command("#:SG %s#" % hrs)
         return self.check()
 
    # set the current longitude
-   def set_longitude(d, m, s):
+   def set_longitude(self, d, m, s):
        long_str = "%d*%02d:%02d" % (d, m, s)
        self.command("#:Sg %s#" % long_str )
        return self.check()
 
    # set the current latitude
-   def set_latitude(d, m, s):
+   def set_latitude(self, d, m, s):
        lat_str = "%d*%02d:%02d" % (d, m, s)
        self.command("#:St %s#" % lat_str)
        return self.check()
@@ -263,6 +263,11 @@ class GTO900:
    def park_mode(self):
        self.command("#:KA#")
 
+   # invoke parked mode
+   def park_mode_test(self):
+       self.command("#:RG2#")
+       self.command("#:Me#")
+
    # park off
    def park_off(self):
        self.command("#PO:#")
@@ -369,6 +374,17 @@ def status(g):
     p = g.pier()
     return ra,dec,ha,lst,alt,az,z,p
 
+def park_position(g):
+    '''
+    Move the telescope to point directly South.
+    '''
+    print 'sending the telescope to the park position...'
+    g.command_alt(32, 22, 33)
+    g.command_az(180,00,00)  
+    g.slew()
+    g.park_mode()
+
+
 def slew(g, ra, dec, niter=100):
     """Slew to a location
 
@@ -453,6 +469,8 @@ if __name__=='__main__':
            init(g)
        elif task == 'park':
            g.park_mode()
+       elif task == 'park_position':
+           park_position(g)
        elif task == 'park_off':
            g.park_off()
        elif task == 'sync':
@@ -461,6 +479,8 @@ if __name__=='__main__':
            g.move(sys.argv[2])
        elif task == 'nudge':
            nudge(g, sys.argv[2])
+       elif task == 'set_time':
+           g.set_local_time()
        elif task == 'slew':
            ra = Angle(sys.argv[2], unit='hour')
            dec = Angle(sys.argv[3], unit='degree')

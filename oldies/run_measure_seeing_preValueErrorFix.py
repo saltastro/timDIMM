@@ -42,27 +42,9 @@ def telescope_info(g):
     '''
     warn = False
 
-    try:
-        alt = Angle('%s degree' % g.alt())
-    except ValueError:
-        time.sleep(1)
-        try:
-            alt = Angle('%s degree' % g.alt())
-        except ValueError:
-            time.sleep(2)
-            alt = Angle('%s degree' % g.alt())
-    try:
-        az = Angle('%s degree' % g.az())
-    except ValueError:
-        time.sleep(1)
-        try:
-            az = Angle('%s degree' % g.az())
-        except ValueError:
-            time.sleep(2)
-            az = Angle('%s degree' % g.az())
-    
+    alt = Angle('%s degree' % g.alt())
+    az = Angle('%s degree' % g.az())
     pier = g.pier().strip().lower()
-
     try:
         lst = Angle('%s hour' %g.lst())
     except ValueError:
@@ -73,26 +55,8 @@ def telescope_info(g):
             time.sleep(2)
             lst = Angle('%s hour' %g.lst())
 
-    try:
-        ra = Angle('%s hour' %g.ra())
-    except ValueError:
-        time.sleep(1)
-        try:
-            ra = Angle('%s hour' %g.ra())
-        except ValueError:
-            time.sleep(2)
-            ra = Angle('%s hour' %g.ra())
-    try:
-        dec = Angle('%s degrees' %g.dec())
-    except ValueError:
-        time.sleep(1)
-        try:
-            dec = Angle('%s degrees' %g.dec())
-        except ValueError:
-            time.sleep(2)
-            dec = Angle('%s degrees' %g.dec())
-    
-    
+    ra = Angle('%s hour' %g.ra())
+    dec = Angle('%s degrees' %g.dec())
     ha = lst - ra
 
     scope = {}
@@ -201,12 +165,6 @@ while True:
 
    try:
        current_star=open('current_object').read().strip()
-       try:
-           print 'Measured at :', datetime.datetime.now()
-           print 'HRnr Name    RA2000   Dec2000     Vmag B-V   SED SpType'
-           os.system('grep '+str(current_star)+' star.lst')
-       except:
-           print 'Cannot retrieve information for HR'+str(current_star)+' from star.lst'
    except:
        old_star = None
        current_star = None

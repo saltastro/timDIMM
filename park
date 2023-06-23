@@ -1,13 +1,10 @@
 #!/bin/sh
 
 cd /home/massdimm/timDIMM/
-#./turbina.rb stop_now
-#./pygto900.py init
-sleep 5
-#./pygto900.py status
-sleep 25
-#./pygto900.py park
-#./turbina.rb park
-echo "TELESCOPE PARKED.  CLOSING...."
-sleep 5
-./ox_wagon.py CLOSE
+./pygto900.py park_position
+echo "TELESCOPE PARKED.  CLOSING OX WAGON...."
+sleep 45
+./pygto900.py park
+sleep 10
+./ox_wagon.py close_scope_on
+rm timDIMM_running

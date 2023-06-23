@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <dc1394/dc1394.h>
+#include <dc1394/camera.h>
 #include <math.h>
 #include <fitsio.h>
 #include <xpa.h>

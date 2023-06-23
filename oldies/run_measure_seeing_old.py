@@ -201,12 +201,6 @@ while True:
 
    try:
        current_star=open('current_object').read().strip()
-       try:
-           print 'Measured at :', datetime.datetime.now()
-           print 'HRnr Name    RA2000   Dec2000     Vmag B-V   SED SpType'
-           os.system('grep '+str(current_star)+' star.lst')
-       except:
-           print 'Cannot retrieve information for HR'+str(current_star)+' from star.lst'
    except:
        old_star = None
        current_star = None

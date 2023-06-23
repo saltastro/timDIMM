@@ -23,14 +23,20 @@ class OxWagon:
     # cache the state when status() is queried
     state = {}
 
-    # dict of most commonly used commands
-    commands = {'RESET':    "2C008000",
-                'OPEN':     "10428C02",
-                'CLOSE':    "14218000",
-                'MONITOR':  "14228C02",
-                'SCOPE':    "00000002",
-                'LIGHT':    "00000001",
-                'OFF':      "00000000",
+    # dict of most commonly used commands:
+    # the last bit in CLOSE was changed from 0 to 2
+    # to keep the scope on when the ox wagon is closed
+    commands = {'RESET':           "2C008000",
+                'OPEN':            "10428C02",
+                'CLOSE':           "14218000",
+                'MONITOR':         "14228C00",
+                'SCOPE':           "00000002",
+                'LIGHT':           "00000001",
+                'OFF':             "00000000",
+                'CLOSE_SCOPE_ON':  "14218002",
+                'CLOSE_SCOPE_OFF': "14218000",
+                'RESET_SCOPE_ON':  "2C008002",
+                'RESET_SCOPE_OFF': "2C008000"
                 }
 
     # bit map for the first 16-bit register used to monitor status
@@ -66,11 +72,11 @@ class OxWagon:
                     'Proximity Close Drop Roof',
                     'Proximity Open Drop Roof',
                     'Proximity Close Slide Roof',
-                    'Proximity Open Slide" Roof',
+                    'Proximity Open Slide Roof',
                     'Lights On']
 
 # old port location "/dev/tty.usbserial-A700dz6N"):
-    def __init__(self, port="/dev/ttyUSB0"):
+    def __init__(self, port="/dev/ttyUSBtoPLC"):
         '''
         we use the py27-serial package to implement RS232 communication.
         beware, the port may change if the USB-RS232 cable is ever moved
@@ -80,7 +86,7 @@ class OxWagon:
                                  bytesize=7,
                                  parity=serial.PARITY_EVEN,
                                  timeout=1)
-        
+
         # use this trick to make sure the CR-LF conversions are
         # handled correctly
         self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser), newline='\r\n')
@@ -107,7 +113,7 @@ class OxWagon:
 
         self.sio.write(unicode(to_send))
         self.sio.flush()
-     
+
         resp = self.sio.readline()
         print resp
         return resp
@@ -116,22 +122,27 @@ class OxWagon:
         '''
         use pre-defined command to open the ox wagon completely
         '''
-        #this is all here because i'm trying to figure out 
-        #who or what is running this at 3:15 every day
-        import traceback as tb
+        print 'Opening for %i seconds' %delay
+# ejk: 2023-02-01 - start
+# Removing this ancient check: It stops TechOps from doing maintenance between 15:00-16:00        
+##this is all here because i'm trying to figure out
+#        #who or what is running this at 3:15 every day
+#        import traceback as tb
         now=datetime.now()
         fout=open('/home/massdimm/ox.log', 'a')
-        if now.hour==15:
-           msg='I refuse to open during 3 pm, and I am not sure who is asking but they should stop'
-           print msg
-           fout.write(now)
-           fout.write(msg)
-           fout.write(tb.format_exc())
-           fout.write(str(tb.format_stack()))
-           fout.write('\n')
-           return 
-        else:
-           fout.write('Opening %s\n' % str(now))
+#        if now.hour==15:
+#           msg='I refuse to open during 3 pm, and I am not sure who is asking but they should stop'
+#           print msg
+#           fout.write(now)
+#           fout.write(msg)
+#           fout.write(tb.format_exc())
+#           fout.write(str(tb.format_stack()))
+#           fout.write('\n')
+#           return
+#        else:
+#           fout.write('Opening %s\n' % str(now))
+        fout.write('Opening %s\n' % str(now))
+# ejk: 2023-02-01 - end
         fout.close()
         self.watch_delay=string.zfill(int(delay),4)
         self.command('OPEN')
@@ -160,6 +171,39 @@ class OxWagon:
         use pre-defined command to turn on power to telescope
         '''
         self.command('SCOPE')
+
+    def close_scope_on(self):
+        '''
+        use pre-defined command to close the ox wagon
+        '''
+        self.command('CLOSE_SCOPE_ON')
+
+    def close_scope_off(self):
+        '''
+        use pre-defined command to close the ox wagon
+        '''
+        self.command('CLOSE_SCOPE_OFF')
+
+    def reset_scope_on(self):
+        '''
+        use pre-defined command to reset the ox wagon controller and
+        clear forced closure bits
+        '''
+        self.command('RESET_SCOPE_ON')
+
+    def reset_scope_off(self):
+        '''
+        use pre-defined command to reset the ox wagon controller and
+        clear forced closure bits
+        '''
+        self.command('RESET_SCOPE_OFF')
+
+    def light_on(self):
+        '''
+        use pre-defined command to reset the ox wagon controller and
+        clear forced closure bits
+        '''
+        self.command('LIGHT')
 
     def status(self):
         '''
